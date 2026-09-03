@@ -1,0 +1,5 @@
+(() => {
+  const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+  function initBeforeAfter(){const root=document.getElementById('before-after-grid');if(!root||!window.MBData)return;const items=window.MBData.getBeforeAfter();root.innerHTML=items.length?items.map(x=>`<article class="before-after-card"><div class="before-after-images"><figure><img src="${esc(x.before)}" alt="Before: ${esc(x.title)}" loading="lazy"><figcaption>Before</figcaption></figure><figure><img src="${esc(x.after)}" alt="After: ${esc(x.title)}" loading="lazy"><figcaption>After</figcaption></figure></div><div class="before-after-copy"><span class="eyebrow">Repair Story</span><h3>${esc(x.title)}</h3><p>${esc(x.description||'')}</p>${x.video?`<video class="before-after-video" controls preload="metadata" src="${esc(x.video)}"></video><a href="${esc(x.video)}" target="_blank" rel="noopener" class="text-link">Open video →</a>`:''}</div></article>`).join(''):'<div class="media-empty"><p>Repair transformations will appear here as the workshop publishes them.</p></div>';}
+  window.initBeforeAfter=initBeforeAfter;
+})();

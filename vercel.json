@@ -1,5 +1,17 @@
 {
-  "git": {
-    "deploymentEnabled": false
-  }
+  "cleanUrls": true,
+  "rewrites": [
+    {"source":"/services","destination":"/services.html"},
+    {"source":"/workshop","destination":"/workshop.html"},
+    {"source":"/inventory","destination":"/inventory.html"},
+    {"source":"/diagnostics","destination":"/diagnostics.html"},
+    {"source":"/process","destination":"/process.html"},
+    {"source":"/reviews","destination":"/reviews.html"},
+    {"source":"/contact","destination":"/contact.html"},
+    {"source":"/appointments","destination":"/appointments.html"},
+    {"source":"/review","destination":"/review.html"},
+    {"source":"/service","destination":"/service.html"},
+    {"source":"/admin-login","destination":"/admin-login.html"},
+    {"source":"/admin","destination":"/admin.html"}
+  ]
 }
