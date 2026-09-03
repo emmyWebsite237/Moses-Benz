@@ -23,14 +23,16 @@
   async function initModules(){
     await loadScript('js/site-data.js');
     await loadScript('js/form-config.js');
+    if(!window.MBAAuth) await loadScript('js/auth.js');
     await loadScript('js/customer-auth.js');
+    await window.MBData?.hydrate?.();
     if(qs('#home-inventory-list')){await loadScript('js/home-inventory.js');window.initHomeInventory?.();}
     if(qs('#inventory-list')){await loadScript('js/inventory.js');window.initInventoryPage?.();}
     if(qs('#appointment-form')){await loadScript('js/appointments.js');window.initAppointmentPage?.();}
     if(qs('#diagnostic-option-grid')){renderDiagnosticOptions();}
     if(qs('#service-catalog-grid')||qs('#service-detail')){await loadScript('js/services.js');window.initServices?.();}
-    if(qs('#before-after-grid')){await loadScript('js/media.js');window.initBeforeAfter?.();}
-    initReveal();initMarquee();initBookingForm();initContactRoutes();window.MBCustomer?.renderMenu?.();
+    if(qs('#before-after-grid')||qs('#credentials-grid')){await loadScript('js/media.js');window.initBeforeAfter?.();window.initCredentials?.();}
+    initReveal();initMarquee();initBookingForm();initContactRoutes();renderAuthLinks();window.MBCustomer?.renderMenu?.();
   }
   function renderDiagnosticOptions(){
     const root=qs('#diagnostic-option-grid'); if(!root||!window.MBData)return;
@@ -61,6 +63,17 @@
       setTimeout(()=>{current.classList.remove('page-enter','page-enter-active');document.body.classList.remove('is-navigating');},520);
     }catch(err){document.body.classList.remove('is-navigating');window.location.href=target.href;}
   }
+
+  function renderAuthLinks(){
+    const auth=document.querySelector('.header-auth');
+    if(auth){
+      auth.innerHTML='<a href="login.html">Log in</a><a href="signup.html">Sign up</a>';
+      if(window.MBAAuth?.configured?.()){ window.MBAAuth.getUser().then(u=>{if(u)auth.innerHTML='<a href="index.html#account">My account</a><button type="button" class="header-logout">Log out</button>';auth.querySelector('.header-logout')?.addEventListener('click',async()=>{await window.MBAAuth.signOut();window.MBCustomer?.clear?.();location.reload();});}); }
+    }
+    const nav=document.querySelector('#main-nav ul');
+    if(nav&&!nav.querySelector('.mobile-auth-links')){const li=document.createElement('li');li.className='mobile-auth-links';li.innerHTML='<a href="login.html">Log in</a><a href="signup.html">Sign up</a>';nav.appendChild(li);}
+  }
+
   function initRouter(){
     document.addEventListener('click',e=>{const a=e.target.closest('a.page-route');if(!a)return;const href=a.getAttribute('href');if(!href||href.startsWith('#')||a.target==='_blank'||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;e.preventDefault();navigate(href,true);});
     window.addEventListener('popstate',()=>navigate(location.href,false));

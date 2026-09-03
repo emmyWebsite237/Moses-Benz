@@ -1,10 +1,6 @@
-/*
-  Optional production backend configuration.
-  Copy this file to js/supabase-config.js and fill in your Supabase project values.
-  NEVER put a Supabase service_role key or any admin secret in browser JavaScript.
-  The public anon key is safe to expose only when your database has correct RLS policies.
-*/
+/* Public Supabase configuration. This file may be loaded by browser JavaScript.
+   Use the publishable/anon key only. NEVER put service_role / secret keys here. */
 window.MBAC_SUPABASE = {
   url: 'https://YOUR-PROJECT.supabase.co',
-  anonKey: 'YOUR_PUBLIC_ANON_KEY'
+  anonKey: 'YOUR_PUBLIC_OR_PUBLISHABLE_KEY'
 };

@@ -217,3 +217,26 @@ The site includes `supabase-schema.sql`, `js/supabase-config.example.js`, `js/su
 **Do not store a plaintext admin password, service-role key, or other secret in browser JavaScript.** Hashing/encoding/obfuscating a password in JS does not make it secret because visitors can inspect the code and attempt offline guesses. I therefore removed the plaintext fallback and kept only the existing SHA-256 local demo gate. For a production admin, use Supabase Auth + RLS/server-side authorization. The supplied SQL intentionally does not grant unrestricted public update/delete access to appointments.
 
 An AI warning/comment cannot technically prevent anyone—including an AI—from inspecting or decoding JavaScript, so no fake anti-decoding mechanism was added.
+
+
+## Customer accounts
+
+The header now includes **Log in** and **Sign up**. Customer accounts use Supabase Auth when `js/supabase-config.js` is configured. The appointment page still supports a no-verification customer identity fallback, so a customer is not blocked from sending a request while the account backend is being configured.
+
+If you want account creation to require **no email verification**, disable email confirmation in Supabase Auth settings. The website cannot override that server-side setting.
+
+## Services and diagnostics
+
+Diagnostics is now presented as part of Services. It has been removed from the main header/footer navigation, while the standalone `diagnostics.html` route is retained for direct links/bookmarks.
+
+## Approvals, certificates and repair media
+
+Admin now has an **Approvals & Certificates** directory. Genuine certificates, approvals, memberships and registrations can be added with a remote image URL and are rendered on `reviews.html`. Before/After repair stories are also stored locally and, when Supabase is configured, synchronized to the `before_after` table so they can appear on every visitor's device.
+
+## Supabase activity
+
+`KEEP_SUPABASE_AWAKE.md` and `.github/workflows/supabase-keepalive.yml` contain an optional once-daily health request. Add `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` as GitHub Actions secrets. Supabase currently says Free projects are considered for automatic pausing after 7 days of low activity; the daily request is a practical activity check, not a guarantee against pausing.
+
+## Security note
+
+The Supabase publishable/anon key is the only Supabase credential intended for browser code. Never put a service-role/secret key in `js/supabase-config.js`. For production-grade admin writes, use Supabase Auth + RLS or a server-side Vercel/Edge Function.

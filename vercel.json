@@ -11,6 +11,8 @@
     {"source":"/appointments","destination":"/appointments.html"},
     {"source":"/review","destination":"/review.html"},
     {"source":"/service","destination":"/service.html"},
+    {"source":"/login","destination":"/login.html"},
+    {"source":"/signup","destination":"/signup.html"},
     {"source":"/admin-login","destination":"/admin-login.html"},
     {"source":"/admin","destination":"/admin.html"}
   ]

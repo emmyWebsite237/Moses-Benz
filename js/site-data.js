@@ -1,39 +1,10 @@
-/* Moses Benz Auto Care — shared editable catalogue. */
+/* Moses Benz Auto Care — shared editable catalogue + Supabase hydration. */
 (() => {
-  const KEYS = {
-    services: 'mbac_services_v3',
-    diagnostics: 'mbac_diagnostics_v3',
-    appointments: 'mbac_appointments_v3',
-    reviews: 'mbac_reviews_v3',
-    beforeAfter: 'mbac_before_after_v1'
-  };
-
-  // Broad Mercedes-Benz workshop catalogue. Individual workshop offerings can be removed/added in Admin.
-  const SERVICES = [
+  const KEYS={services:'mbac_services_v4',diagnostics:'mbac_diagnostics_v4',appointments:'mbac_appointments_v4',reviews:'mbac_reviews_v4',beforeAfter:'mbac_before_after_v2',credentials:'mbac_credentials_v1'};
+  const SERVICES=[
     'Service A','Service B','Oil & Filter Service','Engine Oil & Fluid Check','Brake Inspection','Brake Pad Replacement','Brake Disc / Rotor Replacement','Brake Fluid Flush','ABS / ESP / SBC Repair','Tyre Replacement','Wheel Balancing','Wheel Alignment','Battery Testing & Replacement','Alternator & Charging Repair','Starter Motor Repair','Battery Drain Diagnosis','Engine Diagnostics','Engine Repair','Engine Overhaul / Rebuild','Timing Chain Inspection & Repair','Timing Belt Service','Spark Plug Replacement','Ignition Coil Replacement','Fuel System Repair','Fuel Injector Service','Fuel Pump Repair','Cooling System Service','Radiator Repair / Replacement','Water Pump Replacement','Thermostat Replacement','Coolant Flush','Transmission Diagnostics','Automatic Transmission Service','Transmission Fluid & Filter Service','Transmission Repair / Rebuild','Gearbox Mount Replacement','Driveshaft / Propeller Shaft Repair','Differential Service & Repair','Transfer Case Service','Clutch Service','AIRMATIC Diagnosis & Repair','Air Suspension Compressor Repair','Air Suspension Leak Repair','Shock Absorber Replacement','Control Arm / Bush Replacement','Steering System Repair','Power Steering Service','Wheel Bearing Replacement','Air Conditioning Service','AC Gas Recharge','AC Compressor Repair','Climate Control Repair','Electrical System Repair','Wiring & CAN-Bus Diagnosis','ECU / Module Diagnostics','ECU Coding & Programming','Key / Immobiliser Diagnosis','Window / Central Lock Repair','Lighting & Headlamp Repair','Parking Sensor / Camera Repair','MBUX / Infotainment Repair','Software / Module Updates','Airbag / SRS Diagnosis & Repair','AdBlue / Emissions System Repair','DPF / Exhaust System Diagnosis','Turbocharger Diagnosis & Repair','Hybrid / EV System Inspection','Pre-Purchase Inspection','Roadworthiness Inspection','Accident / Collision Repair','Paint & Panel Repair','Paint Correction & Polishing','Ceramic Coating','Interior Detailing','Exterior Detailing','Headlight Restoration','Windshield / Glass Replacement','Other'
   ];
-
-  const DIAGNOSTICS = [
-    ['D01','Full Vehicle Scan','Complete control-unit scan, fault memory review, live data checks and a vehicle health summary.'],
-    ['D02','Engine Management','Misfire, rough idle, poor acceleration, limp mode, sensor, fuel and combustion faults.'],
-    ['D03','Transmission & Gearbox','Harsh shifts, delayed engagement, slipping, warning messages and transmission-control faults.'],
-    ['D04','ABS / ESP / SBC','Brake-control modules, wheel-speed sensors, stability control and braking warnings.'],
-    ['D05','AIRMATIC / Air Suspension','Ride height, compressor, valve block, leaks, calibration and suspension warnings.'],
-    ['D06','Electrical & Battery','Battery drain, charging, starter, fuses, wiring and intermittent electrical faults.'],
-    ['D07','CAN-Bus / Communication','Communication faults between control units, network errors and intermittent module loss.'],
-    ['D08','Air Conditioning / Climate','Climate-control faults, compressor operation, pressure readings, sensors and cooling performance.'],
-    ['D09','MBUX / Infotainment','Display, audio, Bluetooth, connectivity, camera, navigation and infotainment module issues.'],
-    ['D10','Airbag / SRS','SRS warning lights, restraint systems, seat occupancy sensors and related module faults.'],
-    ['D11','AdBlue / Emissions','AdBlue, NOx sensors, DPF, exhaust and emissions-related warnings and drivability symptoms.'],
-    ['D12','Starting / No-Start','Crank/no-start, immobiliser, key recognition, fuel delivery and ignition checks.'],
-    ['D13','Turbo / Boost System','Boost pressure, turbo actuator, charge-air leaks and under/overboost faults.'],
-    ['D14','Cooling System','Overheating, coolant loss, thermostat, water pump, radiator and fan-control diagnosis.'],
-    ['D15','Steering & Suspension','Steering faults, vibration, control arms, ride-height sensors, shocks and alignment symptoms.'],
-    ['D16','Hybrid / EV System','High-voltage system health checks, charging-related faults and electric drive warnings.'],
-    ['D17','Pre-Purchase Diagnostic','Independent scan and condition review for a Mercedes you are considering buying.'],
-    ['D18','Road Test Diagnosis','Technician-assisted road test to reproduce intermittent noise, vibration, shift or drivability complaints.']
-  ].map(([code,name,description]) => ({code,name,description}));
-
+  const DIAGNOSTICS=[['D01','Full Vehicle Scan','Complete control-unit scan, fault memory review, live data checks and a vehicle health summary.'],['D02','Engine Management','Misfire, rough idle, poor acceleration, limp mode, sensor, fuel and combustion faults.'],['D03','Transmission & Gearbox','Harsh shifts, delayed engagement, slipping, warning messages and transmission-control faults.'],['D04','ABS / ESP / SBC','Brake-control modules, wheel-speed sensors, stability control and braking warnings.'],['D05','AIRMATIC / Air Suspension','Ride height, compressor, valve block, leaks, calibration and suspension warnings.'],['D06','Electrical & Battery','Battery drain, charging, starter, fuses, wiring and intermittent electrical faults.'],['D07','CAN-Bus / Communication','Communication faults between control units, network errors and intermittent module loss.'],['D08','Air Conditioning / Climate','Climate-control faults, compressor operation, pressure readings, sensors and cooling performance.'],['D09','MBUX / Infotainment','Display, audio, Bluetooth, connectivity, camera, navigation and infotainment module issues.'],['D10','Airbag / SRS','SRS warning lights, restraint systems, seat occupancy sensors and related module faults.'],['D11','AdBlue / Emissions','AdBlue, NOx sensors, DPF, exhaust and emissions-related warnings and drivability symptoms.'],['D12','Starting / No-Start','Crank/no-start, immobiliser, key recognition, fuel delivery and ignition checks.'],['D13','Turbo / Boost System','Boost pressure, turbo actuator, charge-air leaks and under/overboost faults.'],['D14','Cooling System','Overheating, coolant loss, thermostat, water pump, radiator and fan-control diagnosis.'],['D15','Steering & Suspension','Steering faults, vibration, control arms, ride-height sensors, shocks and alignment symptoms.'],['D16','Hybrid / EV System','High-voltage system health checks, charging-related faults and electric drive warnings.'],['D17','Pre-Purchase Diagnostic','Independent scan and condition review for a Mercedes you are considering buying.'],['D18','Road Test Diagnosis','Technician-assisted road test to reproduce intermittent noise, vibration, shift or drivability complaints.']].map(([code,name,description])=>({code,name,description}));
   const read=(key,fallback)=>{try{const raw=localStorage.getItem(key);return raw?JSON.parse(raw):fallback}catch{return fallback;}};
   const write=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value));return true}catch{return false;}};
   const clone=x=>JSON.parse(JSON.stringify(x));
@@ -46,8 +17,21 @@
   function updateAppointment(id,patch){const list=getAppointments();const i=list.findIndex(x=>x.id===id);if(i<0)return false;list[i]={...list[i],...patch};return write(KEYS.appointments,list);}
   function getReviews(){return read(KEYS.reviews,[]);}
   function addReview(data){const x=getReviews();const r={id:'rev-'+Date.now().toString(36),createdAt:new Date().toISOString(),...data};x.unshift(r);write(KEYS.reviews,x);return r;}
+  const makeId=(prefix)=>{try{return crypto.randomUUID()}catch{return prefix+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7)}};
   function getBeforeAfter(){return read(KEYS.beforeAfter,[]);}
-  function addBeforeAfter(data){const x=getBeforeAfter();const r={id:'ba-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7),createdAt:new Date().toISOString(),...data};x.unshift(r);write(KEYS.beforeAfter,x);return r;}
+  function addBeforeAfter(data){const x=getBeforeAfter();const r={id:makeId('ba'),createdAt:new Date().toISOString(),...data};x.unshift(r);write(KEYS.beforeAfter,x);return r;}
   function removeBeforeAfter(id){write(KEYS.beforeAfter,getBeforeAfter().filter(x=>x.id!==id));}
-  window.MBData={getServices,saveServices,getDiagnostics,saveDiagnostics,getAppointments,addAppointment,updateAppointment,getReviews,addReview,getBeforeAfter,addBeforeAfter,removeBeforeAfter,KEYS};
+  function getCredentials(){return read(KEYS.credentials,[]);}
+  function addCredential(data){const x=getCredentials();const r={id:makeId('cert'),createdAt:new Date().toISOString(),...data};x.unshift(r);write(KEYS.credentials,x);return r;}
+  function removeCredential(id){write(KEYS.credentials,getCredentials().filter(x=>x.id!==id));}
+  async function hydrate(){
+    if(!window.MBBackend?.ready)return;
+    try{
+      const [ba,certs]=await Promise.all([window.MBBackend.get('before_after','select=*&active=eq.true&order=created_at.desc'),window.MBBackend.get('credentials','select=*&active=eq.true&order=created_at.desc')]);
+      if(ba.ok&&Array.isArray(ba.data)&&ba.data.length)write(KEYS.beforeAfter,ba.data.map(x=>({id:x.id,title:x.title,description:x.description,before:x.before_url,after:x.after_url,video:x.video_url,createdAt:x.created_at})));
+      if(certs.ok&&Array.isArray(certs.data)&&certs.data.length)write(KEYS.credentials,certs.data.map(x=>({id:x.id,title:x.title,issuer:x.issuer,description:x.description,image:x.image_url,year:x.year,createdAt:x.created_at})));
+      window.dispatchEvent(new CustomEvent('mb:data-hydrated'));
+    }catch(e){console.warn('Moses Benz data hydration skipped',e);}
+  }
+  window.MBData={getServices,saveServices,getDiagnostics,saveDiagnostics,getAppointments,addAppointment,updateAppointment,getReviews,addReview,getBeforeAfter,addBeforeAfter,removeBeforeAfter,getCredentials,addCredential,removeCredential,hydrate,KEYS};
 })();

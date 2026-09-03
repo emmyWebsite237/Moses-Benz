@@ -1294,3 +1294,34 @@ body.is-navigating{overflow-x:hidden;}
 @media(max-width:600px){.admin-directory{grid-template-columns:repeat(2,1fr);top:70px;}.admin-top-actions .btn-ghost-dark{display:none;}.service-detail-points{grid-template-columns:1fr;}.before-after-images figure,.before-after-images img{min-height:160px;}}
 @media(min-width:901px){.diag-grid{padding-top:66px;}.diag-media{min-height:574px;}.diag-copy{padding-top:94px;padding-bottom:70px;}}
 .before-after-video{width:100%;max-height:420px;margin-top:18px;background:var(--ink);display:block;}
+
+/* =========================================================
+   Customer account + credentials
+   ========================================================= */
+.header-auth{display:flex;align-items:center;gap:14px;white-space:nowrap;margin-left:auto;}
+.header-auth a,.header-auth button{font:600 11px var(--font-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--silver);background:none;border:0;padding:5px 0;cursor:pointer;}
+.header-auth a:hover,.header-auth button:hover{color:var(--white);}
+.mobile-auth-links{display:flex;flex-direction:column;gap:18px;width:100%;padding-top:8px;border-top:1px solid var(--steel-soft);}
+.mobile-auth-links a{font-size:16px!important;}
+.credentials-section{background:var(--porcelain);padding:100px 0 120px;}
+.credentials-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;}
+.credential-card{background:var(--paper);border:1px solid var(--line-light);}
+.credential-card>a{display:block;background:var(--ink);aspect-ratio:4/3;overflow:hidden;}
+.credential-card img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s ease;}
+.credential-card:hover img{transform:scale(1.025);}
+.credential-copy{padding:24px;}
+.credential-copy h3{font-size:20px;text-transform:uppercase;margin-top:10px;}
+.credential-copy p{color:var(--ink-soft);font-size:13px;line-height:1.65;margin-top:8px;}
+.credential-meta{font:11px var(--font-mono)!important;text-transform:uppercase;letter-spacing:.04em;}
+.credential-preview{width:120px;height:90px;overflow:hidden;background:var(--ink);flex:none;}
+.credential-preview img{width:100%;height:100%;object-fit:cover;display:block;}
+.admin-item{align-items:center;}
+
+@media(max-width:1100px){.header-auth{display:none;}.credentials-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:920px){
+  .main-nav.is-open{background:#0c0e10!important;background-color:#0c0e10!important;opacity:1!important;backdrop-filter:none!important;}
+  .main-nav.is-open::before{content:"";position:absolute;inset:0;background:#0c0e10;z-index:-1;}
+}
+@media(max-width:600px){.credentials-grid{grid-template-columns:1fr;}.credential-preview{width:96px;height:72px;}}
+
+@media(max-width:920px){.main-nav.is-open{position:fixed;}.main-nav.is-open .customer-account-item{position:absolute;top:20px;right:18px;display:list-item;z-index:3}.main-nav.is-open .customer-account-item .mobile-logout{border:1px solid var(--steel-soft);padding:8px 10px;color:var(--white);background:rgba(255,255,255,.04);font:600 10px var(--font-mono);text-transform:uppercase}.main-nav.is-open .customer-account-item .mobile-logout span{color:var(--steel);margin-left:4px}.main-nav.is-open .mobile-auth-links{margin-top:44px;}}
