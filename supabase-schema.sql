@@ -27,9 +27,11 @@ create table if not exists public.reviews (
 );
 create table if not exists public.before_after (
   id uuid primary key default gen_random_uuid(), title text not null, description text not null default '',
-  before_url text not null, after_url text not null, video_url text, active boolean not null default true,
+  before_url text not null, after_url text not null, video_url text, gallery jsonb not null default '[]'::jsonb, active boolean not null default true,
   created_at timestamptz not null default now()
 );
+alter table public.before_after add column if not exists gallery jsonb not null default '[]'::jsonb;
+
 create table if not exists public.credentials (
   id uuid primary key default gen_random_uuid(), title text not null, issuer text, year integer,
   image_url text not null, description text not null default '', active boolean not null default true,

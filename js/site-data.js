@@ -28,7 +28,7 @@
     if(!window.MBBackend?.ready)return;
     try{
       const [ba,certs]=await Promise.all([window.MBBackend.get('before_after','select=*&active=eq.true&order=created_at.desc'),window.MBBackend.get('credentials','select=*&active=eq.true&order=created_at.desc')]);
-      if(ba.ok&&Array.isArray(ba.data)&&ba.data.length)write(KEYS.beforeAfter,ba.data.map(x=>({id:x.id,title:x.title,description:x.description,before:x.before_url,after:x.after_url,video:x.video_url,createdAt:x.created_at})));
+      if(ba.ok&&Array.isArray(ba.data)&&ba.data.length)write(KEYS.beforeAfter,ba.data.map(x=>({id:x.id,title:x.title,description:x.description,before:x.before_url,after:x.after_url,video:x.video_url,gallery:Array.isArray(x.gallery)?x.gallery:[],createdAt:x.created_at})));
       if(certs.ok&&Array.isArray(certs.data)&&certs.data.length)write(KEYS.credentials,certs.data.map(x=>({id:x.id,title:x.title,issuer:x.issuer,description:x.description,image:x.image_url,year:x.year,createdAt:x.created_at})));
       window.dispatchEvent(new CustomEvent('mb:data-hydrated'));
     }catch(e){console.warn('Moses Benz data hydration skipped',e);}

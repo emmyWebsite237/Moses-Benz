@@ -31,7 +31,7 @@
     if(qs('#appointment-form')){await loadScript('js/appointments.js');window.initAppointmentPage?.();}
     if(qs('#diagnostic-option-grid')){renderDiagnosticOptions();}
     if(qs('#service-catalog-grid')||qs('#service-detail')){await loadScript('js/services.js');window.initServices?.();}
-    if(qs('#before-after-grid')||qs('#credentials-grid')){await loadScript('js/media.js');window.initBeforeAfter?.();window.initCredentials?.();}
+    if(qs('#before-after-grid')||qs('#credentials-grid')||qs('#home-credentials-strip')){await loadScript('js/media.js');window.initBeforeAfter?.();window.initCredentials?.();window.initHomeCredentials?.();}
     initReveal();initMarquee();initBookingForm();initContactRoutes();renderAuthLinks();window.MBCustomer?.renderMenu?.();
   }
   function renderDiagnosticOptions(){
