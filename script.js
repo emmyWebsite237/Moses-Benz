@@ -29,15 +29,9 @@
     if(qs('#home-inventory-list')){await loadScript('js/home-inventory.js');window.initHomeInventory?.();}
     if(qs('#inventory-list')){await loadScript('js/inventory.js');window.initInventoryPage?.();}
     if(qs('#appointment-form')){await loadScript('js/appointments.js');window.initAppointmentPage?.();}
-    if(qs('#diagnostic-option-grid')){renderDiagnosticOptions();}
     if(qs('#service-catalog-grid')||qs('#service-detail')){await loadScript('js/services.js');window.initServices?.();}
     if(qs('#before-after-grid')||qs('#credentials-grid')||qs('#home-credentials-strip')){await loadScript('js/media.js');window.initBeforeAfter?.();window.initCredentials?.();window.initHomeCredentials?.();}
     initReveal();initMarquee();initBookingForm();initContactRoutes();await renderAuthLinks();
-  }
-  function renderDiagnosticOptions(){
-    const root=qs('#diagnostic-option-grid'); if(!root||!window.MBData)return;
-    const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-    root.innerHTML=window.MBData.getDiagnostics().map(d=>`<article class="diagnostic-option"><span class="diag-code">${esc(d.code)}</span><h3>${esc(d.name)}</h3><p>${esc(d.description)}</p><a href="appointments.html?service=${encodeURIComponent(d.name)}" class="page-route">Book this →</a></article>`).join('');
   }
   function initBookingForm(){
     const form=qs('#booking-form'); if(!form||form.dataset.bound)return; form.dataset.bound='1';

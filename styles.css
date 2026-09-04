@@ -323,7 +323,7 @@ section{ position:relative; }
   margin-top:36px;
 }
 
-/* Diagnostic callouts overlaid on hero image */
+/* Vehicle readout callouts overlaid on hero image */
 .hero-callouts{ position:absolute; inset:0; z-index:2; pointer-events:none; }
 .callout{
   position:absolute;
@@ -597,9 +597,9 @@ section{ position:relative; }
 @media (max-width:640px){ .inventory-grid{ grid-template-columns:minmax(0,1fr); } }
 
 /* =========================================================
-   Diagnostics / signature section
+   Benz Diagnosing / signature section
    ========================================================= */
-.diagnostics{
+.benz-diagnosing{
   background:var(--porcelain);
   padding:0;
 }
@@ -1166,14 +1166,7 @@ body.is-navigating{overflow-x:hidden;}
 .page-intro-block{background:var(--porcelain);padding:100px 0;}
 .option-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line-light);border:1px solid var(--line-light);}
 .option-card{background:var(--paper);padding:30px;min-height:230px;display:flex;flex-direction:column;}
-.option-card>span,.diagnostic-option .diag-code{font-family:var(--font-mono);font-size:11px;color:var(--ignition);letter-spacing:.08em;}
-.option-card h3,.diagnostic-option h3,.workshop-detail h3{margin-top:14px;font-size:20px;text-transform:uppercase;}
-.option-card p,.diagnostic-option p,.workshop-detail p{margin-top:12px;color:var(--ink-soft);font-size:14.5px;}
 .text-link{margin-top:auto;padding-top:20px;font-family:var(--font-mono);font-size:12px;text-transform:uppercase;color:var(--ink);}
-.diagnostic-options{background:var(--porcelain);padding:100px 0 120px;}
-.diagnostic-option-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;}
-.diagnostic-option{background:var(--paper);border:1px solid var(--line-light);padding:28px;min-height:230px;display:flex;flex-direction:column;}
-.diagnostic-option>a{margin-top:auto;padding-top:18px;font-family:var(--font-mono);font-size:12px;text-transform:uppercase;color:var(--ignition);}
 .workshop-detail-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;}
 .workshop-detail{border-top:1px solid var(--line-light);padding-top:24px;}
 .workshop-detail strong{font-family:var(--font-mono);font-size:12px;color:var(--ignition);}
@@ -1210,14 +1203,12 @@ body.is-navigating{overflow-x:hidden;}
   .main-nav.is-open ul{margin-top:12px;}
 }
 @media(max-width:900px){
-  .option-grid,.diagnostic-option-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
-  .workshop-detail-grid,.contact-option-grid{grid-template-columns:1fr;}
+  .option-grid,  .workshop-detail-grid,.contact-option-grid{grid-template-columns:1fr;}
   .appointment-layout{grid-template-columns:1fr;gap:36px;}
   .appointment-copy{position:static;}
 }
 @media(max-width:560px){
-  .option-grid,.diagnostic-option-grid{grid-template-columns:1fr;}
-  .appointment-page{padding:90px 0;}
+  .option-grid,  .appointment-page{padding:90px 0;}
   .appointment-card{padding:24px 18px;}
   .appointment-copy h1{font-size:42px;}
 }
@@ -1348,80 +1339,53 @@ body.modal-open{overflow:hidden}.enquire-vehicle{display:inline-flex;align-items
 
 /* Admin catalogue: use the available width instead of a tall single-column list. */
 #admin-section-services .admin-grid,
-#admin-section-diagnostics .admin-grid {
-  grid-template-columns: 1fr;
+
 }
 
 #admin-section-services .admin-grid > .admin-card:first-child,
-#admin-section-diagnostics .admin-grid > .admin-card:first-child {
-  max-width: none;
+
 }
 
 #admin-section-services .admin-item-list,
-#admin-section-diagnostics .admin-item-list {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 12px;
-  width: 100%;
+
 }
 
 #admin-section-services .admin-item,
-#admin-section-diagnostics .admin-item {
-  min-width: 0;
-  min-height: 150px;
-  padding: 18px;
-  align-items: stretch;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 14px;
+
 }
 
 #admin-section-services .admin-item-main,
-#admin-section-diagnostics .admin-item-main {
-  min-width: 0;
+
 }
 
 #admin-section-services .admin-item-main strong,
-#admin-section-diagnostics .admin-item-main strong {
-  display: block;
-  line-height: 1.25;
+
 }
 
 #admin-section-services .admin-item-main small,
-#admin-section-diagnostics .admin-item-main small {
-  line-height: 1.5;
+
 }
 
 #admin-section-services .admin-item > button,
-#admin-section-diagnostics .admin-item > button {
-  align-self: flex-start;
-  margin-top: auto;
+
 }
 
 @media (max-width: 1300px) {
   #admin-section-services .admin-item-list,
-  #admin-section-diagnostics .admin-item-list {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
+
 }
 
 @media (max-width: 900px) {
   #admin-section-services .admin-item-list,
-  #admin-section-diagnostics .admin-item-list {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
+
 }
 
 @media (max-width: 650px) {
   #admin-section-services .admin-item-list,
-  #admin-section-diagnostics .admin-item-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
+
 }
 
 @media (max-width: 430px) {
   #admin-section-services .admin-item-list,
-  #admin-section-diagnostics .admin-item-list {
-    grid-template-columns: 1fr;
-  }
+
 }

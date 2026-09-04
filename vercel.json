@@ -25,10 +25,6 @@
       "destination": "/login.html"
     },
     {
-      "source": "/diagnostics",
-      "destination": "/diagnostics.html"
-    },
-    {
       "source": "/inventory",
       "destination": "/inventory.html"
     },

@@ -2,7 +2,7 @@
 (() => {
   const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
   const FORM_ENDPOINT=()=>`https://formsubmit.co/ajax/${encodeURIComponent(window.MBAC_FORMS?.workshopEmail||'')}`;
-  function renderOptions(){const s=document.querySelector('select[name="service"]');if(!s||!window.MBData)return;const current=new URLSearchParams(location.search).get('service')||s.value;const all=[...window.MBData.getServices(),...window.MBData.getDiagnostics().map(x=>x.name)];s.innerHTML='<option value="">Select a service or diagnostic</option>'+[...new Set(all)].map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');if(current)s.value=current;}
+  function renderOptions(){const s=document.querySelector('select[name="service"]');if(!s||!window.MBData)return;const current=new URLSearchParams(location.search).get('service')||s.value;const all=window.MBData.getServices();s.innerHTML='<option value="">Select a service</option>'+[...new Set(all)].map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');if(current)s.value=current;}
   function formSubmit(payload){
     const email=window.MBAC_FORMS?.workshopEmail;
     if(!email || email==='YOUR_WORKSHOP_EMAIL') return Promise.resolve(false);
