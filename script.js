@@ -70,13 +70,13 @@
     let loggedIn=false;
     try{ loggedIn=Boolean(window.MBCustomer?.get?.()); if(window.MBAAuth?.configured?.()){loggedIn=Boolean(await window.MBAAuth.getUser())||loggedIn;} }catch{}
     if(auth){
-      auth.innerHTML=loggedIn?'<button type="button" class="header-logout">Log out</button>':'<a href="login.html" class="page-route">Log in</a><a href="signup.html" class="page-route">Sign up</a>';
+      auth.innerHTML=loggedIn?'<button type="button" class="header-logout">Log out</button>':'<a href="/login" class="page-route">Log in</a><a href="/signup" class="page-route">Sign up</a>';
       auth.querySelector('.header-logout')?.addEventListener('click',async()=>{try{await window.MBAAuth?.signOut?.()}catch{}window.MBCustomer?.clear?.();location.reload();});
     }
     if(nav){
       let li=nav.querySelector('.mobile-auth-links');
       if(!li){li=document.createElement('li');li.className='mobile-auth-links';nav.appendChild(li);}
-      li.innerHTML=loggedIn?'<button type="button" class="mobile-logout">Log out</button>':'<a href="login.html" class="page-route">Log in</a><a href="signup.html" class="page-route">Sign up</a>';
+      li.innerHTML=loggedIn?'<button type="button" class="mobile-logout">Log out</button>':'<a href="/login" class="page-route">Log in</a><a href="/signup" class="page-route">Sign up</a>';
       li.querySelector('.mobile-logout')?.addEventListener('click',async()=>{try{await window.MBAAuth?.signOut?.()}catch{}window.MBCustomer?.clear?.();location.reload();});
     }
   }

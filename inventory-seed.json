@@ -1,0 +1,373 @@
+[
+  {
+    "name": "Mercedes-Benz A 180",
+    "model": "A",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz A 200",
+    "model": "A",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz A 250",
+    "model": "A",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz CLA 250",
+    "model": "CLA",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz CLA 35 AMG",
+    "model": "CLA",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz B 180",
+    "model": "B",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz C 180",
+    "model": "C",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz C 200",
+    "model": "C",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz C 300",
+    "model": "C",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz C 43 AMG",
+    "model": "C",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz C 63 S AMG",
+    "model": "C",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz E 200",
+    "model": "E",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz E 220d",
+    "model": "E",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz E 300",
+    "model": "E",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz E 350",
+    "model": "E",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz E 450",
+    "model": "E",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz E 53 AMG",
+    "model": "E",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz E 63 S AMG",
+    "model": "E",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz S 450",
+    "model": "S",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz S 500",
+    "model": "S",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz S 580",
+    "model": "S",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz S 680 Maybach",
+    "model": "S",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz GLA 200",
+    "model": "GLA",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz GLA 250",
+    "model": "GLA",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz GLA 35 AMG",
+    "model": "GLA",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz GLB 250",
+    "model": "GLB",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz GLB 35 AMG",
+    "model": "GLB",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz GLC 300",
+    "model": "GLC",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz GLC 300 Coupe",
+    "model": "GLC",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz GLC 43 AMG",
+    "model": "GLC",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz GLC 63 S AMG",
+    "model": "GLC",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz GLE 350",
+    "model": "GLE",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz GLE 450",
+    "model": "GLE",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz GLE 53 AMG",
+    "model": "GLE",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz GLE 63 S AMG",
+    "model": "GLE",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz GLE 450 Coupe",
+    "model": "GLE",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz GLS 450",
+    "model": "GLS",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz GLS 580",
+    "model": "GLS",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz GLS 63 AMG",
+    "model": "GLS",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz G 550",
+    "model": "G",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz G 63 AMG",
+    "model": "G",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz G 400d",
+    "model": "G",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz X 250d",
+    "model": "X",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz V 220d",
+    "model": "V",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz EQB 250",
+    "model": "EQB",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz EQE 350",
+    "model": "EQE",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz EQS 450+",
+    "model": "EQS",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz EQS 580",
+    "model": "EQS",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz EQE SUV 350",
+    "model": "EQE",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz EQS SUV 450",
+    "model": "EQS",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz ML 350",
+    "model": "ML",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz GL 450",
+    "model": "GL",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  },
+  {
+    "name": "Mercedes-Benz GL 550",
+    "model": "GL",
+    "year": 2022,
+    "price": "\u20a60",
+    "status": "available"
+  }
+]
