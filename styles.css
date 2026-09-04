@@ -1337,55 +1337,106 @@ body.is-navigating{overflow-x:hidden;}
 body.modal-open{overflow:hidden}.enquire-vehicle{display:inline-flex;align-items:center;gap:7px;background:none;border:0;color:inherit;font:inherit;font-weight:600;cursor:pointer;padding:0}.enquire-vehicle:hover{opacity:.72}.enquiry-modal{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:22px}.enquiry-modal[hidden]{display:none}.enquiry-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(5px)}.enquiry-dialog{position:relative;width:min(680px,100%);max-height:min(90vh,760px);overflow:auto;background:var(--paper);color:var(--ink);padding:34px;border:1px solid var(--line-light);box-shadow:0 24px 80px rgba(0,0,0,.35);animation:enquiry-in .24s ease-out}.enquiry-close{position:absolute;top:12px;right:14px;width:38px;height:38px;border:1px solid var(--line-light);background:transparent;color:var(--ink);font-size:25px;line-height:1;cursor:pointer}.enquiry-dialog h2{font-size:34px;line-height:1.05;text-transform:uppercase;margin:8px 40px 8px 0}.enquiry-dialog .admin-card-note{color:var(--ink-soft);line-height:1.55}.enquiry-dialog .admin-form{margin-top:22px}.enquiry-dialog .admin-form input,.enquiry-dialog .admin-form textarea{background:#fff;color:var(--ink);border-color:var(--line-light)}.enquiry-dialog .form-status{min-height:22px}@keyframes enquiry-in{from{opacity:0;transform:translateY(18px) scale(.985)}to{opacity:1;transform:none}}
 @media(max-width:640px){.enquiry-modal{padding:12px}.enquiry-dialog{padding:28px 18px}.enquiry-dialog h2{font-size:28px}.enquiry-dialog .form-row{grid-template-columns:1fr}.enquire-vehicle{font-size:13px}}
 
-/* Admin catalogue: use the available width instead of a tall single-column list. */
-#admin-section-services .admin-grid,
+/* ADMIN CATALOGUES — full-width responsive tile grids */
+#admin-section-services > .admin-grid,
+#admin-section-inventory > .admin-grid{display:block;width:100%;}
 
+#admin-section-services > .admin-grid > .admin-card,
+#admin-section-inventory > .admin-grid > .admin-card{width:100%;box-sizing:border-box;}
+
+#admin-section-services > .admin-grid > .admin-card:first-child,
+#admin-section-inventory > .admin-grid > .admin-card:first-child{margin-bottom:22px;}
+
+#admin-section-services .admin-item-list{
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:14px;
+  width:100%;
 }
 
-#admin-section-services .admin-grid > .admin-card:first-child,
-
+#admin-section-services .admin-item{
+  min-width:0;
+  min-height:145px;
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:18px;
+  padding:18px;
+  margin:0;
 }
 
-#admin-section-services .admin-item-list,
+#admin-section-services .admin-item-main{min-width:0;width:100%;}
+#admin-section-services .admin-item-main strong{
+  display:block;line-height:1.25;overflow-wrap:anywhere;
+}
+#admin-section-services .admin-item-main small{line-height:1.5;}
+#admin-section-services .admin-item > button{width:100%;margin-top:auto;}
 
+#admin-section-inventory .admin-car-list{
+  display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:14px;
+  width:100%;
 }
 
-#admin-section-services .admin-item,
-
+#admin-section-inventory .admin-car-row{
+  min-width:0;
+  min-height:330px;
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:12px;
+  padding:14px;
+  margin:0;
 }
 
-#admin-section-services .admin-item-main,
-
+#admin-section-inventory .admin-car-thumb{
+  width:100%;
+  height:150px;
+  object-fit:cover;
+  display:block;
 }
 
-#admin-section-services .admin-item-main strong,
+#admin-section-inventory .admin-car-info{min-width:0;flex:1;}
+#admin-section-inventory .admin-car-title{align-items:flex-start;}
+#admin-section-inventory .admin-car-title strong{line-height:1.25;overflow-wrap:anywhere;}
+#admin-section-inventory .admin-car-meta{line-height:1.6;overflow-wrap:anywhere;}
 
+#admin-section-inventory .admin-car-actions{
+  width:100%;
+  display:grid;
+  grid-template-columns:1fr;
+  gap:7px;
+  justify-self:stretch;
+  margin-top:auto;
 }
+#admin-section-inventory .admin-car-actions .btn{width:100%;}
 
-#admin-section-services .admin-item-main small,
-
-}
-
-#admin-section-services .admin-item > button,
-
-}
-
-@media (max-width: 1300px) {
+@media(max-width:1400px){
   #admin-section-services .admin-item-list,
-
+  #admin-section-inventory .admin-car-list{grid-template-columns:repeat(5,minmax(0,1fr));}
 }
-
-@media (max-width: 900px) {
+@media(max-width:1180px){
   #admin-section-services .admin-item-list,
-
+  #admin-section-inventory .admin-car-list{grid-template-columns:repeat(4,minmax(0,1fr));}
 }
-
-@media (max-width: 650px) {
+@media(max-width:900px){
   #admin-section-services .admin-item-list,
-
+  #admin-section-inventory .admin-car-list{grid-template-columns:repeat(3,minmax(0,1fr));}
 }
-
-@media (max-width: 430px) {
+@media(max-width:650px){
   #admin-section-services .admin-item-list,
-
+  #admin-section-inventory .admin-car-list{
+    grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;
+  }
+  #admin-section-services .admin-item{min-height:135px;padding:14px;}
+  #admin-section-inventory .admin-car-row{min-height:300px;padding:10px;}
+  #admin-section-inventory .admin-car-thumb{height:120px;}
+}
+@media(max-width:390px){
+  #admin-section-services .admin-item-list,
+  #admin-section-inventory .admin-car-list{grid-template-columns:1fr;}
 }
