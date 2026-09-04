@@ -10,15 +10,7 @@
     if(!window.MBAAuth?.configured())return get();
     try{const u=await window.MBAAuth.getUser();if(!u)return get();const p={name:u.user_metadata?.full_name||u.email?.split('@')[0]||'Customer',email:u.email||'',phone:u.user_metadata?.phone||''};save(p);return p;}catch{return get();}
   }
-  function renderMenu(){
-    document.querySelectorAll('.customer-account-item').forEach(el=>el.remove());
-    const p=get(); if(!p)return;
-    document.querySelectorAll('.main-nav ul').forEach(ul=>{
-      const li=document.createElement('li');li.className='customer-account-item';
-      li.innerHTML=`<button type="button" class="mobile-logout">Log out <span>${esc(p.name)}</span></button>`;
-      li.querySelector('button').onclick=async()=>{try{await window.MBAAuth?.signOut?.()}catch{}clear();location.reload();};ul.insertBefore(li,ul.firstChild);
-    });
-  }
+  function renderMenu(){ return; }
   async function init(){
     const profile=await syncSupabase();renderMenu();
     const gate=document.getElementById('customer-login'),form=document.getElementById('customer-login-form'),area=document.getElementById('appointment-area');

@@ -32,7 +32,7 @@
     if(qs('#diagnostic-option-grid')){renderDiagnosticOptions();}
     if(qs('#service-catalog-grid')||qs('#service-detail')){await loadScript('js/services.js');window.initServices?.();}
     if(qs('#before-after-grid')||qs('#credentials-grid')||qs('#home-credentials-strip')){await loadScript('js/media.js');window.initBeforeAfter?.();window.initCredentials?.();window.initHomeCredentials?.();}
-    initReveal();initMarquee();initBookingForm();initContactRoutes();renderAuthLinks();window.MBCustomer?.renderMenu?.();
+    initReveal();initMarquee();initBookingForm();initContactRoutes();await renderAuthLinks();
   }
   function renderDiagnosticOptions(){
     const root=qs('#diagnostic-option-grid'); if(!root||!window.MBData)return;
@@ -64,14 +64,21 @@
     }catch(err){document.body.classList.remove('is-navigating');window.location.href=target.href;}
   }
 
-  function renderAuthLinks(){
+  async function renderAuthLinks(){
     const auth=document.querySelector('.header-auth');
-    if(auth){
-      auth.innerHTML='<a href="login.html">Log in</a><a href="signup.html">Sign up</a>';
-      if(window.MBAAuth?.configured?.()){ window.MBAAuth.getUser().then(u=>{if(u)auth.innerHTML='<a href="index.html#account">My account</a><button type="button" class="header-logout">Log out</button>';auth.querySelector('.header-logout')?.addEventListener('click',async()=>{await window.MBAAuth.signOut();window.MBCustomer?.clear?.();location.reload();});}); }
-    }
     const nav=document.querySelector('#main-nav ul');
-    if(nav&&!nav.querySelector('.mobile-auth-links')){const li=document.createElement('li');li.className='mobile-auth-links';li.innerHTML='<a href="login.html">Log in</a><a href="signup.html">Sign up</a>';nav.appendChild(li);}
+    let loggedIn=false;
+    try{ loggedIn=Boolean(window.MBCustomer?.get?.()); if(window.MBAAuth?.configured?.()){loggedIn=Boolean(await window.MBAAuth.getUser())||loggedIn;} }catch{}
+    if(auth){
+      auth.innerHTML=loggedIn?'<button type="button" class="header-logout">Log out</button>':'<a href="login.html" class="page-route">Log in</a><a href="signup.html" class="page-route">Sign up</a>';
+      auth.querySelector('.header-logout')?.addEventListener('click',async()=>{try{await window.MBAAuth?.signOut?.()}catch{}window.MBCustomer?.clear?.();location.reload();});
+    }
+    if(nav){
+      let li=nav.querySelector('.mobile-auth-links');
+      if(!li){li=document.createElement('li');li.className='mobile-auth-links';nav.appendChild(li);}
+      li.innerHTML=loggedIn?'<button type="button" class="mobile-logout">Log out</button>':'<a href="login.html" class="page-route">Log in</a><a href="signup.html" class="page-route">Sign up</a>';
+      li.querySelector('.mobile-logout')?.addEventListener('click',async()=>{try{await window.MBAAuth?.signOut?.()}catch{}window.MBCustomer?.clear?.();location.reload();});
+    }
   }
 
   function initRouter(){

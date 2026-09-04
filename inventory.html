@@ -30,7 +30,7 @@
         <li><a class="page-route" href="process.html">Process</a></li>
         <li><a class="page-route" href="reviews.html">Reviews</a></li>
         <li><a class="page-route" href="contact.html">Contact</a></li>
-        <li><a class="mobile-chat-link" href="https://wa.me/2348106958638" target="_blank" rel="noopener">Start Chat on WhatsApp</a></li><li class="customer-logout-placeholder" hidden><button type="button" class="mobile-logout" id="customer-logout">Log out</button></li>
+        <li><a class="mobile-chat-link" href="https://wa.me/2348106958638" target="_blank" rel="noopener">Start Chat on WhatsApp</a></li>
       </ul>
     </nav>
 
@@ -81,7 +81,7 @@
       <h2>Don't see the right car? Tell us what you're after.</h2>
       <div class="cta-actions">
         <a href="tel:+2349061526267" class="btn btn-primary">Call the Workshop</a>
-        <a href="appointments.html" class="page-route" class="btn btn-ghost-dark">Send a Request</a>
+        <a href="appointments.html" class="page-route btn btn-ghost-dark">Send a Request</a>
       </div>
     </div>
   </div>
@@ -113,6 +113,24 @@
     </a>
   </div>
 </section>
+<div class="enquiry-modal" id="inventory-enquiry-modal" hidden aria-hidden="true">
+  <div class="enquiry-backdrop" data-enquiry-close></div>
+  <section class="enquiry-dialog" role="dialog" aria-modal="true" aria-labelledby="enquiry-title">
+    <button type="button" class="enquiry-close" data-enquiry-close aria-label="Close enquiry">×</button>
+    <span class="eyebrow">Vehicle Enquiry</span>
+    <h2 id="enquiry-title">Tell us who is interested.</h2>
+    <p class="admin-card-note" id="enquiry-vehicle-note">Complete the form and the enquiry will be sent to the workshop.</p>
+    <form id="inventory-enquiry-form" class="admin-form">
+      <input type="hidden" name="vehicle">
+      <div class="form-row"><label>Full name *<input name="buyerName" required autocomplete="name"></label><label>Email *<input name="buyerEmail" type="email" required autocomplete="email"></label></div>
+      <div class="form-row"><label>Phone number *<input name="buyerPhone" type="tel" required autocomplete="tel"></label><label>WhatsApp number<input name="buyerWhatsApp" type="tel" autocomplete="tel"></label></div>
+      <label>Message<textarea name="message" rows="4" placeholder="Tell us what you would like to know about this vehicle."></textarea></label>
+      <button type="submit" class="btn btn-primary btn-block">Send vehicle enquiry</button>
+      <p class="form-status" id="inventory-enquiry-status" role="status"></p>
+    </form>
+  </section>
+</div>
+
 </main>
 <footer class="site-footer">
   <div class="container">
