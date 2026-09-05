@@ -1,64 +1,16 @@
 {
   "rewrites": [
-    {
-      "source": "/service",
-      "destination": "/service.html"
-    },
-    {
-      "source": "/signup",
-      "destination": "/signup.html"
-    },
-    {
-      "source": "/process",
-      "destination": "/process.html"
-    },
-    {
-      "source": "/review",
-      "destination": "/review.html"
-    },
-    {
-      "source": "/services",
-      "destination": "/services.html"
-    },
-    {
-      "source": "/login",
-      "destination": "/login.html"
-    },
-    {
-      "source": "/inventory",
-      "destination": "/inventory.html"
-    },
-    {
-      "source": "/appointments",
-      "destination": "/appointments.html"
-    },
-    {
-      "source": "/admin-login",
-      "destination": "/admin-login.html"
-    },
-    {
-      "source": "/contact",
-      "destination": "/contact.html"
-    },
-    {
-      "source": "/admin",
-      "destination": "/admin.html"
-    },
-    {
-      "source": "/credentials",
-      "destination": "/credentials.html"
-    },
-    {
-      "source": "/workshop",
-      "destination": "/workshop.html"
-    },
-    {
-      "source": "/reviews",
-      "destination": "/reviews.html"
-    },
-    {
-      "source": "/careers",
-      "destination": "/careers.html"
-    }
+    {"source":"/service","destination":"/service.html"},
+    {"source":"/review","destination":"/review.html"},
+    {"source":"/services","destination":"/services.html"},
+    {"source":"/inventory","destination":"/inventory.html"},
+    {"source":"/appointments","destination":"/appointments.html"},
+    {"source":"/contact","destination":"/contact.html"},
+    {"source":"/credentials","destination":"/credentials.html"},
+    {"source":"/workshop","destination":"/workshop.html"},
+    {"source":"/reviews","destination":"/reviews.html"},
+    {"source":"/careers","destination":"/careers.html"},
+    {"source":"/mbac-control-7x4k9","destination":"/mbac-control-7x4k9-login.html"},
+    {"source":"/mbac-control-7x4k9/portal","destination":"/mbac-control-7x4k9-portal.html"}
   ]
 }

@@ -1,35 +1,7 @@
-/* =========================================================
-   Moses Benz Auto Care — Inventory data layer
-   ---------------------------------------------------------
-   This is the single source of truth for "cars for sale",
-   shared by index.html (teaser), inventory.html (full list)
-   and admin.html (add / mark sold / delete).
-
-   HOW PERSISTENCE WORKS (read this before you deploy):
-   - Inventory is currently kept in browser storage in this HTML build.
-   - Car data lives in the browser's localStorage, seeded from
-     CARS_SEED below the first time the site is opened.
-   - When the admin adds/edits/deletes a car in admin.html, that
-     change is saved to localStorage IN THAT BROWSER ONLY. It
-     will not appear for visitors using a different browser or
-     device, because there is no server to sync it to.
-   - To actually publish changes for every visitor, use the
-     "Export data" button on admin.html to download an updated
-     cars-seed.js file, then replace this file with it and
-     re-deploy the site. That makes your edits the new default
-     for everyone.
-   - If you outgrow this (e.g. multiple admins, real-time
-     updates), swap this file out for calls to a real backend
-     (a small API + database, or a headless CMS) — every place
-     that calls MBStore.getCars() etc. would keep working the
-     same way.
-   ========================================================= */
-
-(function (global) {
-  const STORAGE_KEY = 'mbac_cars_v1';
-
-  // ---- Seed data (used the first time, or after "Reset to defaults") ----
-  const CARS_SEED = [
+/* Moses Benz Auto Care — central inventory data layer. Supabase is the source of truth. */
+(function(global) {
+  const STORAGE_KEY='mbac_cars_cache_v2';
+  const CARS_SEED=[
     {
         "id": "car-a-180-2021",
         "name": "A 180",
@@ -738,149 +710,35 @@
         "imageCredit": "Wikimedia Commons / CC BY-SA",
         "description": "Mercedes-AMG GT reference listing."
     }
-]
-
-  // ---- Storage helpers ----
-  function readRaw() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : null;
-    } catch (e) {
-      console.warn('MBStore: could not read localStorage, using seed data.', e);
-      return null;
-    }
+];
+  const cache={cars:null};
+  const clone=x=>JSON.parse(JSON.stringify(x));
+  const localRead=()=>{try{const x=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');return Array.isArray(x)?x:null;}catch{return null;}};
+  const localWrite=x=>{try{localStorage.setItem(STORAGE_KEY,JSON.stringify(x));}catch{}};
+  const emit=()=>window.dispatchEvent(new CustomEvent('mb:inventory-hydrated'));
+  function getCars(){ if(cache.cars) return clone(cache.cars); const x=localRead(); cache.cars=x||clone(CARS_SEED); if(!x)localWrite(cache.cars); return clone(cache.cars); }
+  async function hydrate(){
+    if(!window.MBBackend?.ready){emit();return getCars();}
+    const r=await window.MBBackend.get('inventory','select=*&order=created_at.desc');
+    if(r.ok&&Array.isArray(r.data)){cache.cars=r.data.map(x=>({id:x.id,name:x.name,year:x.year,priceNGN:x.price_ngn,mileageKm:x.mileage_km,specTag:x.spec_tag,status:x.status,image:x.image_url,description:x.description||'',createdAt:x.created_at}));localWrite(cache.cars);}
+    emit(); return getCars();
   }
-
-  function writeRaw(cars) {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(cars));
-      return true;
-    } catch (e) {
-      console.warn('MBStore: could not write to localStorage.', e);
-      return false;
-    }
+  async function addCar(car){
+    const id='car-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7);
+    const item={id,status:'available',...car};
+    if(!window.MBBackend?.ready)throw new Error('Supabase is not configured. Connect the public key before editing shared inventory.'); if(window.MBBackend?.ready){const r=await window.MBBackend.post('inventory',{id:item.id,name:item.name,year:item.year,price_ngn:item.priceNGN,mileage_km:item.mileageKm,spec_tag:item.specTag,status:item.status,image_url:item.image,description:item.description||'',active:true});if(!r.ok)throw new Error('Could not save vehicle to Supabase.');}
+    cache.cars=[item,...getCars().filter(x=>x.id!==id)];localWrite(cache.cars);emit();return item;
   }
-
-  function getCars() {
-    const stored = readRaw();
-    if (stored && Array.isArray(stored)) {
-      const byId = new Map(stored.map(c => [c.id, c]));
-      let changed = false;
-      CARS_SEED.forEach(seedCar => { if (!byId.has(seedCar.id)) { byId.set(seedCar.id, seedCar); changed = true; } });
-      const merged = Array.from(byId.values());
-      if (changed) writeRaw(merged);
-      return merged;
-    }
-    writeRaw(CARS_SEED);
-    return CARS_SEED.slice();
+  async function updateCar(id,patch){
+    const current=getCars().find(x=>x.id===id);if(!current)return false;
+    const next={...current,...patch};
+    if(!window.MBBackend?.ready)throw new Error('Supabase is not configured. Connect the public key before editing shared inventory.'); if(window.MBBackend?.ready){const r=await window.MBBackend.patch('inventory',`id=eq.${encodeURIComponent(id)}`,{name:next.name,year:next.year,price_ngn:next.priceNGN,mileage_km:next.mileageKm,spec_tag:next.specTag,status:next.status,image_url:next.image,description:next.description||'',active:true});if(!r.ok)throw new Error('Could not update vehicle in Supabase.');}
+    cache.cars=getCars().map(x=>x.id===id?next:x);localWrite(cache.cars);emit();return true;
   }
-
-  function saveCars(cars) {
-    writeRaw(cars);
-  }
-
-  function addCar(car) {
-    const cars = getCars();
-    const id = 'car-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6);
-    cars.unshift(Object.assign({ id, status: 'available' }, car));
-    saveCars(cars);
-    return id;
-  }
-
-  function updateCar(id, patch) {
-    const cars = getCars();
-    const idx = cars.findIndex((c) => c.id === id);
-    if (idx === -1) return false;
-    cars[idx] = Object.assign({}, cars[idx], patch);
-    saveCars(cars);
-    return true;
-  }
-
-  function deleteCar(id) {
-    const cars = getCars().filter((c) => c.id !== id);
-    saveCars(cars);
-  }
-
-  function markSold(id) {
-    return updateCar(id, { status: 'sold' });
-  }
-
-  function markAvailable(id) {
-    return updateCar(id, { status: 'available' });
-  }
-
-  function resetToDefaults() {
-    saveCars(CARS_SEED.slice());
-  }
-
-  // ---- Formatting ----
-  function formatNGN(amount) {
-    try {
-      return new Intl.NumberFormat('en-NG', {
-        style: 'currency',
-        currency: 'NGN',
-        maximumFractionDigits: 0
-      }).format(amount);
-    } catch (e) {
-      return '₦' + Number(amount || 0).toLocaleString('en-NG');
-    }
-  }
-
-  function formatKm(km) {
-    return Number(km || 0).toLocaleString('en-NG') + ' km';
-  }
-
-  // ---- Export / Import (the "make it live for everyone" workflow) ----
-  function exportAsSeedFile() {
-    const cars = getCars();
-    const fileBody =
-      '/* Generated by admin.html — replace the CARS_SEED array in js/store.js\n' +
-      '   with this array, then re-deploy the site to publish these changes\n' +
-      '   for every visitor. */\n\n' +
-      'const CARS_SEED = ' + JSON.stringify(cars, null, 2) + ';\n';
-    const blob = new Blob([fileBody], { type: 'text/javascript' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'cars-seed-export.js';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
-
-  function exportAsJSON() {
-    const cars = getCars();
-    const blob = new Blob([JSON.stringify(cars, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'cars.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }
-
-  function importFromJSONText(jsonText) {
-    const parsed = JSON.parse(jsonText);
-    if (!Array.isArray(parsed)) throw new Error('Expected a JSON array of cars.');
-    saveCars(parsed);
-  }
-
-  global.MBStore = {
-    getCars,
-    saveCars,
-    addCar,
-    updateCar,
-    deleteCar,
-    markSold,
-    markAvailable,
-    resetToDefaults,
-    formatNGN,
-    formatKm,
-    exportAsSeedFile,
-    exportAsJSON,
-    importFromJSONText
-  };
+  async function deleteCar(id){if(!window.MBBackend?.ready)throw new Error('Supabase is not configured. Connect the public key before editing shared inventory.'); if(window.MBBackend?.ready){const r=await window.MBBackend.remove('inventory',`id=eq.${encodeURIComponent(id)}`);if(!r.ok)throw new Error('Could not delete vehicle from Supabase.');}cache.cars=getCars().filter(x=>x.id!==id);localWrite(cache.cars);emit();return true;}
+  async function markSold(id){return updateCar(id,{status:'sold'});}
+  async function markAvailable(id){return updateCar(id,{status:'available'});}
+  const formatNGN=amount=>{try{return new Intl.NumberFormat('en-NG',{style:'currency',currency:'NGN',maximumFractionDigits:0}).format(amount);}catch{return '₦'+Number(amount||0).toLocaleString('en-NG');}};
+  const formatKm=km=>Number(km||0).toLocaleString('en-NG')+' km';
+  global.MBStore={getCars,hydrate,addCar,updateCar,deleteCar,markSold,markAvailable,formatNGN,formatKm};
 })(window);

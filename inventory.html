@@ -20,16 +20,15 @@
         <li><a class="page-route" href="/services">Services</a></li>
         <li><a class="page-route" href="/workshop">Our Workshop</a></li>
         <li><a class="page-route" href="/inventory">Inventory</a></li>
-        <li><a class="page-route" href="/process">Process</a></li>
         <li><a class="page-route" href="/reviews">Reviews</a></li>
         <li><a class="page-route" href="/contact">Contact</a></li><li><a class="page-route" href="/careers">Careers</a></li>
-        <li><a class="mobile-chat-link" href="https://wa.me/2348106958638" target="_blank" rel="noopener">Start Chat on WhatsApp</a></li>
+        
       </ul>
     </nav>
 
-    <div class="header-auth" aria-label="Customer account"><a href="/login">Log in</a><a href="/signup">Sign up</a></div>
+    
     <div class="header-cta">
-      <a href="https://wa.me/2348106958638" target="_blank" rel="noopener" class="header-chat">Start Chat</a>
+      
       <a href="/appointments" class="btn btn-primary page-route">Book a Service</a>
       <button class="nav-toggle" id="nav-toggle" aria-label="Open navigation menu" title="Open navigation menu" aria-expanded="false" aria-controls="main-nav">
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path class="icon-menu" d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="icon-close" d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
@@ -51,7 +50,7 @@
      ========================================================= -->
 <section class="inventory-page">
   <div class="container">
-    <div class="filter-bar">
+    <div class="inventory-search-wrap"><label class="sr-only" for="inventory-search-input">Search inventory</label><input id="inventory-search-input" type="search" placeholder="Search Mercedes model, year, engine or description…" autocomplete="off"><span id="inventory-search-count" class="inventory-search-count"></span></div><div class="filter-bar">
       <button class="filter-btn is-active" data-filter="all">All Cars</button>
       <button class="filter-btn" data-filter="available">Available</button>
       <button class="filter-btn" data-filter="sold">Sold</button>
@@ -124,6 +123,8 @@
   </section>
 </div>
 
+
+<div class="inventory-detail-modal" id="inventory-detail-modal" hidden aria-hidden="true"><div class="enquiry-backdrop" data-detail-close></div><section class="inventory-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="detail-name"><button type="button" class="enquiry-close" data-detail-close aria-label="Close vehicle details">×</button><img data-detail-image src="" alt=""><div class="inventory-detail-copy"><span class="eyebrow">Vehicle Details</span><h2 id="detail-name" data-detail-name></h2><strong class="car-price" data-detail-price></strong><p class="car-specs" data-detail-spec></p><p data-detail-description></p><button class="btn btn-primary" type="button" data-detail-buy>Request to purchase</button></div></section></div>
 </main>
 <footer class="site-footer">
   <div class="container">
@@ -149,7 +150,7 @@
           <li><a href="/services" class="page-route">Services</a></li>
           <li><a href="/workshop" class="page-route">Our Workshop</a></li>
           <li><a href="/inventory" class="page-route">Inventory</a></li>
-          <li><a href="/process" class="page-route">How it works</a></li>
+          
           <li><a href="/reviews" class="page-route">Reviews</a></li>
           <li><a href="/credentials" class="page-route">Approvals &amp; Certificates</a></li>
           <li><a href="/careers" class="page-route">Careers</a></li>
@@ -188,7 +189,7 @@
     </div>
 
     <div class="footer-disclaimer">
-      Moses Benz Auto Care is an independent service provider and is not affiliated with, endorsed by, or sponsored by Mercedes-Benz AG. "Mercedes-Benz" and related model names are trademarks of their respective owner and are used here for identification purposes only. Address, phone and hours are pulled from the business's public Google Maps listing — double-check them before publishing. Cars for sale are managed from the admin panel; VINs, reviews and stats shown are placeholder content and should be replaced with real details.
+      Moses Benz Auto Care is an independent service provider and is not affiliated with, endorsed by, or sponsored by Mercedes-Benz AG. "Mercedes-Benz" and related model names are trademarks of their respective owner and are used here for identification purposes only. Address, phone and hours are pulled from the business's public Google Maps listing — double-check them before publishing. Cars for sale, workshop services, repair stories and approved reviews are managed through the shared workshop control centre.
     </div>
 
     <div class="footer-bottom">
@@ -196,7 +197,7 @@
       <div class="legal-links">
         <a href="#">Privacy Policy</a>
         <a href="#">Terms of Service</a>
-        <a href="/admin-login" style="opacity:0.5;">Admin</a>
+        
       </div>
     </div>
   </div>

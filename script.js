@@ -23,18 +23,15 @@
   async function initModules(){
     await loadScript('js/site-data.js');
     await loadScript('js/form-config.js');
-    await loadScript('js/search.js');
-    window.initGlobalSearch?.();
-    if(!window.MBAAuth) await loadScript('js/auth.js');
-    await loadScript('js/customer-auth.js');
     await window.MBData?.hydrate?.();
     if(qs('#home-inventory-list')){await loadScript('js/home-inventory.js');window.initHomeInventory?.();}
     if(qs('#inventory-list')){await loadScript('js/inventory.js');window.initInventoryPage?.();}
     if(qs('#appointment-form')){await loadScript('js/searchable-select.js');await loadScript('js/appointments.js');window.initAppointmentPage?.();}
     if(qs('#career-form')){await loadScript('js/careers.js');window.initCareerPage?.();}
     if(qs('#service-catalog-grid')||qs('#service-detail')){await loadScript('js/services.js');window.initServices?.();}
+    if(qs('#public-reviews-grid')||qs('#review-form')){await loadScript('js/reviews.js');window.initReviews?.();}
     if(qs('#before-after-grid')||qs('#credentials-grid')||qs('#home-credentials-strip')){await loadScript('js/media.js');window.initBeforeAfter?.();window.initCredentials?.();window.initHomeCredentials?.();}
-    initReveal();initMarquee();initBookingForm();initContactRoutes();await renderAuthLinks();
+    initReveal();initMarquee();initBookingForm();initContactRoutes();
   }
   function initBookingForm(){
     const form=qs('#booking-form'); if(!form||form.dataset.bound)return; form.dataset.bound='1';
@@ -43,7 +40,7 @@
   function initContactRoutes(){
     qsa('a[href^="tel:"],a[href^="https://wa.me/"],a[target="_blank"]').forEach(a=>{a.addEventListener('click',()=>{const nav=qs('.main-nav');const t=qs('#nav-toggle');if(nav&&t){nav.classList.remove('is-open');t.classList.remove('is-open');t.setAttribute('aria-expanded','false');}});});
   }
-  function setActive(url){const path=new URL(url,location.href).pathname.split('/').pop()||'index.html';qsa('.main-nav a').forEach(a=>{const p=new URL(a.href,location.href).pathname.split('/').pop()||'index.html';a.toggleAttribute('aria-current',p===path);});}
+  function setActive(url){const path=new URL(url,location.href).pathname.replace(/\/$/,'')||'/';qsa('.main-nav a').forEach(a=>{const p=new URL(a.href,location.href).pathname.replace(/\/$/,'')||'/';a.toggleAttribute('aria-current',p===path);});}
   async function navigate(url,push=true){
     const target=new URL(url,location.href); if(target.origin!==location.origin)return;
     const current=qs('#page-content'); if(!current)return window.location.href=target.href;
@@ -59,23 +56,6 @@
       requestAnimationFrame(()=>current.classList.add('page-enter-active'));
       setTimeout(()=>{current.classList.remove('page-enter','page-enter-active');document.body.classList.remove('is-navigating');},520);
     }catch(err){document.body.classList.remove('is-navigating');window.location.href=target.href;}
-  }
-
-  async function renderAuthLinks(){
-    const auth=document.querySelector('.header-auth');
-    const nav=document.querySelector('#main-nav ul');
-    let loggedIn=false;
-    try{ loggedIn=Boolean(window.MBCustomer?.get?.()); if(window.MBAAuth?.configured?.()){loggedIn=Boolean(await window.MBAAuth.getUser())||loggedIn;} }catch{}
-    if(auth){
-      auth.innerHTML=loggedIn?'<button type="button" class="header-logout">Log out</button>':'<a href="/login" class="page-route">Log in</a><a href="/signup" class="page-route">Sign up</a>';
-      auth.querySelector('.header-logout')?.addEventListener('click',async()=>{try{await window.MBAAuth?.signOut?.()}catch{}window.MBCustomer?.clear?.();location.reload();});
-    }
-    if(nav){
-      let li=nav.querySelector('.mobile-auth-links');
-      if(!li){li=document.createElement('li');li.className='mobile-auth-links';nav.appendChild(li);}
-      li.innerHTML=loggedIn?'<button type="button" class="mobile-logout">Log out</button>':'<a href="/login" class="page-route">Log in</a><a href="/signup" class="page-route">Sign up</a>';
-      li.querySelector('.mobile-logout')?.addEventListener('click',async()=>{try{await window.MBAAuth?.signOut?.()}catch{}window.MBCustomer?.clear?.();location.reload();});
-    }
   }
 
   function initRouter(){
