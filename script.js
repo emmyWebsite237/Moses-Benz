@@ -23,12 +23,15 @@
   async function initModules(){
     await loadScript('js/site-data.js');
     await loadScript('js/form-config.js');
+    await loadScript('js/search.js');
+    window.initGlobalSearch?.();
     if(!window.MBAAuth) await loadScript('js/auth.js');
     await loadScript('js/customer-auth.js');
     await window.MBData?.hydrate?.();
     if(qs('#home-inventory-list')){await loadScript('js/home-inventory.js');window.initHomeInventory?.();}
     if(qs('#inventory-list')){await loadScript('js/inventory.js');window.initInventoryPage?.();}
-    if(qs('#appointment-form')){await loadScript('js/appointments.js');window.initAppointmentPage?.();}
+    if(qs('#appointment-form')){await loadScript('js/searchable-select.js');await loadScript('js/appointments.js');window.initAppointmentPage?.();}
+    if(qs('#career-form')){await loadScript('js/careers.js');window.initCareerPage?.();}
     if(qs('#service-catalog-grid')||qs('#service-detail')){await loadScript('js/services.js');window.initServices?.();}
     if(qs('#before-after-grid')||qs('#credentials-grid')||qs('#home-credentials-strip')){await loadScript('js/media.js');window.initBeforeAfter?.();window.initCredentials?.();window.initHomeCredentials?.();}
     initReveal();initMarquee();initBookingForm();initContactRoutes();await renderAuthLinks();

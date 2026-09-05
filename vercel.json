@@ -55,6 +55,10 @@
     {
       "source": "/reviews",
       "destination": "/reviews.html"
+    },
+    {
+      "source": "/careers",
+      "destination": "/careers.html"
     }
   ]
 }

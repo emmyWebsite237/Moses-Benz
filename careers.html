@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Our Workshop — Moses Benz Auto Care</title>
-<meta name="description" content="Our Workshop — Moses Benz Auto Care — Mercedes-Benz specialist servicing, vehicle health checks and vehicle sales in Idimu, Lagos.">
+<title>Careers — Moses Benz Auto Care</title>
+<meta name="description" content="Careers — Moses Benz Auto Care — join a Mercedes-Benz specialist workshop in Idimu, Lagos. Send your details and we will reach out about current openings.">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -22,7 +22,7 @@
         <li><a class="page-route" href="/inventory">Inventory</a></li>
         <li><a class="page-route" href="/process">Process</a></li>
         <li><a class="page-route" href="/reviews">Reviews</a></li>
-        <li><a class="page-route" href="/contact">Contact</a></li><li><a class="page-route" href="/careers">Careers</a></li>
+        <li><a class="page-route" href="/contact">Contact</a></li><li><a class="page-route" href="/careers" aria-current="page">Careers</a></li>
         <li><a class="mobile-chat-link" href="https://wa.me/2348106958638" target="_blank" rel="noopener">Start Chat on WhatsApp</a></li>
       </ul>
     </nav>
@@ -38,27 +38,67 @@
   </div>
 </header>
 <main id="page-content" class="page-transition">
-<section class="gallery" id="workshop">
+<section class="appointment-page">
   <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">The Actual Place</span>
-      <h2>No stock photos past this point.</h2>
-      <p>This is our yard on Lasu Rd, Idimu — real cars, real technicians, real work.</p>
-    </div>
+    <div class="appointment-layout">
+      <div class="appointment-copy reveal">
+        <span class="eyebrow">Careers</span>
+        <h1>Work on Mercedes-Benz, every day.</h1>
+        <p>We're always glad to hear from technicians, apprentices and support staff who want to work on Mercedes-Benz vehicles specifically. Send your details below and we'll reach out when a role fits.</p>
+        <div class="appointment-points">
+          <div><strong>01</strong><span>Tell us how to reach you and which role interests you.</span></div>
+          <div><strong>02</strong><span>Let us know your experience level — hands-on already, or ready to learn on the job.</span></div>
+          <div><strong>03</strong><span>We review applications and contact promising candidates directly by phone or WhatsApp.</span></div>
+        </div>
+        <a href="https://wa.me/2348106958638?text=Hello%2C%20I%27d%20like%20to%20ask%20about%20job%20openings%20at%20Moses%20Benz%20Auto%20Care." target="_blank" rel="noopener" class="btn btn-ghost-light">Ask about openings on WhatsApp</a>
+      </div>
 
-    <div class="gallery-grid reveal">
-      <figure class="gallery-item gallery-item--wide">
-        <img src="images/workshop-yard.jpg" alt="Mercedes-Benz cars being serviced in the Moses Benz Auto Care yard, Idimu" loading="lazy">
-        <figcaption>Our yard on Lasu Rd — several bays working at once, hoods up, no idle time.</figcaption>
-      </figure>
-      <figure class="gallery-item">
-        <img src="images/street-cars.jpg" alt="Cars parked at Moses Benz Auto Care" loading="lazy">
-        <figcaption>Parking out front — always cars in for work.</figcaption>
-      </figure>
+      <div class="appointment-card reveal">
+        <div class="form-heading">
+          <span class="eyebrow">Join The Team</span>
+          <h2>Apply now</h2>
+          <p>Fields marked * are required. We contact applicants using the phone number or email provided.</p>
+        </div>
+        <form id="career-form" class="appointment-form">
+          <div class="form-row">
+            <label>Full name *
+              <input name="name" required autocomplete="name" placeholder="Your full name">
+            </label>
+            <label>Phone / WhatsApp *
+              <input name="phone" required type="tel" autocomplete="tel" placeholder="080... / +234...">
+            </label>
+          </div>
+          <label>Email (optional)
+            <input name="email" type="email" autocomplete="email" placeholder="you@example.com">
+          </label>
+          <label>Role you're interested in *
+            <select name="role" required>
+              <option value="">Select a role</option>
+              <option value="Mechanic / Technician">Mechanic / Technician</option>
+              <option value="Benz Diagnosing Technician">Benz Diagnosing Technician</option>
+              <option value="Bodywork &amp; Detailing">Bodywork &amp; Detailing</option>
+              <option value="Apprentice / Trainee">Apprentice / Trainee</option>
+              <option value="Front Desk / Customer Service">Front Desk / Customer Service</option>
+              <option value="Other">Other</option>
+            </select>
+          </label>
+          <label>Your experience *
+            <select name="experience" required>
+              <option value="">Select one</option>
+              <option value="Experienced — I have worked on Mercedes-Benz or general vehicle repair before">Experienced — I have worked on Mercedes-Benz or general vehicle repair before</option>
+              <option value="New to this — I don't have formal experience yet, but I'm eager to learn">New to this — I don't have formal experience yet, but I'm eager to learn</option>
+            </select>
+          </label>
+          <label>Tell us a bit about yourself
+            <textarea name="message" rows="6" placeholder="Past work, training, or why you'd like to join Moses Benz Auto Care."></textarea>
+          </label>
+          <button type="submit" class="btn btn-primary btn-block">Send application <span>→</span></button>
+          <p class="form-status" id="career-status" role="status"></p>
+        </form>
+      </div>
     </div>
   </div>
 </section>
-<section class="page-intro-block"><div class="container"><div class="section-head center reveal"><span class="eyebrow">Inside the Bay</span><h2>Built around inspection, explanation and careful work.</h2><p>Bring the car in, see what we find, and understand the work before approving it.</p></div><div class="workshop-detail-grid reveal"><div class="workshop-detail"><strong>01</strong><h3>Inspection first</h3><p>We start with the symptom and the vehicle condition before recommending parts.</p></div><div class="workshop-detail"><strong>02</strong><h3>Clear communication</h3><p>We explain the finding in plain language and separate urgent work from maintenance.</p></div><div class="workshop-detail"><strong>03</strong><h3>Documented handover</h3><p>Completed work is explained at collection so you know what was done.</p></div></div></div></section>
 </main>
 <footer class="site-footer">
   <div class="container">

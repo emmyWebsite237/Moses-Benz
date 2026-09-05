@@ -11,14 +11,7 @@
 <header class="site-header">
   <div class="container">
     <a href="/" class="brand page-route">
-      <span class="brand-mark">
-        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="20" cy="20" r="18.5" stroke="currentColor" stroke-width="1.4"/>
-          <path d="M20 6 L20 20 L30.5 27" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-          <path d="M20 20 L11 28" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-          <circle cx="20" cy="20" r="2" fill="currentColor"/>
-        </svg>
-      </span>
+      <span class="brand-mark"><img src="images/logo.png" alt="Moses Benz Auto Care logo"></span>
       <span class="brand-word">Moses Benz<small>Auto Care · Idimu, Lagos</small></span>
     </a>
 
@@ -29,7 +22,7 @@
         <li><a class="page-route" href="/inventory">Inventory</a></li>
         <li><a class="page-route" href="/process">Process</a></li>
         <li><a class="page-route" href="/reviews">Reviews</a></li>
-        <li><a class="page-route" href="/contact">Contact</a></li>
+        <li><a class="page-route" href="/contact">Contact</a></li><li><a class="page-route" href="/careers">Careers</a></li>
         <li><a class="mobile-chat-link" href="https://wa.me/2348106958638" target="_blank" rel="noopener">Start Chat on WhatsApp</a></li>
       </ul>
     </nav>
@@ -48,20 +41,13 @@
 <div class="appointment-copy reveal"><span class="eyebrow">Book an Appointment</span><h1>Tell us what your Mercedes needs.</h1><p>First, enter your contact details so we know who is making the request. No verification or password is required. After that, send the workshop the vehicle and service details. We will contact you with the actual appointment time.</p><div class="appointment-points"><div><strong>01</strong><span>Sign in with your name, email and phone — no verification.</span></div><div><strong>02</strong><span>Tell us your Mercedes model, service or service need and the problem.</span></div><div><strong>03</strong><span>The workshop reviews the request and sends you the appointment time.</span></div></div><a href="https://wa.me/2348106958638" target="_blank" rel="noopener" class="btn btn-ghost-light">Start a WhatsApp chat</a></div>
 <div class="appointment-card reveal">
 <div id="customer-login" class="customer-login"><div class="form-heading"><span class="eyebrow">Customer sign-in</span><h2>Before you book</h2><p>No password. No email verification. We only need your details so the workshop knows who sent the request.</p></div><form id="customer-login-form" class="appointment-form"><div class="form-row"><label>Full name *<input name="name" required autocomplete="name" placeholder="Your full name"></label><label>Email *<input name="email" required type="email" autocomplete="email" placeholder="you@example.com"></label></div><label>Phone / WhatsApp *<input name="phone" required type="tel" autocomplete="tel" placeholder="080... / +234..."></label><button class="btn btn-primary btn-block">Continue to appointment request →</button></form></div>
-<div id="appointment-area" hidden><div class="form-heading"><span class="eyebrow">Appointment Request</span><h2>Send your request</h2><p id="customer-session-note">Signed in</p><button type="button" id="customer-logout" class="btn btn-ghost-light" style="margin-top:12px;">Log out</button></div><form id="appointment-form" class="appointment-form"><div class="form-row"><label>Full name *<input name="name" required readonly></label><label>Email *<input name="email" required type="email" readonly></label></div><div class="form-row"><label>Phone *<input name="phone" required type="tel" readonly></label><label>Mercedes model *<input name="model" required placeholder="e.g. E 350, GLE 450"></label></div><div class="form-row"><label>Year<input name="year" type="number" min="1980" max="2035" placeholder="2021"></label><label>Registration / plate<input name="registration" placeholder="Optional"></label></div><label>Service *<select name="service" required><option value="">Select a service</option></select></label><label>What is the car doing? *<textarea name="message" rows="7" required placeholder="Describe the warning light, noise, symptom, service needed, or anything else we should know."></textarea></label><button type="submit" class="btn btn-primary btn-block">Send appointment request <span>→</span></button><p class="form-status" id="appointment-status" role="status"></p></form></div></div></div></div></section></main>
+<div id="appointment-area" hidden><div class="form-heading"><span class="eyebrow">Appointment Request</span><h2>Send your request</h2><p id="customer-session-note">Signed in</p><button type="button" id="customer-logout" class="btn btn-ghost-light" style="margin-top:12px;">Log out</button></div><form id="appointment-form" class="appointment-form"><div class="form-row"><label>Full name *<input name="name" required readonly></label><label>Email *<input name="email" required type="email" readonly></label></div><div class="form-row"><label>Phone *<input name="phone" required type="tel" readonly></label><label>Mercedes model *<input name="model" required placeholder="e.g. E 350, GLE 450"></label></div><div class="form-row"><label>Year<input name="year" type="number" min="1980" max="2035" placeholder="2021"></label><label>Registration / plate<input name="registration" placeholder="Optional"></label></div><label>Service *<select name="service" required data-combobox="1" data-placeholder="Type to search services, e.g. brakes, AIRMATIC, AC…"><option value="">Select a service</option></select></label><label>What is the car doing? *<textarea name="message" rows="7" required placeholder="Describe the warning light, noise, symptom, service needed, or anything else we should know."></textarea></label><button type="submit" class="btn btn-primary btn-block">Send appointment request <span>→</span></button><p class="form-status" id="appointment-status" role="status"></p></form></div></div></div></div></section></main>
 <footer class="site-footer">
   <div class="container">
     <div class="footer-top">
       <div class="footer-brand">
         <a href="/" class="brand page-route">
-          <span class="brand-mark">
-            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="20" cy="20" r="18.5" stroke="currentColor" stroke-width="1.4"/>
-              <path d="M20 6 L20 20 L30.5 27" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-              <path d="M20 20 L11 28" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-              <circle cx="20" cy="20" r="2" fill="currentColor"/>
-            </svg>
-          </span>
+          <span class="brand-mark"><img src="images/logo.png" alt="Moses Benz Auto Care logo"></span>
           <span class="brand-word" style="color:var(--white);">Moses Benz Auto Care</span>
         </a>
         <p>Mercedes-Benz repairs, maintenance and auto sales in Idimu, Lagos. Factory-trained technicians, honest pricing, every time.</p>
@@ -81,7 +67,9 @@
           <li><a href="/workshop" class="page-route">Our Workshop</a></li>
           <li><a href="/inventory" class="page-route">Inventory</a></li>
           <li><a href="/process" class="page-route">How it works</a></li>
-          <li><a href="/reviews" class="page-route">Reviews</a></li><li><a href="/credentials" class="page-route">Approvals &amp; Certificates</a></li>
+          <li><a href="/reviews" class="page-route">Reviews</a></li>
+          <li><a href="/credentials" class="page-route">Approvals &amp; Certificates</a></li>
+          <li><a href="/careers" class="page-route">Careers</a></li>
         </ul>
       </div>
 

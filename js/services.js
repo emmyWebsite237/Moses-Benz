@@ -13,7 +13,23 @@
     'air-conditioning-service':'AC performance testing, refrigerant checks, leak diagnosis, compressor checks, blower and climate-control troubleshooting.',
     'pre-purchase-inspection':'A structured Mercedes inspection before purchase covering diagnostics, mechanical condition, suspension, brakes, electronics and visible body condition.'
   };
-  function initCatalog(){const root=document.getElementById('service-catalog-grid');if(!root||!window.MBData)return;root.innerHTML=window.MBData.getServices().map((name,i)=>{const s=slug(name);return `<article class="option-card"><span>${String(i+1).padStart(2,'0')}</span><h3>${esc(name)}</h3><p>${esc(detail[s]||'Mercedes-Benz specialist service covering inspection, diagnosis, repair or maintenance for this system. We explain the finding before work begins.')}</p><a href="service.html?service=${encodeURIComponent(name)}" class="text-link page-route">About this service →</a></article>`}).join('');}
+  function initCatalog(){
+    const root=document.getElementById('service-catalog-grid');if(!root||!window.MBData)return;
+    const input=document.getElementById('service-search-input');
+    const countEl=document.getElementById('service-search-count');
+    const emptyEl=document.getElementById('service-search-empty');
+    const all=window.MBData.getServices();
+    function cardFor(name,i){const s=slug(name);return `<article class="option-card"><span>${String(i+1).padStart(2,'0')}</span><h3>${esc(name)}</h3><p>${esc(detail[s]||'Mercedes-Benz specialist service covering inspection, diagnosis, repair or maintenance for this system. We explain the finding before work begins.')}</p><a href="service.html?service=${encodeURIComponent(name)}" class="text-link page-route">About this service →</a></article>`;}
+    function render(){
+      const q=(input?.value||'').trim().toLowerCase();
+      const matches=q?all.filter(name=>name.toLowerCase().includes(q)):all;
+      root.innerHTML=matches.map(cardFor).join('');
+      if(countEl)countEl.textContent=q?`${matches.length} of ${all.length} services`:`${all.length} services`;
+      if(emptyEl)emptyEl.hidden=matches.length>0;
+    }
+    if(input&&!input.dataset.bound){input.dataset.bound='1';input.addEventListener('input',render);}
+    render();
+  }
   function initDetail(){const root=document.getElementById('service-detail');if(!root)return;const name=new URLSearchParams(location.search).get('service')||'Mercedes-Benz Service';const s=slug(name);const text=detail[s]||`At Moses Benz Auto Care, ${name} is approached with inspection first, clear communication and repair work matched to the condition of the vehicle. We identify the cause, explain the finding and only proceed with approved work.`;root.innerHTML=`<span class="eyebrow">Service Detail</span><h1>${esc(name)}</h1><p>${esc(text)}</p><div class="service-detail-points"><div><strong>01</strong><span>Inspect and diagnose the vehicle before replacing parts.</span></div><div><strong>02</strong><span>Explain the finding and separate urgent repairs from maintenance.</span></div><div><strong>03</strong><span>Carry out the approved work and explain the completed job at handover.</span></div></div><a href="appointments.html?service=${encodeURIComponent(name)}" class="btn btn-primary page-route">Request this service</a>`;}
   window.initServices=()=>{initCatalog();initDetail();};
 })();
