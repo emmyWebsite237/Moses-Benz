@@ -22,16 +22,16 @@
   function loadScript(src){return new Promise((resolve,reject)=>{const old=document.querySelector(`script[data-module="${src}"]`);if(old){resolve();return;}const s=document.createElement('script');s.src=src;s.dataset.module=src;s.onload=resolve;s.onerror=reject;document.body.appendChild(s);});}
   async function initModules(){
     await loadScript('js/site-data.js');
+    await loadScript('js/form-config.js');
+    await window.MBData?.hydrate?.();
     if(qs('#home-inventory-list')){await loadScript('js/home-inventory.js');window.initHomeInventory?.();}
     if(qs('#inventory-list')){await loadScript('js/inventory.js');window.initInventoryPage?.();}
-    if(qs('#appointment-form')){await loadScript('js/appointments.js');window.initAppointmentPage?.();}
-    if(qs('#diagnostic-option-grid')){renderDiagnosticOptions();}
+    if(qs('#appointment-form')){await loadScript('js/searchable-select.js');await loadScript('js/appointments.js');window.initAppointmentPage?.();}
+    if(qs('#career-form')){await loadScript('js/careers.js');window.initCareerPage?.();}
+    if(qs('#service-catalog-grid')||qs('#service-detail')){await loadScript('js/services.js');window.initServices?.();}
+    if(qs('#public-reviews-grid')||qs('#review-form')){await loadScript('js/reviews.js');window.initReviews?.();}
+    if(qs('#before-after-grid')||qs('#credentials-grid')||qs('#home-credentials-strip')){await loadScript('js/media.js');window.initBeforeAfter?.();window.initCredentials?.();window.initHomeCredentials?.();}
     initReveal();initMarquee();initBookingForm();initContactRoutes();
-  }
-  function renderDiagnosticOptions(){
-    const root=qs('#diagnostic-option-grid'); if(!root||!window.MBData)return;
-    const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-    root.innerHTML=window.MBData.getDiagnostics().map(d=>`<article class="diagnostic-option"><span class="diag-code">${esc(d.code)}</span><h3>${esc(d.name)}</h3><p>${esc(d.description)}</p><a href="appointments.html?service=${encodeURIComponent(d.name)}" class="page-route">Book this →</a></article>`).join('');
   }
   function initBookingForm(){
     const form=qs('#booking-form'); if(!form||form.dataset.bound)return; form.dataset.bound='1';
@@ -40,7 +40,7 @@
   function initContactRoutes(){
     qsa('a[href^="tel:"],a[href^="https://wa.me/"],a[target="_blank"]').forEach(a=>{a.addEventListener('click',()=>{const nav=qs('.main-nav');const t=qs('#nav-toggle');if(nav&&t){nav.classList.remove('is-open');t.classList.remove('is-open');t.setAttribute('aria-expanded','false');}});});
   }
-  function setActive(url){const path=new URL(url,location.href).pathname.split('/').pop()||'index.html';qsa('.main-nav a').forEach(a=>{const p=new URL(a.href,location.href).pathname.split('/').pop()||'index.html';a.toggleAttribute('aria-current',p===path);});}
+  function setActive(url){const path=new URL(url,location.href).pathname.replace(/\/$/,'')||'/';qsa('.main-nav a').forEach(a=>{const p=new URL(a.href,location.href).pathname.replace(/\/$/,'')||'/';a.toggleAttribute('aria-current',p===path);});}
   async function navigate(url,push=true){
     const target=new URL(url,location.href); if(target.origin!==location.origin)return;
     const current=qs('#page-content'); if(!current)return window.location.href=target.href;
@@ -57,6 +57,7 @@
       setTimeout(()=>{current.classList.remove('page-enter','page-enter-active');document.body.classList.remove('is-navigating');},520);
     }catch(err){document.body.classList.remove('is-navigating');window.location.href=target.href;}
   }
+
   function initRouter(){
     document.addEventListener('click',e=>{const a=e.target.closest('a.page-route');if(!a)return;const href=a.getAttribute('href');if(!href||href.startsWith('#')||a.target==='_blank'||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;e.preventDefault();navigate(href,true);});
     window.addEventListener('popstate',()=>navigate(location.href,false));

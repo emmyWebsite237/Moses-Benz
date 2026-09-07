@@ -1,57 +1,53 @@
-/* Moses Benz Auto Care — shared editable site data.
- * Local mode works immediately. Add Supabase later for cross-device sync.
- */
+/* Moses Benz Auto Care — shared content layer. Supabase is authoritative; localStorage is only a fast cache. */
 (() => {
-  const KEYS = {
-    services: 'mbac_services_v1',
-    diagnostics: 'mbac_diagnostics_v1',
-    slots: 'mbac_slots_v1',
-    appointments: 'mbac_appointments_v1',
-    reviews: 'mbac_reviews_v1'
-  };
-  const SERVICES = [
-    'Routine Service','Oil & Filter Service','Brake Service','Transmission Service','AIRMATIC / Suspension','Electrical Repair','Air Conditioning','Cooling System','Engine Repair','Steering & Wheel Alignment','Bodywork / Detailing','Pre-Purchase Inspection','Other'
-  ];
-  const DIAGNOSTICS = [
-    ['D01','Full Vehicle Scan','Complete module scan, stored faults, live data review and a vehicle health report.'],
-    ['D02','Engine Management','Misfires, rough idle, limp mode, poor acceleration, fuel and sensor faults.'],
-    ['D03','Transmission','Gear selection, harsh shifts, slipping, warning messages and transmission control faults.'],
-    ['D04','ABS / ESP / SBC','Brake control modules, wheel-speed sensors, stability and braking warnings.'],
-    ['D05','AIRMATIC / Suspension','Ride-height faults, compressor issues, leaks, calibration and suspension warnings.'],
-    ['D06','Electrical System','Battery drain, alternator, starter, fuses, wiring and intermittent electrical faults.'],
-    ['D07','Air Conditioning','Climate-control faults, compressor operation, pressure readings and cooling performance.'],
-    ['D08','MBUX / Infotainment','Display, audio, Bluetooth, connectivity, camera and infotainment module issues.'],
-    ['D09','AdBlue / Emissions','AdBlue warnings, NOx sensors, emissions faults and related drivability symptoms.'],
-    ['D10','Airbag / SRS','SRS warning lights, restraint systems, seat occupancy and related module faults.'],
-    ['D11','Starting / No-Start','Crank/no-start, immobiliser, key recognition, fuel delivery and ignition checks.'],
-    ['D12','Pre-Purchase Scan','Independent diagnostic check for a Mercedes you are considering buying.']
-  ].map(([code,name,description]) => ({code,name,description}));
-
-  const seedSlots = () => {
-    const slots=[]; const now=new Date();
-    for(let d=0;d<10;d++){
-      const day=new Date(now); day.setDate(now.getDate()+d);
-      if(day.getDay()===0) continue;
-      ['08:00','09:30','11:00','13:00','14:30','16:00'].forEach(time=>slots.push({id:`slot-${day.toISOString().slice(0,10)}-${time}`,date:day.toISOString().slice(0,10),time,capacity:1,booked:0,status:'open'}));
-    }
-    return slots;
-  };
-  const read=(key,fallback)=>{try{const raw=localStorage.getItem(key);return raw?JSON.parse(raw):fallback}catch{return fallback;}};
-  const write=(key,value)=>{try{localStorage.setItem(key,JSON.stringify(value));return true}catch{return false;}};
-  const clone=x=>JSON.parse(JSON.stringify(x));
-  function getServices(){let x=read(KEYS.services,null);if(!Array.isArray(x)){x=SERVICES.slice();write(KEYS.services,x);}return x;}
-  function getDiagnostics(){let x=read(KEYS.diagnostics,null);if(!Array.isArray(x)){x=clone(DIAGNOSTICS);write(KEYS.diagnostics,x);}return x;}
-  function getSlots(){let x=read(KEYS.slots,null);if(!Array.isArray(x)){x=seedSlots();write(KEYS.slots,x);}return x;}
-  function getAppointments(){return read(KEYS.appointments,[]);}
-  function saveAppointments(x){write(KEYS.appointments,x);}
-  function addAppointment(data){const list=getAppointments();const id='apt-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7);const a={id,createdAt:new Date().toISOString(),status:'requested',reviewRequested:false,...data};list.push(a);saveAppointments(list);return a;}
-  function updateAppointment(id,patch){const list=getAppointments();const i=list.findIndex(x=>x.id===id);if(i<0)return false;list[i]={...list[i],...patch};saveAppointments(list);return true;}
-  function saveServices(x){write(KEYS.services,x);}
-  function saveDiagnostics(x){write(KEYS.diagnostics,x);}
-  function saveSlots(x){write(KEYS.slots,x);}
-  function addSlot(data){const x=getSlots();const id='slot-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7);x.push({id,booked:0,status:'open',...data});saveSlots(x);return id;}
-  function bookSlot(id){const x=getSlots();const s=x.find(v=>v.id===id);if(!s||s.status!=='open'||Number(s.booked)>=Number(s.capacity))return false;s.booked=Number(s.booked)+1;if(s.booked>=s.capacity)s.status='full';saveSlots(x);return true;}
-  function getReviews(){return read(KEYS.reviews,[]);}
-  function addReview(data){const x=getReviews();x.unshift({id:'rev-'+Date.now().toString(36),createdAt:new Date().toISOString(),...data});write(KEYS.reviews,x);return x[0];}
-  window.MBData={getServices,getDiagnostics,getSlots,getAppointments,saveAppointments,addAppointment,updateAppointment,saveServices,saveDiagnostics,addSlot,bookSlot,getReviews,addReview,KEYS};
+  const KEYS={services:'mbac_services_v6',appointments:'mbac_appointments_v5',reviews:'mbac_reviews_v5',beforeAfter:'mbac_before_after_v3',credentials:'mbac_credentials_v2'};
+  const SERVICES=["Oil & Filter Service","Engine Oil & Fluid Check","Benz Servicing","Brake Inspection","Brake Pad Replacement","Brake Disc / Rotor Replacement","Brake Fluid Flush","ABS / ESP / SBC Repair","Tyre Replacement","Wheel Balancing","Wheel Alignment","Battery Testing & Replacement","Alternator & Charging Repair","Starter Motor Repair","Battery Drain Diagnosis","Engine Repair","Engine Overhaul / Rebuild","Timing Chain Inspection & Repair","Timing Belt Service","Spark Plug Replacement","Ignition Coil Replacement","Fuel System Repair","Fuel Injector Service","Fuel Pump Repair","Cooling System Service","Radiator Repair / Replacement","Water Pump Replacement","Thermostat Replacement","Coolant Flush","Automatic Transmission Service","Transmission Fluid & Filter Service","Transmission Repair / Rebuild","Gearbox Mount Replacement","Driveshaft / Propeller Shaft Repair","Differential Service & Repair","Transfer Case Service","Clutch Service","AIRMATIC Diagnosis & Repair","Air Suspension Compressor Repair","Air Suspension Leak Repair","Shock Absorber Replacement","Control Arm / Bush Replacement","Steering System Repair","Power Steering Service","Wheel Bearing Replacement","Air Conditioning Service","AC Gas Recharge","AC Compressor Repair","Climate Control Repair","Electrical System Repair","Wiring & CAN-Bus Diagnosis","ECU Coding & Programming","Key / Immobiliser Diagnosis","Window / Central Lock Repair","Lighting & Headlamp Repair","Parking Sensor / Camera Repair","MBUX / Infotainment Repair","Software / Module Updates","Airbag / SRS Repair","AdBlue / Emissions System Repair","DPF / Exhaust System Repair","Turbocharger Repair","Hybrid / EV System Inspection","Pre-Purchase Inspection","Roadworthiness Inspection","Accident / Collision Repair","Paint & Panel Repair","Paint Correction & Polishing","Ceramic Coating","Interior Detailing","Exterior Detailing","Headlight Restoration","Windshield / Glass Replacement","Benz Diagnosing","Benz Diagnosing — Full Vehicle Scan","Benz Diagnosing — Engine Management","Benz Diagnosing — Transmission & Gearbox","Benz Diagnosing — ABS / ESP / SBC","Benz Diagnosing — AIRMATIC / Air Suspension","Benz Diagnosing — Electrical & Battery","Benz Diagnosing — CAN-Bus / Communication","Benz Diagnosing — Air Conditioning / Climate","Benz Diagnosing — MBUX / Infotainment","Benz Diagnosing — Airbag / SRS","Benz Diagnosing — AdBlue / Emissions","Benz Diagnosing — Starting / No-Start","Benz Diagnosing — Turbo / Boost System","Benz Diagnosing — Cooling System","Benz Diagnosing — Steering & Suspension","Benz Diagnosing — Hybrid / EV System","Benz Diagnosing — Pre-Purchase","Benz Diagnosing — Road Test","Other"];
+  const cache={services:null,appointments:null,reviews:null,beforeAfter:null,credentials:null};
+  const read=(k,f)=>{try{const x=JSON.parse(localStorage.getItem(k)||'null');return x??f;}catch{return f;}};
+  const write=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
+  const emit=()=>window.dispatchEvent(new CustomEvent('mb:data-hydrated'));
+  function getServices(){return cache.services||read(KEYS.services,SERVICES.slice());}
+  async function saveServices(x){if(window.MBBackend?.ready){const current=await window.MBBackend.get('services','select=id,name,active');if(!current.ok)throw new Error('Could not read services from Supabase.');const map=new Map((current.data||[]).map(r=>[r.name,r]));for(const row of current.data||[])if(!x.includes(row.name)&&row.active!==false)await window.MBBackend.patch('services',`id=eq.${encodeURIComponent(row.id)}`,{active:false});for(const name of x){const row=map.get(name);if(row){if(row.active===false)await window.MBBackend.patch('services',`id=eq.${encodeURIComponent(row.id)}`,{active:true});}else{const r=await window.MBBackend.post('services',{name,active:true});if(!r.ok)throw new Error('Could not add service to Supabase.');}}}cache.services=[...x];write(KEYS.services,cache.services);emit();return true;}
+  function getAppointments(){return cache.appointments||read(KEYS.appointments,[]);}
+  function addAppointment(data){const a={id:'apt-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7),createdAt:new Date().toISOString(),status:'requested',reviewRequested:false,reviewRequired:false,...data};cache.appointments=[...getAppointments(),a];write(KEYS.appointments,cache.appointments);return a;}
+  function updateAppointment(id,patch){cache.appointments=getAppointments().map(x=>x.id===id?{...x,...patch}:x);write(KEYS.appointments,cache.appointments);return true;}
+  async function deleteAppointment(id){if(window.MBBackend?.ready){const r=await window.MBBackend.remove('appointments',`id=eq.${encodeURIComponent(id)}`);if(!r.ok)throw new Error('Could not delete appointment from Supabase.');}cache.appointments=getAppointments().filter(x=>x.id!==id);write(KEYS.appointments,cache.appointments);return true;}
+  function getReviews(){return cache.reviews||read(KEYS.reviews,[]);}
+  function addReview(data){const r={id:'rev-'+Date.now().toString(36),createdAt:new Date().toISOString(),approved:false,...data};cache.reviews=[r,...getReviews()];write(KEYS.reviews,cache.reviews);return r;}
+  function getBeforeAfter(){return cache.beforeAfter||read(KEYS.beforeAfter,[]);}
+  function addBeforeAfter(data){const r={id:crypto.randomUUID?.()||'ba-'+Date.now().toString(36),createdAt:new Date().toISOString(),...data};cache.beforeAfter=[r,...getBeforeAfter()];write(KEYS.beforeAfter,cache.beforeAfter);return r;}
+  function removeBeforeAfter(id){cache.beforeAfter=getBeforeAfter().filter(x=>x.id!==id);write(KEYS.beforeAfter,cache.beforeAfter);}
+  function getCredentials(){return cache.credentials||read(KEYS.credentials,[]);}
+  function addCredential(data){const r={id:crypto.randomUUID?.()||'cert-'+Date.now().toString(36),createdAt:new Date().toISOString(),...data};cache.credentials=[r,...getCredentials()];write(KEYS.credentials,cache.credentials);return r;}
+  function removeCredential(id){cache.credentials=getCredentials().filter(x=>x.id!==id);write(KEYS.credentials,cache.credentials);}
+  async function migrateLegacyLocalData(){
+    if(!window.MBBackend?.ready)throw new Error('Supabase is not configured.');
+    let migrated=0;
+    const legacyServices=read('mbac_services_v5',[]); if(Array.isArray(legacyServices)&&legacyServices.length){for(const name of legacyServices){const r=await window.MBBackend.post('services',{name:String(name),active:true});if(r.ok||r.status===409)migrated++;}}
+    const legacyBA=read('mbac_before_after_v2',[]); if(Array.isArray(legacyBA)&&legacyBA.length){for(const x of legacyBA){const gallery=Array.isArray(x.gallery)&&x.gallery.length?x.gallery:[];const before=x.before||x.before_url||gallery.find(g=>g.type==='before')?.url;const after=x.after||x.after_url||[...gallery].reverse().find(g=>g.type==='after')?.url;if(!before||!after)continue;const r=await window.MBBackend.post('before_after',{title:x.title||'Repair story',description:x.description||'',before_url:before,after_url:after,video_url:x.video||x.video_url||null,gallery,active:true});if(r.ok)migrated++;}}
+    const legacyReviews=read('mbac_reviews_v4',[]); if(Array.isArray(legacyReviews)&&legacyReviews.length){for(const x of legacyReviews){const r=await window.MBBackend.post('reviews',{id:x.id||('rev-'+Date.now().toString(36)),appointment_id:x.appointmentId||null,name:x.name||'Customer',model:x.model||null,rating:Number(x.rating)||5,review:x.review||'',approved:false});if(r.ok)migrated++;}}
+    const legacyCars=read('mbac_cars_v1',[]); if(Array.isArray(legacyCars)&&legacyCars.length&&window.MBStore){for(const x of legacyCars){const r=await window.MBBackend.post('inventory',{id:x.id,name:x.name,year:x.year,price_ngn:x.priceNGN||0,mileage_km:x.mileageKm||0,spec_tag:x.specTag||'',status:x.status||'available',image_url:x.image||'',description:x.description||'',active:true});if(r.ok)migrated++;}}
+    await hydrate(true); await window.MBStore?.hydrate?.(); return migrated;
+  }
+  async function hydrate(isAdmin=false){
+    if(!window.MBBackend?.ready){emit();return;}
+    try{
+      const requests=[
+        window.MBBackend.get('services','select=*&active=eq.true&order=name.asc'),
+        isAdmin?window.MBBackend.get('appointments','select=*&order=created_at.desc'):Promise.resolve({ok:false,data:null}),
+        window.MBBackend.get('reviews','select=*&approved=eq.true&order=created_at.desc'),
+        window.MBBackend.get('before_after','select=*&active=eq.true&order=created_at.desc'),
+        window.MBBackend.get('credentials','select=*&active=eq.true&order=created_at.desc')
+      ];
+      const [services,apps,reviews,ba,certs]=await Promise.all(requests);
+      if(services.ok&&Array.isArray(services.data)){cache.services=services.data.map(x=>x.name);write(KEYS.services,cache.services);}
+      if(apps.ok&&Array.isArray(apps.data)){cache.appointments=apps.data.map(x=>({id:x.id,name:x.name,email:x.email,phone:x.phone,model:x.model,year:x.year,service:x.service,registration:x.registration,message:x.message,status:x.status,scheduledDate:x.scheduled_date,scheduledTime:x.scheduled_time,reviewRequested:x.review_requested,reviewRequired:x.review_required,createdAt:x.created_at}));write(KEYS.appointments,cache.appointments);}
+      if(reviews.ok&&Array.isArray(reviews.data)){cache.reviews=reviews.data.map(x=>({id:x.id,appointmentId:x.appointment_id,name:x.name,model:x.model,rating:x.rating,review:x.review,createdAt:x.created_at}));write(KEYS.reviews,cache.reviews);}
+      if(ba.ok&&Array.isArray(ba.data)){cache.beforeAfter=ba.data.map(x=>({id:x.id,title:x.title,description:x.description,before:x.before_url,after:x.after_url,video:x.video_url,gallery:Array.isArray(x.gallery)?x.gallery:[],createdAt:x.created_at}));write(KEYS.beforeAfter,cache.beforeAfter);}
+      if(certs.ok&&Array.isArray(certs.data)){cache.credentials=certs.data.map(x=>({id:x.id,title:x.title,issuer:x.issuer,description:x.description,image:x.image_url,year:x.year,createdAt:x.created_at}));write(KEYS.credentials,cache.credentials);}
+      if(window.MBStore?.hydrate)await window.MBStore.hydrate();
+      emit();
+    }catch(e){console.warn('Moses Benz data hydration skipped',e);emit();}
+  }
+  window.MBData={getServices,saveServices,getAppointments,addAppointment,updateAppointment,deleteAppointment,getReviews,addReview,getBeforeAfter,addBeforeAfter,removeBeforeAfter,getCredentials,addCredential,removeCredential,hydrate,migrateLegacyLocalData,KEYS};
 })();

@@ -1,0 +1,4 @@
+Corrected catalogue layout:
+Services and Inventory in the Admin Portal are both full-width responsive grids.
+Desktop: up to 6 columns. Smaller screens: 5, 4, 3, 2, then 1.
+The previous malformed catalogue CSS was removed.

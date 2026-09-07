@@ -4,87 +4,45 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Book an Appointment — Moses Benz Auto Care</title>
-<meta name="description" content="Book an Appointment — Moses Benz Auto Care — Mercedes-Benz specialist servicing, diagnostics and vehicle sales in Idimu, Lagos.">
+<meta name="description" content="Book an Appointment — Moses Benz Auto Care — Mercedes-Benz specialist servicing, vehicle health checks and vehicle sales in Idimu, Lagos.">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <header class="site-header">
   <div class="container">
-    <a href="index.html" class="brand page-route">
-      <span class="brand-mark">
-        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="20" cy="20" r="18.5" stroke="currentColor" stroke-width="1.4"/>
-          <path d="M20 6 L20 20 L30.5 27" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-          <path d="M20 20 L11 28" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-          <circle cx="20" cy="20" r="2" fill="currentColor"/>
-        </svg>
-      </span>
+    <a href="/" class="brand page-route">
+      <span class="brand-mark"><img src="images/logo.png" alt="Moses Benz Auto Care logo"></span>
       <span class="brand-word">Moses Benz<small>Auto Care · Idimu, Lagos</small></span>
     </a>
 
     <nav class="main-nav" id="main-nav" aria-label="Primary navigation">
       <ul>
-        <li><a class="page-route" href="services.html">Services</a></li>
-        <li><a class="page-route" href="workshop.html">Our Workshop</a></li>
-        <li><a class="page-route" href="inventory.html">Inventory</a></li>
-                        <li><a class="page-route" href="reviews.html">Reviews</a></li>
-        <li><a class="page-route" href="contact.html">Contact</a></li>
+        <li><a class="page-route" href="/services">Services</a></li>
+        <li><a class="page-route" href="/workshop">Our Workshop</a></li>
+        <li><a class="page-route" href="/inventory">Inventory</a></li>
+        <li><a class="page-route" href="/reviews">Reviews</a></li>
+        <li><a class="page-route" href="/contact">Contact</a></li><li><a class="page-route" href="/careers">Careers</a></li>
+        
       </ul>
     </nav>
 
-    <div class="header-cta">
-      <a href="appointments.html" class="btn btn-primary page-route">Book a Service</a>
+    
+    <div class="header-cta"><a href="tel:+2349061526267" class="header-call-workshop">Call the Workshop</a>
+      
+      <a href="/services" class="btn btn-primary page-route">Book a Service</a>
       <button class="nav-toggle" id="nav-toggle" aria-label="Open navigation menu" title="Open navigation menu" aria-expanded="false" aria-controls="main-nav">
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path class="icon-menu" d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="icon-close" d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
       </button>
     </div>
   </div>
 </header>
-<main id="page-content" class="page-transition">
-
-<section class="appointment-page">
-  <div class="container">
-    <div class="appointment-layout">
-      <div class="appointment-copy reveal">
-        <span class="eyebrow">Book an Appointment</span>
-        <h1>Give your Mercedes a proper appointment window.</h1>
-        <p>Tell us what you drive, what you need, and when you want to come in. The request opens WhatsApp with your details so our team can confirm the slot with you.</p>
-        <div class="appointment-points">
-          <div><strong>01</strong><span>Choose a service or diagnostic area.</span></div>
-          <div><strong>02</strong><span>Pick your preferred date and time.</span></div>
-          <div><strong>03</strong><span>We confirm availability with you.</span></div>
-        </div>
-        <a href="tel:+2349061526267" class="btn btn-ghost-light">Call +234 906 152 6267</a>
-      </div>
-      <div class="appointment-card reveal">
-        <div class="form-heading"><span class="eyebrow">Appointment Request</span><h2>Book a bay</h2><p>All fields marked * are required.</p></div>
-        <form id="appointment-form" class="appointment-form">
-          <div class="form-row"><label>Full name *<input name="name" required autocomplete="name" placeholder="Your full name"></label><label>Phone *<input name="phone" required type="tel" autocomplete="tel" placeholder="080... / +234..." ></label></div>
-          <div class="form-row"><label>Mercedes model *<input name="model" required placeholder="e.g. E 350, GLE 450"></label><label>Year<input name="year" type="number" min="1980" max="2035" placeholder="2021"></label></div>
-          <div class="form-row"><label>Service / diagnostic *<select name="service" required><option value="">Select an option</option><option>Routine Service</option><option>Full Vehicle Scan</option><option>Engine Diagnostics</option><option>Transmission Diagnostics</option><option>ABS / ESP / SBC Diagnostics</option><option>AIRMATIC / Suspension Diagnostics</option><option>Electrical Diagnostics</option><option>AC / Climate Service</option><option>MBUX / Infotainment Diagnostics</option><option>Pre-Purchase Inspection</option><option>Bodywork / Detailing</option><option>Other</option></select></label><label>Preferred date *<input name="date" required type="date"></label></div>
-          <div class="form-row"><label>Preferred time *<select name="time" required><option value="">Select a time</option><option>8:00 AM</option><option>9:00 AM</option><option>10:00 AM</option><option>11:00 AM</option><option>12:00 PM</option><option>1:00 PM</option><option>2:00 PM</option><option>3:00 PM</option><option>4:00 PM</option><option>5:00 PM</option></select></label><label>Registration / plate<input name="registration" placeholder="Optional"></label></div>
-          <label>What is the car doing? *<textarea name="message" rows="6" required placeholder="Describe the warning light, noise, symptom, service needed, or anything else we should know."></textarea></label>
-          <button type="submit" class="btn btn-primary btn-block">Send appointment request <span>→</span></button>
-          <p class="form-status" id="appointment-status" role="status"></p>
-        </form>
-      </div>
-    </div>
-  </div>
-</section>
-</main>
+<main id="page-content" class="page-transition"><section class="appointment-page simplified-request-page"><div class="container"><div class="simple-request-wrap"><div class="simple-request-intro"><span class="eyebrow">Service Request</span><h1>Tell us what your Mercedes needs.</h1><p>Keep it simple. Send your email, WhatsApp number and a clear description of what you need. The workshop will review it and contact you with the next step and appointment time.</p></div><div class="simple-request-card"><form id="appointment-form" class="appointment-form simple-request-form"><label>Email *<input name="email" type="email" required autocomplete="email" placeholder="you@example.com"></label><label>WhatsApp *<input name="phone" type="tel" required autocomplete="tel" placeholder="080... / +234..."></label><label>What do you need? *<input name="request" required placeholder="Service, repair, diagnosis, maintenance, etc."></label><label>What is the car doing? / More explanation<textarea name="message" rows="8" required placeholder="Tell us the symptoms, warning light, repair needed or anything else that will help the workshop understand the request."></textarea></label><button type="submit" class="btn btn-primary btn-block">Send request <span>→</span></button><p class="form-status" id="appointment-status" role="status"></p></form></div></div></div></section></main>
 <footer class="site-footer">
   <div class="container">
     <div class="footer-top">
       <div class="footer-brand">
-        <a href="index.html" class="brand page-route">
-          <span class="brand-mark">
-            <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="20" cy="20" r="18.5" stroke="currentColor" stroke-width="1.4"/>
-              <path d="M20 6 L20 20 L30.5 27" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-              <path d="M20 20 L11 28" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-              <circle cx="20" cy="20" r="2" fill="currentColor"/>
-            </svg>
-          </span>
+        <a href="/" class="brand page-route">
+          <span class="brand-mark"><img src="images/logo.png" alt="Moses Benz Auto Care logo"></span>
           <span class="brand-word" style="color:var(--white);">Moses Benz Auto Care</span>
         </a>
         <p>Mercedes-Benz repairs, maintenance and auto sales in Idimu, Lagos. Factory-trained technicians, honest pricing, every time.</p>
@@ -100,11 +58,13 @@
       <div class="footer-col">
         <h4>Explore</h4>
         <ul>
-          <li><a href="services.html" class="page-route">Services</a></li>
-          <li><a href="workshop.html" class="page-route">Our Workshop</a></li>
-          <li><a href="inventory.html" class="page-route">Inventory</a></li>
-                              <li><a href="reviews.html" class="page-route">Reviews</a></li>
-          <li><a href="mercedes.html" class="page-route">Mercedes-Benz Guide</a></li>
+          <li><a href="/services" class="page-route">Services</a></li>
+          <li><a href="/workshop" class="page-route">Our Workshop</a></li>
+          <li><a href="/inventory" class="page-route">Inventory</a></li>
+          
+          <li><a href="/reviews" class="page-route">Reviews</a></li>
+          <li><a href="/credentials" class="page-route">Approvals &amp; Certificates</a></li>
+          <li><a href="/careers" class="page-route">Careers</a></li>
         </ul>
       </div>
 
@@ -115,7 +75,7 @@
             <address>11 Lasu Rd,<br>beside Federal Peace Estate,<br>Idimu, Lagos 102213</address>
           </li>
           <li><a href="https://www.google.com/maps/place/?q=place_id:ChIJ9wS7aQCROxARHinfFB1ds1w" target="_blank" rel="noopener">Get directions on Google Maps →</a></li>
-          <li><a href="tel:+2349061526267">+234 906 152 6267</a></li>
+          <li><a href="tel:+2349061526267">Call the Workshop</a></li>
           <li><a href="https://wa.me/2348106958638" target="_blank" rel="noopener">WhatsApp us for service enquiries</a></li>
         </ul>
       </div>
@@ -129,7 +89,7 @@
     </div>
 
     <div class="footer-disclaimer">
-      Moses Benz Auto Care is an independent service provider and is not affiliated with, endorsed by, or sponsored by Mercedes-Benz AG. "Mercedes-Benz" and related model names are trademarks of their respective owner and are used here for identification purposes only. Address, phone and hours are pulled from the business's public Google Maps listing — double-check them before publishing. Cars for sale are managed from the admin panel; VINs, reviews and stats shown are placeholder content and should be replaced with real details.
+      Moses Benz Auto Care is an independent service provider and is not affiliated with, endorsed by, or sponsored by Mercedes-Benz AG. "Mercedes-Benz" and related model names are trademarks of their respective owner and are used here for identification purposes only. Address, phone and hours are pulled from the business's public Google Maps listing — double-check them before publishing. Cars for sale, workshop services, repair stories and approved reviews are managed through the shared workshop control centre.
     </div>
 
     <div class="footer-bottom">
@@ -137,7 +97,7 @@
       <div class="legal-links">
         <a href="#">Privacy Policy</a>
         <a href="#">Terms of Service</a>
-        <a href="mbac-control-7x4k9-login.html" style="opacity:.45;">Admin</a>
+        
       </div>
     </div>
   </div>
