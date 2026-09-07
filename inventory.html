@@ -5,14 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Inventory — Moses Benz Auto Care</title>
 <meta name="description" content="Inventory — Moses Benz Auto Care — Mercedes-Benz specialist servicing, vehicle health checks and vehicle sales in Idimu, Lagos.">
-<link rel="icon" type="image/jpeg" href="images/moses-benz-logo.jpg">
+<link rel="icon" type="image/jpeg" href="images/moses-benz-logo-cropped.jpg">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <header class="site-header">
   <div class="container">
     <a href="/" class="brand page-route">
-      <span class="brand-mark"><img src="images/moses-benz-logo.jpg" alt="Moses Benz Auto Care logo"></span>
+      <span class="brand-mark"><img src="images/moses-benz-logo-cropped.jpg" alt="Moses Benz Auto Care logo"></span>
       <span class="brand-word">Moses Benz<small>Auto Care · Idimu, Lagos</small></span>
     </a>
 
@@ -21,6 +21,7 @@
         <li><a class="page-route" href="/services">Services</a></li>
         <li><a class="page-route" href="/inventory">Inventory</a></li>
         <li><a class="page-route" href="/reviews">Reviews</a></li>
+        <li><a class="page-route" href="/careers">Careers</a></li>
         <li><a class="page-route" href="/contact">Contact</a></li>
         
       </ul>
@@ -105,13 +106,13 @@
   <section class="enquiry-dialog" role="dialog" aria-modal="true" aria-labelledby="enquiry-title">
     <button type="button" class="enquiry-close" data-enquiry-close aria-label="Close enquiry">×</button>
     <span class="eyebrow">Vehicle Enquiry</span>
-    <h2 id="enquiry-title">Tell us who is interested.</h2>
-    <p class="admin-card-note" id="enquiry-vehicle-note">Complete the form and the enquiry will be sent to the workshop.</p>
+    <h2 id="enquiry-title">Vehicle purchase enquiry.</h2>
+    <p class="admin-card-note" id="enquiry-vehicle-note">Tell us how to reach you and what you would like to know about this vehicle.</p>
     <form id="inventory-enquiry-form" class="admin-form">
       <input type="hidden" name="vehicle">
-      <div class="form-row"><label>Full name *<input name="buyerName" required autocomplete="name"></label><label>Email *<input name="buyerEmail" type="email" required autocomplete="email"></label></div>
-      <div class="form-row"><label>Phone number *<input name="buyerPhone" type="tel" required autocomplete="tel"></label><label>WhatsApp number<input name="buyerWhatsApp" type="tel" autocomplete="tel"></label></div>
-      <label>Message<textarea name="message" rows="4" placeholder="Tell us what you would like to know about this vehicle."></textarea></label>
+      <label>Email *<input name="buyerEmail" type="email" required autocomplete="email" placeholder="you@example.com"></label>
+      <label>WhatsApp number *<input name="buyerWhatsApp" type="tel" required autocomplete="tel" placeholder="080… / +234…"></label>
+      <label>What would you like to know?<textarea name="message" rows="5" placeholder="Ask about the car, viewing, purchase, financing, or anything else."></textarea></label>
       <button type="submit" class="btn btn-primary btn-block">Send vehicle enquiry</button>
       <p class="form-status" id="inventory-enquiry-status" role="status"></p>
     </form>
@@ -119,14 +120,33 @@
 </div>
 
 
-<div class="inventory-detail-modal" id="inventory-detail-modal" hidden aria-hidden="true"><div class="enquiry-backdrop" data-detail-close></div><section class="inventory-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="detail-name"><button type="button" class="enquiry-close" data-detail-close aria-label="Close vehicle details">×</button><img data-detail-image src="" alt=""><div class="inventory-detail-copy"><span class="eyebrow">Vehicle Details</span><h2 id="detail-name" data-detail-name></h2><strong class="car-price" data-detail-price></strong><p class="car-specs" data-detail-spec></p><p data-detail-description></p><button class="btn btn-primary" type="button" data-detail-buy>Request to purchase</button></div></section></div>
+<div class="inventory-detail-modal" id="inventory-detail-modal" hidden aria-hidden="true">
+  <div class="enquiry-backdrop" data-detail-close></div>
+  <section class="inventory-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="detail-name">
+    <button type="button" class="enquiry-close" data-detail-close aria-label="Close vehicle details">×</button>
+    <div class="inventory-detail-media"><img data-detail-image src="" alt=""></div>
+    <div class="inventory-detail-copy">
+      <span class="eyebrow">Vehicle Details</span>
+      <h2 id="detail-name" data-detail-name></h2>
+      <strong class="car-price" data-detail-price></strong>
+      <div class="detail-spec-grid">
+        <div><span>Year</span><strong data-detail-year>—</strong></div>
+        <div><span>Engine / spec</span><strong data-detail-engine>—</strong></div>
+        <div><span>Mileage</span><strong data-detail-mileage>—</strong></div>
+      </div>
+      <p data-detail-description></p>
+      <div class="detail-note"><strong>Vehicle enquiry</strong><span>Request a viewing or ask about this vehicle and the workshop will respond using your contact details.</span></div>
+      <button class="btn btn-primary" type="button" data-detail-buy>Request to purchase</button>
+    </div>
+  </section>
+</div>
 </main>
 <footer class="site-footer">
   <div class="container">
     <div class="footer-top">
       <div class="footer-brand">
         <a href="/" class="brand page-route">
-          <span class="brand-mark"><img src="images/moses-benz-logo.jpg" alt="Moses Benz Auto Care logo"></span>
+          <span class="brand-mark"><img src="images/moses-benz-logo-cropped.jpg" alt="Moses Benz Auto Care logo"></span>
           <span class="brand-word" style="color:var(--white);">Moses Benz Auto Care</span>
         </a>
         <p>Mercedes-Benz repairs, maintenance and auto sales in Idimu, Lagos. Factory-trained technicians, honest pricing, every time.</p>

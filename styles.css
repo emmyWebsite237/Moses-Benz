@@ -1738,3 +1738,171 @@ body{background:#f6f4ef;color:#17181b;}
   .hero-copy{padding-top:34px!important;}
 }
 @media(min-width:921px){.header-cta .header-call-workshop{display:none!important;}}
+
+
+/* =========================================================
+   MOSES BENZ — INVENTORY MOTION + VEHICLE DETAIL POLISH
+   ========================================================= */
+
+/* Use the supplied Moses Benz artwork as a real brand lockup.
+   The image is kept inside a clean rectangular mark instead of
+   being forced into the old circular placeholder. */
+.brand-mark{
+  width:112px!important;
+  height:54px!important;
+  flex:0 0 112px!important;
+  background:#fff!important;
+  border:0!important;
+  border-radius:0!important;
+  overflow:hidden!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+.brand-mark img{
+  width:100%!important;
+  height:100%!important;
+  object-fit:contain!important;
+  object-position:center!important;
+}
+
+/* Category names are intentionally high-contrast. */
+.inventory-category-head h2{
+  color:#111317!important;
+  font-weight:800!important;
+}
+
+/* A calm showroom rail: cards remain horizontally scrollable. */
+.inventory-track{
+  scroll-behavior:smooth;
+  overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;
+}
+
+/* Slight visual cue that a rail can be explored horizontally. */
+.inventory-carousel::after{
+  content:"SWIPE / SCROLL";
+  position:absolute;
+  right:8px;
+  bottom:-2px;
+  font:9px var(--font-mono);
+  letter-spacing:.12em;
+  color:#777b80;
+  pointer-events:none;
+  opacity:.72;
+}
+@media(max-width:700px){
+  .inventory-carousel::after{font-size:8px;right:4px;}
+}
+
+/* Rich vehicle detail dialog. */
+.inventory-detail-dialog{
+  width:min(1040px,96vw)!important;
+  grid-template-columns:minmax(0,1.05fr) minmax(320px,.95fr)!important;
+  max-height:92vh!important;
+  overflow:hidden!important;
+}
+.inventory-detail-media{
+  min-height:500px;
+  background:#ece9e2;
+}
+.inventory-detail-media img{
+  width:100%;
+  height:100%;
+  min-height:500px;
+  object-fit:cover;
+}
+.inventory-detail-copy{
+  overflow:auto;
+  padding:48px!important;
+}
+.inventory-detail-copy .car-price{
+  display:block;
+  font-size:22px;
+  margin-top:8px;
+}
+.detail-spec-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  margin:26px 0;
+}
+.detail-spec-grid div{
+  border:1px solid #ddd8ce;
+  padding:14px 12px;
+  background:#faf9f6;
+}
+.detail-spec-grid span{
+  display:block;
+  font:9px var(--font-mono);
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  color:#777b80;
+  margin-bottom:6px;
+}
+.detail-spec-grid strong{
+  display:block;
+  color:#17181b;
+  font-size:13px;
+}
+.detail-note{
+  display:grid;
+  gap:5px;
+  border-left:2px solid var(--ignition);
+  background:#f3f0ea;
+  padding:15px 16px;
+  margin:0 0 24px;
+}
+.detail-note strong{
+  font:11px var(--font-mono);
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.detail-note span{
+  color:#555a61;
+  font-size:13px;
+  line-height:1.55;
+}
+.inventory-detail-copy>[data-detail-description]{
+  font-size:15px!important;
+  line-height:1.75!important;
+  color:#4e535a!important;
+}
+@media(max-width:700px){
+  .brand-mark{width:92px!important;height:46px!important;flex-basis:92px!important;}
+  .inventory-detail-dialog{
+    width:96vw!important;
+    grid-template-columns:1fr!important;
+    max-height:94vh!important;
+    overflow:auto!important;
+  }
+  .inventory-detail-media{min-height:240px;height:42vh;}
+  .inventory-detail-media img{min-height:240px;height:100%;}
+  .inventory-detail-copy{padding:26px 20px!important;overflow:visible;}
+  .detail-spec-grid{grid-template-columns:1fr 1fr;}
+  .detail-spec-grid div:last-child{grid-column:1/-1;}
+}
+
+/* Purchase form is a separate modal and opens after the detail modal closes. */
+#inventory-enquiry-modal .enquiry-dialog{
+  width:min(680px,94vw);
+}
+#inventory-enquiry-form>label{
+  display:block;
+  margin-bottom:16px;
+}
+#inventory-enquiry-form input,
+#inventory-enquiry-form textarea{
+  width:100%;
+}
+
+/* Keep the mobile menu a solid layer regardless of the page beneath it. */
+@media(max-width:920px){
+  .main-nav.is-open,
+  .main-nav.is-open::before,
+  .main-nav.is-open ul{
+    background:#080a0c!important;
+    background-color:#080a0c!important;
+    opacity:1!important;
+  }
+}
