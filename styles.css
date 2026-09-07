@@ -1687,3 +1687,54 @@ body{background:var(--porcelain);color:var(--ink);}
 @media(max-width:560px){.simple-request-card{padding:22px}.simplified-request-page{padding-top:125px}.inventory-category-head h2{font-size:34px}.inventory-track{gap:12px}.inventory-track .car-card{min-width:78vw}.hero{min-height:760px}.hero-media::after{background:linear-gradient(180deg,rgba(247,245,240,.55) 0%,rgba(247,245,240,.76) 48%,rgba(247,245,240,.96) 100%)}.hero-copy{padding-top:40px}.header-cta .btn-primary{display:none}}
 .header-call-workshop{font:11px var(--font-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink);white-space:nowrap}.header-call-workshop:hover{color:var(--ignition)}
 @media(max-width:920px){.header-call-workshop{display:none}}
+
+
+/* =========================================================
+   MOSES BENZ — CLEAN LIGHT SHOWROOM PASS
+   ========================================================= */
+body{background:#f6f4ef;color:#17181b;}
+.site-header{background:rgba(255,255,252,.98)!important;border-bottom:1px solid #ddd9d0!important;backdrop-filter:blur(14px);}
+.brand-mark{width:92px!important;height:48px!important;border:0!important;border-radius:0!important;background:#fff!important;overflow:hidden!important;display:flex!important;align-items:center!important;justify-content:center!important;}
+.brand-mark img{width:100%!important;height:100%!important;object-fit:contain!important;object-position:center!important;}
+.brand-word{color:#17181b!important;}.brand-word small{color:#676b70!important;}
+.main-nav a{color:#202328!important;}.main-nav a:hover{color:#c8102e!important;}
+.header-cta .btn-primary{background:#c8102e!important;color:#fff!important;}
+.nav-toggle{background:#fff!important;color:#17181b!important;border-color:#d5d0c7!important;}
+.hero{background:#f0eee8!important;min-height:min(760px,90vh)!important;}
+.hero-media img{opacity:.42!important;filter:brightness(1.18) saturate(.72)!important;object-position:center 52%!important;}
+.hero-media::after{background:linear-gradient(90deg,rgba(247,245,240,.99) 0%,rgba(247,245,240,.94) 36%,rgba(247,245,240,.66) 62%,rgba(247,245,240,.18) 100%),linear-gradient(180deg,rgba(247,245,240,.15),rgba(247,245,240,.28))!important;}
+.hero-media::before{display:none!important;}
+.hero-copy{max-width:720px!important;}.hero-copy h1{color:#111317!important;text-shadow:none!important;}.hero-copy h1 em{-webkit-text-stroke:1px #111317!important;color:#111317!important;}.hero-copy p.lede{color:#4b5057!important;}
+.eyebrow.on-dark{color:#4e5359!important;}
+.hud-strip{border-top-color:#d8d3ca!important;}.hud-item .k{color:#646970!important}.hud-item .v{color:#151619!important}
+.marquee-band{background:#fffefa!important;color:#292d31!important;border-top:1px solid #ded9d0!important;border-bottom:1px solid #ded9d0!important;}
+.marquee-track span{color:#292d31!important;}
+.services,.gallery,.page-intro-block,.contact-options,.appointment-page,.inventory-page,.find-us{background:#f6f4ef!important;}
+.section-head h2,.page-head h1,.inventory-category-head h2{color:#17181b!important;}
+.section-head p,.page-head p{color:#555a61!important;}
+/* Inventory: clean category rails, no availability/status/filter clutter. */
+.inventory-search-wrap{background:transparent!important;}.inventory-search-wrap input{background:#fffefa!important;color:#17181b!important;}
+.inventory-category{margin-bottom:64px!important;}.inventory-category-head{margin-bottom:18px!important;align-items:center!important;}
+.inventory-category-head h2{font-size:clamp(30px,4vw,48px)!important;font-weight:800!important;letter-spacing:-.03em!important;color:#121418!important;margin:0!important;}
+.inventory-category-count{display:none!important;}.inventory-track{padding:2px 4px 18px!important;}
+.inventory-track .car-card{flex:0 0 min(340px,31%);min-width:280px!important;background:#fffefa!important;border:1px solid #ded9d0!important;box-shadow:0 8px 26px rgba(20,22,25,.05)!important;}
+.car-status{display:none!important;}.car-media{background:#eae7e0!important;}.car-body{background:#fffefa!important;}
+.car-specs{color:#555a61!important}.desc{color:#50555c!important}.car-price{color:#17181b!important}.car-heading h3{color:#17181b!important}.car-view-link{color:#17181b!important}
+.filter-bar{display:none!important;}
+/* Never show the redundant workshop/call CTA in the header. */
+.header-call-workshop{display:none!important;}
+/* Mobile drawer is opaque and independent from the page beneath it. */
+@media(max-width:920px){
+  .main-nav.is-open{background:#080a0c!important;background-color:#080a0c!important;opacity:1!important;backdrop-filter:none!important;isolation:isolate!important;}
+  .main-nav.is-open::before{background:#080a0c!important;opacity:1!important;}
+  .main-nav.is-open ul{background:#080a0c!important;}
+  .main-nav.is-open a{color:#fff!important;}
+  .nav-toggle.is-open{background:#080a0c!important;color:#fff!important;border-color:#30343a!important;}
+  .inventory-track .car-card{flex:0 0 82vw!important;min-width:82vw!important;}
+  .inventory-category-head h2{font-size:34px!important;}
+  .hero{min-height:720px!important;}
+  .hero-media img{opacity:.25!important;}
+  .hero-media::after{background:linear-gradient(180deg,rgba(247,245,240,.35) 0%,rgba(247,245,240,.78) 42%,rgba(247,245,240,.98) 78%,#f7f5f0 100%)!important;}
+  .hero-copy{padding-top:34px!important;}
+}
+@media(min-width:921px){.header-cta .header-call-workshop{display:none!important;}}
