@@ -1,744 +1,227 @@
-/* Moses Benz Auto Care — central inventory data layer. Supabase is the source of truth. */
-(function(global) {
-  const STORAGE_KEY='mbac_cars_cache_v2';
-  const CARS_SEED=[
+/* =========================================================
+   Moses Benz Auto Care — Inventory data layer
+   ---------------------------------------------------------
+   This is the single source of truth for "cars for sale",
+   shared by index.html (teaser), inventory.html (full list)
+   and admin.html (add / mark sold / delete).
+
+   HOW PERSISTENCE WORKS (read this before you deploy):
+   - There is no backend/database here — it's a static site.
+   - Car data lives in the browser's localStorage, seeded from
+     CARS_SEED below the first time the site is opened.
+   - When the admin adds/edits/deletes a car in admin.html, that
+     change is saved to localStorage IN THAT BROWSER ONLY. It
+     will not appear for visitors using a different browser or
+     device, because there is no server to sync it to.
+   - To actually publish changes for every visitor, use the
+     "Export data" button on admin.html to download an updated
+     cars-seed.js file, then replace this file with it and
+     re-deploy the site. That makes your edits the new default
+     for everyone.
+   - If you outgrow this (e.g. multiple admins, real-time
+     updates), swap this file out for calls to a real backend
+     (a small API + database, or a headless CMS) — every place
+     that calls MBStore.getCars() etc. would keep working the
+     same way.
+   ========================================================= */
+
+(function (global) {
+  const STORAGE_KEY = 'mbac_cars_v1';
+
+  // ---- Seed data (used the first time, or after "Reset to defaults") ----
+  const CARS_SEED = [
     {
-        "id": "car-a-180-2021",
-        "name": "A 180",
-        "year": 2021,
-        "priceNGN": 32000000,
-        "mileageKm": 41000,
-        "specTag": "1.3L Turbo",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "Mercedes-Benz A-Class hatchback reference listing."
+      id: 'car-g63-amg',
+      name: 'G 63 AMG',
+      year: 2023,
+      priceNGN: 185000000,
+      mileageKm: 8200,
+      specTag: '4.0L V8 Biturbo',
+      status: 'available',
+      image: 'https://images.unsplash.com/photo-1590326794974-f7aa897f04a8?fm=jpg&q=80&w=1400&auto=format&fit=crop',
+      description: 'One owner, full Moses Benz service history, ceramic-coated and inspected bumper to bumper.'
     },
     {
-        "id": "car-a-200-2022",
-        "name": "A 200",
-        "year": 2022,
-        "priceNGN": 38000000,
-        "mileageKm": 29000,
-        "specTag": "1.3L Turbo",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "A-Class reference listing prepared for editing."
+      id: 'car-c63s-amg',
+      name: 'C 63 S AMG',
+      year: 2021,
+      priceNGN: 92000000,
+      mileageKm: 34500,
+      specTag: '4.0L V8 Biturbo',
+      status: 'available',
+      image: 'https://images.unsplash.com/photo-1514316454349-750a7fd3da3a?fm=jpg&q=80&w=1400&auto=format&fit=crop',
+      description: 'Track-inspected brakes, fresh tyres, and a full diagnostic report included at handover.'
     },
     {
-        "id": "car-a-250-2023",
-        "name": "A 250",
-        "year": 2023,
-        "priceNGN": 48000000,
-        "mileageKm": 18000,
-        "specTag": "2.0L Turbo",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "A-Class performance-oriented reference listing."
+      id: 'car-amg-gtr',
+      name: 'AMG GT R',
+      year: 2022,
+      priceNGN: 164900000,
+      mileageKm: 6100,
+      specTag: '4.0L V8',
+      status: 'sold',
+      image: 'https://images.unsplash.com/photo-1617814076231-2c58846db944?fm=jpg&q=80&w=1400&auto=format&fit=crop',
+      description: 'Sold last month — a similar car is expected in stock. Ask us to notify you.'
     },
     {
-        "id": "car-cla-200-2022",
-        "name": "CLA 200",
-        "year": 2022,
-        "priceNGN": 41000000,
-        "mileageKm": 32000,
-        "specTag": "1.3L Turbo",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20CLA-Klasse%20Coup%C3%A9%20%28C118%29%20CLA%20250%20e%20%282024%29%20%2853971555578%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "CLA reference listing."
+      id: 'car-e350',
+      name: 'E 350',
+      year: 2020,
+      priceNGN: 45000000,
+      mileageKm: 61000,
+      specTag: '2.0L Turbo I4',
+      status: 'available',
+      image: 'https://images.unsplash.com/photo-1559167628-9394a8576f33?fm=jpg&q=80&w=1400&auto=format&fit=crop',
+      description: 'Well-maintained executive saloon, recently serviced, new tyres all round.'
     },
     {
-        "id": "car-cla-250-2023",
-        "name": "CLA 250",
-        "year": 2023,
-        "priceNGN": 52000000,
-        "mileageKm": 21000,
-        "specTag": "2.0L Turbo",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20CLA-Klasse%20Coup%C3%A9%20%28C118%29%20CLA%20250%20e%20%282024%29%20%2853971555578%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "CLA reference listing."
-    },
-    {
-        "id": "car-cla-250-e-2024",
-        "name": "CLA 250 e",
-        "year": 2024,
-        "priceNGN": 59000000,
-        "mileageKm": 12000,
-        "specTag": "Plug-in Hybrid",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20CLA-Klasse%20Coup%C3%A9%20%28C118%29%20CLA%20250%20e%20%282024%29%20%2853971555578%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "CLA plug-in hybrid reference listing."
-    },
-    {
-        "id": "car-c-180-2020",
-        "name": "C 180",
-        "year": 2020,
-        "priceNGN": 32000000,
-        "mileageKm": 61000,
-        "specTag": "1.5L Turbo",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "C-Class reference listing."
-    },
-    {
-        "id": "car-c-200-2021",
-        "name": "C 200",
-        "year": 2021,
-        "priceNGN": 42000000,
-        "mileageKm": 52000,
-        "specTag": "1.5L Turbo",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "C-Class reference listing."
-    },
-    {
-        "id": "car-c-300-2022",
-        "name": "C 300",
-        "year": 2022,
-        "priceNGN": 58500000,
-        "mileageKm": 38200,
-        "specTag": "2.0L Turbo",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "C-Class reference listing."
-    },
-    {
-        "id": "car-c-300-e-2022",
-        "name": "C 300 e",
-        "year": 2022,
-        "priceNGN": 62000000,
-        "mileageKm": 30000,
-        "specTag": "Plug-in Hybrid",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "C-Class plug-in hybrid reference listing."
-    },
-    {
-        "id": "car-c-43-amg-2022",
-        "name": "C 43 AMG",
-        "year": 2022,
-        "priceNGN": 82000000,
-        "mileageKm": 26000,
-        "specTag": "3.0L Turbo",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "AMG C-Class reference listing."
-    },
-    {
-        "id": "car-c-63-s-amg-2021",
-        "name": "C 63 S AMG",
-        "year": 2021,
-        "priceNGN": 92000000,
-        "mileageKm": 34500,
-        "specTag": "4.0L V8",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "AMG C-Class reference listing."
-    },
-    {
-        "id": "car-e-200-2020",
-        "name": "E 200",
-        "year": 2020,
-        "priceNGN": 42000000,
-        "mileageKm": 61000,
-        "specTag": "2.0L Turbo",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "E-Class reference listing."
-    },
-    {
-        "id": "car-e-220d-2021",
-        "name": "E 220d",
-        "year": 2021,
-        "priceNGN": 48000000,
-        "mileageKm": 55000,
-        "specTag": "2.0L Diesel",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "E-Class reference listing."
-    },
-    {
-        "id": "car-e-300-2021",
-        "name": "E 300",
-        "year": 2021,
-        "priceNGN": 52000000,
-        "mileageKm": 48800,
-        "specTag": "2.0L Turbo",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "E-Class reference listing."
-    },
-    {
-        "id": "car-e-350-2022",
-        "name": "E 350",
-        "year": 2022,
-        "priceNGN": 62000000,
-        "mileageKm": 36000,
-        "specTag": "2.0L Turbo",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "E-Class reference listing."
-    },
-    {
-        "id": "car-e-350e-2024",
-        "name": "E 350e",
-        "year": 2024,
-        "priceNGN": 76000000,
-        "mileageKm": 15000,
-        "specTag": "Plug-in Hybrid",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "E-Class plug-in hybrid reference listing."
-    },
-    {
-        "id": "car-e-450-4matic-2022",
-        "name": "E 450 4MATIC",
-        "year": 2022,
-        "priceNGN": 73500000,
-        "mileageKm": 29400,
-        "specTag": "3.0L Turbo I6",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "E-Class reference listing."
-    },
-    {
-        "id": "car-e-53-amg-2022",
-        "name": "E 53 AMG",
-        "year": 2022,
-        "priceNGN": 105000000,
-        "mileageKm": 19000,
-        "specTag": "3.0L AMG",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "AMG E-Class reference listing."
-    },
-    {
-        "id": "car-e-63-s-amg-2021",
-        "name": "E 63 S AMG",
-        "year": 2021,
-        "priceNGN": 120000000,
-        "mileageKm": 27000,
-        "specTag": "4.0L V8",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "AMG E-Class reference listing."
-    },
-    {
-        "id": "car-s-450-2021",
-        "name": "S 450",
-        "year": 2021,
-        "priceNGN": 118000000,
-        "mileageKm": 36500,
-        "specTag": "3.0L Turbo I6",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "S-Class reference listing."
-    },
-    {
-        "id": "car-s-500-2022",
-        "name": "S 500",
-        "year": 2022,
-        "priceNGN": 155000000,
-        "mileageKm": 21400,
-        "specTag": "3.0L Turbo I6",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "S-Class reference listing."
-    },
-    {
-        "id": "car-s-580-2022",
-        "name": "S 580",
-        "year": 2022,
-        "priceNGN": 168000000,
-        "mileageKm": 21400,
-        "specTag": "4.0L V8",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "S-Class reference listing."
-    },
-    {
-        "id": "car-maybach-s-580-2022",
-        "name": "Maybach S 580",
-        "year": 2022,
-        "priceNGN": 220000000,
-        "mileageKm": 12000,
-        "specTag": "4.0L V8",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Maybach%20S-Class.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "Mercedes-Maybach reference listing."
-    },
-    {
-        "id": "car-maybach-s-680-2023",
-        "name": "Maybach S 680",
-        "year": 2023,
-        "priceNGN": 330000000,
-        "mileageKm": 8000,
-        "specTag": "6.0L V12",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Maybach%20S-Class.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "Mercedes-Maybach reference listing."
-    },
-    {
-        "id": "car-gla-200-2024",
-        "name": "GLA 200",
-        "year": 2024,
-        "priceNGN": 52000000,
-        "mileageKm": 12000,
-        "specTag": "1.3L Turbo",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20GLA%20200%20%28H247%2C%202024%29%20%2853989141643%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "GLA reference listing."
-    },
-    {
-        "id": "car-gla-250-2022",
-        "name": "GLA 250",
-        "year": 2022,
-        "priceNGN": 58000000,
-        "mileageKm": 24000,
-        "specTag": "2.0L Turbo",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20GLA%20200%20%28H247%2C%202024%29%20%2853989141643%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "GLA reference listing."
-    },
-    {
-        "id": "car-gla-250-e-2023",
-        "name": "GLA 250 e",
-        "year": 2023,
-        "priceNGN": 65000000,
-        "mileageKm": 18000,
-        "specTag": "Plug-in Hybrid",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20GLA%20200%20%28H247%2C%202024%29%20%2853989141643%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "GLA plug-in hybrid reference listing."
-    },
-    {
-        "id": "car-gla-35-amg-2022",
-        "name": "GLA 35 AMG",
-        "year": 2022,
-        "priceNGN": 78000000,
-        "mileageKm": 21000,
-        "specTag": "2.0L AMG",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20GLA%20200%20%28H247%2C%202024%29%20%2853989141643%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "AMG GLA reference listing."
-    },
-    {
-        "id": "car-gla-45-amg-2023",
-        "name": "GLA 45 AMG",
-        "year": 2023,
-        "priceNGN": 95000000,
-        "mileageKm": 14000,
-        "specTag": "2.0L AMG",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20GLA%20200%20%28H247%2C%202024%29%20%2853989141643%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "AMG GLA reference listing."
-    },
-    {
-        "id": "car-glb-200-2022",
-        "name": "GLB 200",
-        "year": 2022,
-        "priceNGN": 48000000,
-        "mileageKm": 32000,
-        "specTag": "1.3L Turbo",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20GLB%20%28X247%29%20%2848816725736%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "GLB reference listing."
-    },
-    {
-        "id": "car-glb-200d-2022",
-        "name": "GLB 200d",
-        "year": 2022,
-        "priceNGN": 50000000,
-        "mileageKm": 37000,
-        "specTag": "2.0L Diesel",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20GLB%20%28X247%29%20%2848816725736%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "GLB reference listing."
-    },
-    {
-        "id": "car-glb-250-2022",
-        "name": "GLB 250",
-        "year": 2022,
-        "priceNGN": 56000000,
-        "mileageKm": 26000,
-        "specTag": "2.0L Turbo",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20GLB%20%28X247%29%20%2848816725736%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "GLB reference listing."
-    },
-    {
-        "id": "car-glb-35-amg-2022",
-        "name": "GLB 35 AMG",
-        "year": 2022,
-        "priceNGN": 78000000,
-        "mileageKm": 22000,
-        "specTag": "2.0L AMG",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20GLB%20%28X247%29%20%2848816725736%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "AMG GLB reference listing."
-    },
-    {
-        "id": "car-glc-300-2022",
-        "name": "GLC 300",
-        "year": 2022,
-        "priceNGN": 64500000,
-        "mileageKm": 41100,
-        "specTag": "2.0L Turbo",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes%20Benz%20GLC.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "GLC reference listing."
-    },
-    {
-        "id": "car-glc-300-coupe-2023",
-        "name": "GLC 300 Coupe",
-        "year": 2023,
-        "priceNGN": 75000000,
-        "mileageKm": 21000,
-        "specTag": "2.0L Turbo",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes%20Benz%20GLC.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "GLC Coupé reference listing."
-    },
-    {
-        "id": "car-glc-43-amg-2022",
-        "name": "GLC 43 AMG",
-        "year": 2022,
-        "priceNGN": 88000000,
-        "mileageKm": 24000,
-        "specTag": "3.0L AMG",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes%20Benz%20GLC.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "AMG GLC reference listing."
-    },
-    {
-        "id": "car-glc-63-s-amg-2022",
-        "name": "GLC 63 S AMG",
-        "year": 2022,
-        "priceNGN": 125000000,
-        "mileageKm": 18000,
-        "specTag": "4.0L AMG",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes%20Benz%20GLC.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "AMG GLC reference listing."
-    },
-    {
-        "id": "car-gle-350-2020",
-        "name": "GLE 350",
-        "year": 2020,
-        "priceNGN": 58500000,
-        "mileageKm": 58200,
-        "specTag": "2.0L Turbo",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20GLE-Klasse%20Coup%C3%A9%20%28C167%29%20GLE%2063%20S%20AMG%20%282022%29%20%2852597811506%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "GLE reference listing."
-    },
-    {
-        "id": "car-gle-450-2021",
-        "name": "GLE 450",
-        "year": 2021,
-        "priceNGN": 68000000,
-        "mileageKm": 45300,
-        "specTag": "3.0L Turbo I6",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20GLE-Klasse%20Coup%C3%A9%20%28C167%29%20GLE%2063%20S%20AMG%20%282022%29%20%2852597811506%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "GLE reference listing."
-    },
-    {
-        "id": "car-gle-450-coupe-2022",
-        "name": "GLE 450 Coupe",
-        "year": 2022,
-        "priceNGN": 90000000,
-        "mileageKm": 29000,
-        "specTag": "3.0L Turbo I6",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20GLE-Klasse%20Coup%C3%A9%20%28C167%29%20GLE%2063%20S%20AMG%20%282022%29%20%2852597811506%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "GLE Coupé reference listing."
-    },
-    {
-        "id": "car-gle-53-amg-2022",
-        "name": "GLE 53 AMG",
-        "year": 2022,
-        "priceNGN": 98000000,
-        "mileageKm": 27600,
-        "specTag": "3.0L AMG",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20GLE-Klasse%20Coup%C3%A9%20%28C167%29%20GLE%2063%20S%20AMG%20%282022%29%20%2852597811506%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "AMG GLE reference listing."
-    },
-    {
-        "id": "car-gle-63-s-amg-2021",
-        "name": "GLE 63 S AMG",
-        "year": 2021,
-        "priceNGN": 145000000,
-        "mileageKm": 22000,
-        "specTag": "4.0L AMG",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20GLE-Klasse%20Coup%C3%A9%20%28C167%29%20GLE%2063%20S%20AMG%20%282022%29%20%2852597811506%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "AMG GLE reference listing."
-    },
-    {
-        "id": "car-gls-450-2021",
-        "name": "GLS 450",
-        "year": 2021,
-        "priceNGN": 92000000,
-        "mileageKm": 49700,
-        "specTag": "3.0L Turbo I6",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20GLS-Klasse%20%28X167%29%20GLS%20400%20d%204MATIC%20%282021%29%20%2853322683536%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "GLS reference listing."
-    },
-    {
-        "id": "car-gls-580-2022",
-        "name": "GLS 580",
-        "year": 2022,
-        "priceNGN": 139000000,
-        "mileageKm": 31200,
-        "specTag": "4.0L V8",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20GLS-Klasse%20%28X167%29%20GLS%20400%20d%204MATIC%20%282021%29%20%2853322683536%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "GLS reference listing."
-    },
-    {
-        "id": "car-gls-63-amg-2021",
-        "name": "GLS 63 AMG",
-        "year": 2021,
-        "priceNGN": 155000000,
-        "mileageKm": 24000,
-        "specTag": "4.0L AMG",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20GLS-Klasse%20%28X167%29%20GLS%20400%20d%204MATIC%20%282021%29%20%2853322683536%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "AMG GLS reference listing."
-    },
-    {
-        "id": "car-maybach-gls-600-2022",
-        "name": "Maybach GLS 600",
-        "year": 2022,
-        "priceNGN": 220000000,
-        "mileageKm": 16000,
-        "specTag": "4.0L V8",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Maybach%20S-Class.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "Mercedes-Maybach GLS reference listing."
-    },
-    {
-        "id": "car-g-400d-2021",
-        "name": "G 400d",
-        "year": 2021,
-        "priceNGN": 150000000,
-        "mileageKm": 31000,
-        "specTag": "3.0L Diesel",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "G-Class reference listing."
-    },
-    {
-        "id": "car-g-500-2021",
-        "name": "G 500",
-        "year": 2021,
-        "priceNGN": 165000000,
-        "mileageKm": 25000,
-        "specTag": "4.0L V8",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "G-Class reference listing."
-    },
-    {
-        "id": "car-g-550-2020",
-        "name": "G 550",
-        "year": 2020,
-        "priceNGN": 135000000,
-        "mileageKm": 38000,
-        "specTag": "4.0L V8",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "G-Class reference listing."
-    },
-    {
-        "id": "car-g-63-amg-2023",
-        "name": "G 63 AMG",
-        "year": 2023,
-        "priceNGN": 185000000,
-        "mileageKm": 8200,
-        "specTag": "4.0L V8 Biturbo",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "AMG G-Class reference listing."
-    },
-    {
-        "id": "car-g-450d-2024",
-        "name": "G 450d",
-        "year": 2024,
-        "priceNGN": 175000000,
-        "mileageKm": 9000,
-        "specTag": "3.0L Diesel",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "G-Class reference listing."
-    },
-    {
-        "id": "car-v-220d-2020",
-        "name": "V 220d",
-        "year": 2020,
-        "priceNGN": 55000000,
-        "mileageKm": 61000,
-        "specTag": "2.0L Diesel",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "V-Class reference listing."
-    },
-    {
-        "id": "car-v-250d-2021",
-        "name": "V 250d",
-        "year": 2021,
-        "priceNGN": 65000000,
-        "mileageKm": 48000,
-        "specTag": "2.0L Diesel",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "V-Class reference listing."
-    },
-    {
-        "id": "car-v-300d-2022",
-        "name": "V 300d",
-        "year": 2022,
-        "priceNGN": 78000000,
-        "mileageKm": 32000,
-        "specTag": "2.0L Diesel",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mercedes-Benz%20C-Klasse%20%28W206%29%20C%20300%20e%204MATIC%20%282022%29%20%2852576969672%29.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "V-Class reference listing."
-    },
-    {
-        "id": "car-sl-43-amg-2023",
-        "name": "SL 43 AMG",
-        "year": 2023,
-        "priceNGN": 120000000,
-        "mileageKm": 12000,
-        "specTag": "2.0L AMG",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/2022%20Mercedes%20SL55.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "SL Roadster reference listing."
-    },
-    {
-        "id": "car-sl-55-amg-2022",
-        "name": "SL 55 AMG",
-        "year": 2022,
-        "priceNGN": 145000000,
-        "mileageKm": 14000,
-        "specTag": "4.0L V8",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/2022%20Mercedes%20SL55.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "SL Roadster reference listing."
-    },
-    {
-        "id": "car-amg-gt-55-2024",
-        "name": "AMG GT 55",
-        "year": 2024,
-        "priceNGN": 175000000,
-        "mileageKm": 7000,
-        "specTag": "4.0L V8",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/2024%20Mercedes%20AMG%20GT.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "Mercedes-AMG GT reference listing."
-    },
-    {
-        "id": "car-amg-gt-63-2024",
-        "name": "AMG GT 63",
-        "year": 2024,
-        "priceNGN": 210000000,
-        "mileageKm": 6000,
-        "specTag": "4.0L V8",
-        "status": "available",
-        "image": "https://commons.wikimedia.org/wiki/Special:FilePath/2024%20Mercedes%20AMG%20GT.jpg",
-        "imageCredit": "Wikimedia Commons / CC BY-SA",
-        "description": "Mercedes-AMG GT reference listing."
+      id: 'car-gle450',
+      name: 'GLE 450',
+      year: 2021,
+      priceNGN: 68000000,
+      mileageKm: 45300,
+      specTag: '3.0L Turbo I6',
+      status: 'available',
+      image: 'https://images.unsplash.com/photo-1559511206-f5ade67b8484?fm=jpg&q=80&w=1400&auto=format&fit=crop',
+      description: 'Family SUV, AIRMATIC suspension inspected and calibrated, clean interior throughout.'
     }
-];
-  const cache={cars:null};
-  const clone=x=>JSON.parse(JSON.stringify(x));
-  const localRead=()=>{try{const x=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');return Array.isArray(x)?x:null;}catch{return null;}};
-  const localWrite=x=>{try{localStorage.setItem(STORAGE_KEY,JSON.stringify(x));}catch{}};
-  const emit=()=>window.dispatchEvent(new CustomEvent('mb:inventory-hydrated'));
-  function getCars(){ if(cache.cars) return clone(cache.cars); const x=localRead(); cache.cars=x||clone(CARS_SEED); if(!x)localWrite(cache.cars); return clone(cache.cars); }
-  async function hydrate(){
-    if(!window.MBBackend?.ready){emit();return getCars();}
-    const r=await window.MBBackend.get('inventory','select=*&order=created_at.desc');
-    if(r.ok&&Array.isArray(r.data)){cache.cars=r.data.map(x=>({id:x.id,name:x.name,year:x.year,priceNGN:x.price_ngn,mileageKm:x.mileage_km,specTag:x.spec_tag,status:x.status,image:x.image_url,description:x.description||'',createdAt:x.created_at}));localWrite(cache.cars);}
-    emit(); return getCars();
+  ];
+
+  // ---- Storage helpers ----
+  function readRaw() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+      console.warn('MBStore: could not read localStorage, using seed data.', e);
+      return null;
+    }
   }
-  async function addCar(car){
-    const id='car-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7);
-    const item={id,status:'available',...car};
-    if(!window.MBBackend?.ready)throw new Error('Supabase is not configured. Connect the public key before editing shared inventory.'); if(window.MBBackend?.ready){const r=await window.MBBackend.post('inventory',{id:item.id,name:item.name,year:item.year,price_ngn:item.priceNGN,mileage_km:item.mileageKm,spec_tag:item.specTag,status:item.status,image_url:item.image,description:item.description||'',active:true});if(!r.ok)throw new Error('Could not save vehicle to Supabase.');}
-    cache.cars=[item,...getCars().filter(x=>x.id!==id)];localWrite(cache.cars);emit();return item;
+
+  function writeRaw(cars) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cars));
+      return true;
+    } catch (e) {
+      console.warn('MBStore: could not write to localStorage.', e);
+      return false;
+    }
   }
-  async function updateCar(id,patch){
-    const current=getCars().find(x=>x.id===id);if(!current)return false;
-    const next={...current,...patch};
-    if(!window.MBBackend?.ready)throw new Error('Supabase is not configured. Connect the public key before editing shared inventory.'); if(window.MBBackend?.ready){const r=await window.MBBackend.patch('inventory',`id=eq.${encodeURIComponent(id)}`,{name:next.name,year:next.year,price_ngn:next.priceNGN,mileage_km:next.mileageKm,spec_tag:next.specTag,status:next.status,image_url:next.image,description:next.description||'',active:true});if(!r.ok)throw new Error('Could not update vehicle in Supabase.');}
-    cache.cars=getCars().map(x=>x.id===id?next:x);localWrite(cache.cars);emit();return true;
+
+  function getCars() {
+    const stored = readRaw();
+    if (stored && Array.isArray(stored)) return stored;
+    // First run: seed localStorage so admin edits have something to work from
+    writeRaw(CARS_SEED);
+    return CARS_SEED.slice();
   }
-  async function deleteCar(id){if(!window.MBBackend?.ready)throw new Error('Supabase is not configured. Connect the public key before editing shared inventory.'); if(window.MBBackend?.ready){const r=await window.MBBackend.remove('inventory',`id=eq.${encodeURIComponent(id)}`);if(!r.ok)throw new Error('Could not delete vehicle from Supabase.');}cache.cars=getCars().filter(x=>x.id!==id);localWrite(cache.cars);emit();return true;}
-  async function markSold(id){return updateCar(id,{status:'sold'});}
-  async function markAvailable(id){return updateCar(id,{status:'available'});}
-  const formatNGN=amount=>{try{return new Intl.NumberFormat('en-NG',{style:'currency',currency:'NGN',maximumFractionDigits:0}).format(amount);}catch{return '₦'+Number(amount||0).toLocaleString('en-NG');}};
-  const formatKm=km=>Number(km||0).toLocaleString('en-NG')+' km';
-  global.MBStore={getCars,hydrate,addCar,updateCar,deleteCar,markSold,markAvailable,formatNGN,formatKm};
+
+  function saveCars(cars) {
+    writeRaw(cars);
+  }
+
+  function addCar(car) {
+    const cars = getCars();
+    const id = 'car-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6);
+    cars.unshift(Object.assign({ id, status: 'available' }, car));
+    saveCars(cars);
+    return id;
+  }
+
+  function updateCar(id, patch) {
+    const cars = getCars();
+    const idx = cars.findIndex((c) => c.id === id);
+    if (idx === -1) return false;
+    cars[idx] = Object.assign({}, cars[idx], patch);
+    saveCars(cars);
+    return true;
+  }
+
+  function deleteCar(id) {
+    const cars = getCars().filter((c) => c.id !== id);
+    saveCars(cars);
+  }
+
+  function markSold(id) {
+    return updateCar(id, { status: 'sold' });
+  }
+
+  function markAvailable(id) {
+    return updateCar(id, { status: 'available' });
+  }
+
+  function resetToDefaults() {
+    saveCars(CARS_SEED.slice());
+  }
+
+  // ---- Formatting ----
+  function formatNGN(amount) {
+    try {
+      return new Intl.NumberFormat('en-NG', {
+        style: 'currency',
+        currency: 'NGN',
+        maximumFractionDigits: 0
+      }).format(amount);
+    } catch (e) {
+      return '₦' + Number(amount || 0).toLocaleString('en-NG');
+    }
+  }
+
+  function formatKm(km) {
+    return Number(km || 0).toLocaleString('en-NG') + ' km';
+  }
+
+  // ---- Export / Import (the "make it live for everyone" workflow) ----
+  function exportAsSeedFile() {
+    const cars = getCars();
+    const fileBody =
+      '/* Generated by admin.html — replace the CARS_SEED array in js/store.js\n' +
+      '   with this array, then re-deploy the site to publish these changes\n' +
+      '   for every visitor. */\n\n' +
+      'const CARS_SEED = ' + JSON.stringify(cars, null, 2) + ';\n';
+    const blob = new Blob([fileBody], { type: 'text/javascript' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'cars-seed-export.js';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function exportAsJSON() {
+    const cars = getCars();
+    const blob = new Blob([JSON.stringify(cars, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'cars.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function importFromJSONText(jsonText) {
+    const parsed = JSON.parse(jsonText);
+    if (!Array.isArray(parsed)) throw new Error('Expected a JSON array of cars.');
+    saveCars(parsed);
+  }
+
+  global.MBStore = {
+    getCars,
+    saveCars,
+    addCar,
+    updateCar,
+    deleteCar,
+    markSold,
+    markAvailable,
+    resetToDefaults,
+    formatNGN,
+    formatKm,
+    exportAsSeedFile,
+    exportAsJSON,
+    importFromJSONText
+  };
 })(window);
