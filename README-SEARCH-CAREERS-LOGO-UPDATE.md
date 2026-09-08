@@ -1,9 +1,9 @@
 # Update — Logo, Site Search, Searchable Service Select, Careers Page
 
 ## Logo
-- Replaced the generated inline logo mark with an `<img>` pointing at `images/logo.png`, across every page's header and footer (15 files).
-- A neutral placeholder `images/logo.png` is included so the site doesn't show a broken image icon.
-- **To use your real logo:** just replace `images/logo.png` with your own file, keeping the exact same filename. No code or HTML changes needed — it updates everywhere automatically. A roughly square image with a transparent background works best (it's displayed in a small ~34px badge in the header and footer).
+- Replaced the generated inline logo mark with an `<img>` pointing at `images/moses-benz-logo.png`, across every page's header and footer (15 files).
+- A neutral placeholder `images/moses-benz-logo.png` is included so the site doesn't show a broken image icon.
+- **To use your real logo:** just replace `images/moses-benz-logo.png` with your own file, keeping the exact same filename. No code or HTML changes needed — it updates everywhere automatically. A roughly square image with a transparent background works best (it's displayed in a small ~34px badge in the header and footer).
 
 ## Site-wide search
 - A search button (magnifying glass icon) now appears in the header on every customer-facing page, next to "Book a Service".
