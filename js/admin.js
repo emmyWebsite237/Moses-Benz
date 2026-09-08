@@ -41,6 +41,34 @@
     document.getElementById('admin-logout')?.addEventListener('click',()=>{sessionStorage.removeItem('mbac_admin_session');location.replace('/mbac-control-7x4k9');});
     document.getElementById('migrate-legacy-data')?.addEventListener('click',async()=>{const status=document.getElementById('migration-status');try{status.textContent='Migrating…';const n=await window.MBData.migrateLegacyLocalData();status.textContent=`Migration complete: ${n} records sent to Supabase.`;await renderCars();await renderBeforeAfter();}catch(ex){status.textContent=ex.message||'Migration failed.';}});
   }
-  async function boot(){if(!(await ensure()))return;document.querySelector('.site-header')?.style.removeProperty('visibility');document.getElementById('page-content')?.style.removeProperty('visibility');sectionNav();bindTimeModal();bindForms();await Promise.all([window.MBData?.hydrate?.(true),window.MBStore?.hydrate?.()]);await renderCars();await renderServices();await renderAppointments();await renderBeforeAfter();await renderCredentials();await renderReviews();}
+  async function boot(){
+    if(!(await ensure())) return;
+
+    // Reveal the admin UI immediately. Data hydration must never leave the
+    // entire portal invisible if a remote request is slow or fails.
+    document.querySelector('.site-header')?.style.removeProperty('visibility');
+    document.getElementById('page-content')?.style.removeProperty('visibility');
+
+    sectionNav();
+    bindTimeModal();
+    bindForms();
+
+    try { await window.MBData?.hydrate?.(true); } catch(ex) { console.error('MBData hydration failed:', ex); }
+    try { await window.MBStore?.hydrate?.(); } catch(ex) { console.error('MBStore hydration failed:', ex); }
+
+    const jobs = [
+      ['cars', renderCars],
+      ['services', renderServices],
+      ['appointments', renderAppointments],
+      ['before/after', renderBeforeAfter],
+      ['credentials', renderCredentials],
+      ['reviews', renderReviews]
+    ];
+
+    await Promise.all(jobs.map(async ([name, fn]) => {
+      try { await fn(); }
+      catch(ex) { console.error(`Admin ${name} render failed:`, ex); }
+    }));
+  }
   document.addEventListener('DOMContentLoaded',boot);
 })();
