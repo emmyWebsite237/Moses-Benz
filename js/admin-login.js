@@ -43,7 +43,7 @@
 
         sessionStorage.setItem('mbac_admin_session', JSON.stringify({
           username: result.username,
-          loggedInAt: Date.now()
+          loggedInAt: Date.now(), password
         }));
         location.replace('/mbac-control-7x4k9/portal');
       } catch(ex) {

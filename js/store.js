@@ -720,19 +720,19 @@
   async function hydrate(){
     if(!window.MBBackend?.ready){emit();return getCars();}
     const r=await window.MBBackend.get('inventory','select=*&order=created_at.desc');
-    if(r.ok&&Array.isArray(r.data)){cache.cars=r.data.map(x=>({id:x.id,name:x.name,year:x.year,priceNGN:x.price_ngn,mileageKm:x.mileage_km,specTag:x.spec_tag,status:x.status,image:x.image_url,description:x.description||'',createdAt:x.created_at}));localWrite(cache.cars);}
+    if(r.ok&&Array.isArray(r.data)){cache.cars=r.data.map(x=>({id:x.id,name:x.name,brand:x.brand||'Mercedes-Benz',year:x.year,priceNGN:x.price_ngn,mileageKm:x.mileage_km,specTag:x.spec_tag,status:x.status,image:x.image_url,description:x.description||'',createdAt:x.created_at}));localWrite(cache.cars);}
     emit(); return getCars();
   }
   async function addCar(car){
     const id='car-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7);
-    const item={id,status:'available',...car};
-    if(!window.MBBackend?.ready)throw new Error('Supabase is not configured. Connect the public key before editing shared inventory.'); if(window.MBBackend?.ready){const r=await window.MBBackend.post('inventory',{id:item.id,name:item.name,year:item.year,price_ngn:item.priceNGN,mileage_km:item.mileageKm,spec_tag:item.specTag,status:item.status,image_url:item.image,description:item.description||'',active:true});if(!r.ok)throw new Error('Could not save vehicle to Supabase.');}
+    const item={id,status:'available',brand:car.brand||'Mercedes-Benz',...car};
+    if(!window.MBBackend?.ready)throw new Error('Supabase is not configured. Connect the public key before editing shared inventory.'); if(window.MBBackend?.ready){const r=await window.MBBackend.post('inventory',{id:item.id,name:item.name,brand:item.brand||'Mercedes-Benz',year:item.year,price_ngn:item.priceNGN,mileage_km:item.mileageKm,spec_tag:item.specTag,status:item.status,image_url:item.image,description:item.description||'',active:true});if(!r.ok)throw new Error('Could not save vehicle to Supabase.');}
     cache.cars=[item,...getCars().filter(x=>x.id!==id)];localWrite(cache.cars);emit();return item;
   }
   async function updateCar(id,patch){
     const current=getCars().find(x=>x.id===id);if(!current)return false;
     const next={...current,...patch};
-    if(!window.MBBackend?.ready)throw new Error('Supabase is not configured. Connect the public key before editing shared inventory.'); if(window.MBBackend?.ready){const r=await window.MBBackend.patch('inventory',`id=eq.${encodeURIComponent(id)}`,{name:next.name,year:next.year,price_ngn:next.priceNGN,mileage_km:next.mileageKm,spec_tag:next.specTag,status:next.status,image_url:next.image,description:next.description||'',active:true});if(!r.ok)throw new Error('Could not update vehicle in Supabase.');}
+    if(!window.MBBackend?.ready)throw new Error('Supabase is not configured. Connect the public key before editing shared inventory.'); if(window.MBBackend?.ready){const r=await window.MBBackend.patch('inventory',`id=eq.${encodeURIComponent(id)}`,{name:next.name,brand:next.brand||'Mercedes-Benz',year:next.year,price_ngn:next.priceNGN,mileage_km:next.mileageKm,spec_tag:next.specTag,status:next.status,image_url:next.image,description:next.description||'',active:true});if(!r.ok)throw new Error('Could not update vehicle in Supabase.');}
     cache.cars=getCars().map(x=>x.id===id?next:x);localWrite(cache.cars);emit();return true;
   }
   async function deleteCar(id){if(!window.MBBackend?.ready)throw new Error('Supabase is not configured. Connect the public key before editing shared inventory.'); if(window.MBBackend?.ready){const r=await window.MBBackend.remove('inventory',`id=eq.${encodeURIComponent(id)}`);if(!r.ok)throw new Error('Could not delete vehicle from Supabase.');}cache.cars=getCars().filter(x=>x.id!==id);localWrite(cache.cars);emit();return true;}

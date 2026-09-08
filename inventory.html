@@ -16,22 +16,10 @@
       <span class="brand-word">Moses Benz<small>Auto Care · Idimu, Lagos</small></span>
     </a>
 
-    <nav class="main-nav" id="main-nav" aria-label="Primary navigation">
-      <ul>
-        <li><a class="page-route" href="/services">Services</a></li>
-        <li><a class="page-route" href="/inventory">Inventory</a></li>
-        <li><a class="page-route" href="/reviews">Reviews</a></li>
-        <li><a class="page-route" href="/careers">Careers</a></li>
-        <li><a class="page-route" href="/contact">Contact</a></li>
-        
-      </ul>
-    </nav>
+    <nav class="main-nav" id="main-nav" aria-label="Primary navigation"><ul><li><a class="page-route" href="/">Home</a></li><li><a class="page-route" href="/inventory">Inventory</a></li><li><a class="page-route" href="/blog">Blog</a></li><li><a class="page-route" href="/contact">Contact</a></li></ul></nav>
 
     
-    <div class="header-cta">
-      
-      <a href="/services" class="btn btn-primary page-route">Book a Service</a>
-      <button class="nav-toggle" id="nav-toggle" aria-label="Open navigation menu" title="Open navigation menu" aria-expanded="false" aria-controls="main-nav">
+    <div class="header-cta"><a href="tel:+2349061526267" class="btn btn-primary">Call Us Now</a><button class="nav-toggle" id="nav-toggle" aria-label="Open navigation menu" title="Open navigation menu" aria-expanded="false" aria-controls="main-nav">
         <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path class="icon-menu" d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path class="icon-close" d="M5 5l14 14M19 5L5 19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
       </button>
     </div>
@@ -42,7 +30,7 @@
   <div class="container">
     <span class="eyebrow on-dark">For Sale</span>
     <h1>Cars we've prepared ourselves.</h1>
-    <p>Browse the vehicles we have listed for sale. Tap any vehicle to view its details and send a purchase request. Browse by Mercedes class, then swipe through the vehicles in that class. Prices are shown in Naira.</p>
+    <p>Browse by class and swipe through the vehicles. Tap a car for full details, then contact the seller directly on WhatsApp. Prices are shown in Naira.</p>
   </div>
 </section>
 
@@ -63,17 +51,7 @@
 <!-- =========================================================
      CTA BANNER
      ========================================================= -->
-<section class="cta-banner">
-  <div class="container">
-    <div class="cta-inner">
-      <h2>Don't see the right car? Tell us what you're after.</h2>
-      <div class="cta-actions">
-        <a href="tel:+2349061526267" class="btn btn-primary">Call the Workshop</a>
-        <a href="/appointments" class="page-route btn btn-ghost-dark">Send a Request</a>
-      </div>
-    </div>
-  </div>
-</section>
+<section class="cta-banner"><div class="container"><div class="cta-inner"><h2>Want a car that is not listed?</h2><div class="cta-actions"><a href="https://wa.me/2348106958638" target="_blank" rel="noopener" class="btn btn-primary">WhatsApp the Seller</a><a href="tel:+2349061526267" class="btn btn-ghost-dark">Call Us Now</a></div></div></div></section>
 
 <!-- =========================================================
      FIND US — embedded map
@@ -101,25 +79,6 @@
     </a>
   </div>
 </section>
-<div class="enquiry-modal" id="inventory-enquiry-modal" hidden aria-hidden="true">
-  <div class="enquiry-backdrop" data-enquiry-close></div>
-  <section class="enquiry-dialog" role="dialog" aria-modal="true" aria-labelledby="enquiry-title">
-    <button type="button" class="enquiry-close" data-enquiry-close aria-label="Close enquiry">×</button>
-    <span class="eyebrow">Vehicle Enquiry</span>
-    <h2 id="enquiry-title">Vehicle purchase enquiry.</h2>
-    <p class="admin-card-note" id="enquiry-vehicle-note">Tell us how to reach you and what you would like to know about this vehicle.</p>
-    <form id="inventory-enquiry-form" class="admin-form">
-      <input type="hidden" name="vehicle">
-      <label>Email *<input name="buyerEmail" type="email" required autocomplete="email" placeholder="you@example.com"></label>
-      <label>WhatsApp number *<input name="buyerWhatsApp" type="tel" required autocomplete="tel" placeholder="080… / +234…"></label>
-      <label>What would you like to know?<textarea name="message" rows="5" placeholder="Ask about the car, viewing, purchase, financing, or anything else."></textarea></label>
-      <button type="submit" class="btn btn-primary btn-block">Send vehicle enquiry</button>
-      <p class="form-status" id="inventory-enquiry-status" role="status"></p>
-    </form>
-  </section>
-</div>
-
-
 <div class="inventory-detail-modal" id="inventory-detail-modal" hidden aria-hidden="true">
   <div class="enquiry-backdrop" data-detail-close></div>
   <section class="inventory-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="detail-name">
@@ -136,7 +95,7 @@
       </div>
       <p data-detail-description></p>
       <div class="detail-note"><strong>Vehicle enquiry</strong><span>Request a viewing or ask about this vehicle and the workshop will respond using your contact details.</span></div>
-      <button class="btn btn-primary" type="button" data-detail-buy>Request to purchase</button>
+      <button class="btn btn-primary" type="button" data-detail-buy>Chat with seller on WhatsApp</button>
     </div>
   </section>
 </div>
@@ -161,15 +120,7 @@
 
       <div class="footer-col">
         <h4>Explore</h4>
-        <ul>
-          <li><a href="/services" class="page-route">Services</a></li>
-          <li><a href="/workshop" class="page-route">Our Workshop</a></li>
-          <li><a href="/inventory" class="page-route">Inventory</a></li>
-          
-          <li><a href="/reviews" class="page-route">Reviews</a></li>
-          <li><a href="/credentials" class="page-route">Approvals &amp; Certificates</a></li>
-          <li><a href="/careers" class="page-route">Careers</a></li>
-        </ul>
+        <ul><li><a href="/">Home</a></li><li><a href="/inventory" class="page-route">Inventory</a></li><li><a href="/blog" class="page-route">Blog</a></li><li><a href="/contact" class="page-route">Contact</a></li><li><a href="/credentials" class="page-route">Approvals &amp; Certificates</a></li></ul>
       </div>
 
       <div class="footer-col">

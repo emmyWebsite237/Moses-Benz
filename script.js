@@ -28,8 +28,8 @@
     if(qs('#inventory-list')){await loadScript('js/inventory.js');window.initInventoryPage?.();}
     if(qs('#appointment-form')){await loadScript('js/searchable-select.js');await loadScript('js/appointments.js');window.initAppointmentPage?.();}
     if(qs('#career-form')){await loadScript('js/careers.js');window.initCareerPage?.();}
-    if(qs('#service-catalog-grid')||qs('#service-detail')){await loadScript('js/services.js');window.initServices?.();}
-    if(qs('#public-reviews-grid')||qs('#review-form')){await loadScript('js/reviews.js');window.initReviews?.();}
+    if(qs('#blog-list')||qs('#blog-post')||qs('#home-blog-grid')){await loadScript('js/blog.js');window.MBBlogPosts&&window.MBBlogPosts.length;}
+    if(qs('#public-reviews-grid')){await loadScript('js/reviews.js');window.initReviews?.();}
     if(qs('#before-after-grid')||qs('#credentials-grid')||qs('#home-credentials-strip')){await loadScript('js/media.js');window.initBeforeAfter?.();window.initCredentials?.();window.initHomeCredentials?.();}
     initReveal();initMarquee();initBookingForm();initContactRoutes();
   }
