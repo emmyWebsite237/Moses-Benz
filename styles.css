@@ -1916,3 +1916,27 @@ body{background:#f6f4ef;color:#17181b;}
 .page-head{background:var(--porcelain)!important;color:var(--ink)!important;border-bottom:1px solid var(--line-light)!important}
 .page-head h1,.page-head p,.page-head .eyebrow{color:#17181b!important}
 .page-head .eyebrow{color:var(--ignition)!important}
+
+
+/* Site navigation alignment */
+.site-header .container{justify-content:flex-start;}
+.main-nav{margin-left:auto;}
+.header-cta{margin-left:10px;}
+@media(max-width:900px){
+  .main-nav{margin-left:0;}
+  .header-cta{margin-left:auto;}
+}
+.blog-comments{margin-top:64px;padding-top:36px;border-top:1px solid var(--line-light);}
+.blog-comments h2{margin-bottom:20px;}
+.blog-comment-form{display:grid;gap:12px;max-width:760px;margin-bottom:30px;}
+.blog-comment-form input,.blog-comment-form textarea{
+  width:100%;border:1px solid var(--line-light);background:var(--paper);color:var(--ink);padding:12px 14px;font:inherit;
+}
+.blog-comment{border-top:1px solid var(--line-light);padding:20px 0;}
+.blog-comment .comment-meta{font-size:12px;color:var(--ink-soft);margin-bottom:7px;}
+.blog-comment .comment-body{color:var(--ink);}
+.blog-comment .admin-reply{margin:14px 0 0 20px;padding:14px 16px;border-left:2px solid var(--ignition);background:var(--porcelain);}
+.blog-comment .admin-reply strong{display:block;font-size:12px;text-transform:uppercase;margin-bottom:4px;}
+.footer-social a[hidden]{display:none;}
+
+.review-track{display:flex;gap:24px;overflow-x:auto;scroll-behavior:smooth;scrollbar-width:none;width:100%;padding-bottom:4px}.review-track::-webkit-scrollbar{display:none}.review-track .testi-card{width:min(360px,78vw);flex:0 0 min(360px,78vw)}

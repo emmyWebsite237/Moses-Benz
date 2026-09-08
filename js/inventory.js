@@ -1,6 +1,6 @@
 (() => {
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
-  const seller='2348106958638';
+  const seller=()=>String(window.MBSiteSettings?.whatsapp||'2348106958638').replace(/\D/g,'');
   function initDetail(){
     const modal=document.getElementById('inventory-detail-modal'); if(!modal||modal.dataset.bound)return; modal.dataset.bound='1';
     const close=()=>{modal.hidden=true;modal.setAttribute('aria-hidden','true');document.body.classList.remove('modal-open');};
@@ -12,7 +12,7 @@
       modal.querySelector('[data-detail-price]').textContent=window.MBStore.formatNGN(car.priceNGN);
       const set=(sel,value)=>{const el=modal.querySelector(sel);if(el)el.textContent=value||'—';};
       set('[data-detail-year]',car.year);set('[data-detail-engine]',car.specTag);set('[data-detail-mileage]',window.MBStore.formatKm(car.mileageKm));set('[data-detail-description]',car.description||'Contact the seller for availability, viewing and purchase details.');
-      const btn=modal.querySelector('[data-detail-buy]'); if(btn)btn.onclick=()=>{const text=`Hello Moses Benz Auto Care, I am interested in the ${car.name}${car.year?` (${car.year})`:''} listed on your website. Is it still available?`;window.open(`https://wa.me/${seller}?text=${encodeURIComponent(text)}`,'_blank','noopener');};
+      const btn=modal.querySelector('[data-detail-buy]'); if(btn)btn.onclick=()=>{const text=`Hello Moses Benz Auto Care, I am interested in the ${car.name}${car.year?` (${car.year})`:''} listed on your website. Is it still available?`;window.open(`https://wa.me/${seller()}?text=${encodeURIComponent(text)}`,'_blank','noopener');};
       modal.hidden=false;modal.setAttribute('aria-hidden','false');document.body.classList.add('modal-open');
     }};
   }

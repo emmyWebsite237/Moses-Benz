@@ -23,19 +23,19 @@
   async function initModules(){
     await loadScript('js/site-data.js');
     await loadScript('js/form-config.js');
-    await window.MBData?.hydrate?.();
+    await window.MBData?.hydrate?.(); await window.MBSiteSettingsAPI?.load?.();
     if(qs('#home-inventory-list')){await loadScript('js/home-inventory.js');window.initHomeInventory?.();}
     if(qs('#inventory-list')){await loadScript('js/inventory.js');window.initInventoryPage?.();}
     if(qs('#appointment-form')){await loadScript('js/searchable-select.js');await loadScript('js/appointments.js');window.initAppointmentPage?.();}
     if(qs('#career-form')){await loadScript('js/careers.js');window.initCareerPage?.();}
-    if(qs('#blog-list')||qs('#blog-post')||qs('#home-blog-grid')){await loadScript('js/blog.js');window.MBBlogPosts&&window.MBBlogPosts.length;}
+    if(qs('#blog-list')||qs('#blog-post')||qs('#home-blog-grid')){await loadScript('js/blog.js');window.initBlogPage?.();}
     if(qs('#public-reviews-grid')){await loadScript('js/reviews.js');window.initReviews?.();}
     if(qs('#before-after-grid')||qs('#credentials-grid')||qs('#home-credentials-strip')){await loadScript('js/media.js');window.initBeforeAfter?.();window.initCredentials?.();window.initHomeCredentials?.();}
     initReveal();initMarquee();initBookingForm();initContactRoutes();
   }
   function initBookingForm(){
     const form=qs('#booking-form'); if(!form||form.dataset.bound)return; form.dataset.bound='1';
-    form.addEventListener('submit',e=>{e.preventDefault();const name=qs('#bf-name')?.value.trim();const model=qs('#bf-model')?.value.trim();const phone=qs('#bf-phone')?.value.trim();const msg=`Hello Moses Benz Auto Care. I would like to request a callback.\nName: ${name}\nMercedes: ${model}\nPhone: ${phone}`;window.open('https://wa.me/2349061526267?text='+encodeURIComponent(msg),'_blank','noopener');});
+    form.addEventListener('submit',e=>{e.preventDefault();const name=qs('#bf-name')?.value.trim();const model=qs('#bf-model')?.value.trim();const phone=qs('#bf-phone')?.value.trim();const msg=`Hello Moses Benz Auto Care. I would like to request a callback.\nName: ${name}\nMercedes: ${model}\nPhone: ${phone}`;const wa=(window.MBSiteSettings?.whatsapp||'2348106958638').replace(/\D/g,'');window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg),'_blank','noopener');});
   }
   function initContactRoutes(){
     qsa('a[href^="tel:"],a[href^="https://wa.me/"],a[target="_blank"]').forEach(a=>{a.addEventListener('click',()=>{const nav=qs('.main-nav');const t=qs('#nav-toggle');if(nav&&t){nav.classList.remove('is-open');t.classList.remove('is-open');t.setAttribute('aria-expanded','false');}});});
