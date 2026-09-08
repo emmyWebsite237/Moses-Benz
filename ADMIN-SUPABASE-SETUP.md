@@ -1,12 +1,42 @@
-# Secure Admin Setup
+# Moses Benz Auto Care — Simple Supabase Admin
 
-The browser project contains no admin password, password hash, hard-coded admin email, or service-role key.
+This version intentionally does NOT use Supabase Authentication.
 
-1. Create the administrator in Supabase Authentication → Users.
-2. Copy the user's UUID.
-3. Run `supabase-admin-auth-migration.sql`.
-4. Insert the UUID and chosen username into `public.admin_users`.
-5. Keep the password only in Supabase Auth.
-6. Keep the service-role/secret key out of all browser files.
+## 1. Run the SQL
 
-Important: a static HTML browser cannot safely turn an arbitrary username into a Supabase Auth email/password login without exposing the email or using a server-side resolver. The production username/password flow should therefore use a Vercel server-side endpoint or Supabase Edge Function. The browser should receive only the public Supabase URL/key and authenticated session.
+Run `supabase-admin-auth-migration.sql` in the Supabase SQL Editor.
+
+## 2. Create your password hash
+
+Run:
+
+```sql
+select encode(digest('YOUR_PASSWORD_HERE', 'sha256'), 'hex');
+```
+
+Copy the returned hash.
+
+## 3. Create the admin
+
+```sql
+insert into public.admin_users (username, password)
+values ('YOUR_USERNAME', 'PASTE_HASH_HERE');
+```
+
+The `password` column contains the one-way hash, not the plaintext password.
+
+## 4. Configure the site
+
+`js/supabase-config.js` needs only your Supabase project URL and public anon/publishable key.
+
+Do NOT put a service-role/secret key in browser JavaScript.
+
+## Login
+
+Open:
+
+`/mbac-control-7x4k9`
+
+Enter your username and password.
+
+The database verifies the credentials through `verify_admin_login`; the admin table itself is not readable by the browser.
