@@ -5,8 +5,8 @@
   async function init(){if(readyPromise)return readyPromise;readyPromise=(async()=>{if(!cfg.url||!cfg.anonKey)return null;await loadSdk();client=window.supabase.createClient(cfg.url,cfg.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});return client;})().catch(()=>null);return readyPromise;}
   async function getUser(){const c=await init();if(!c)return null;const {data}=await c.auth.getUser();return data?.user||null;}
   async function getAccessToken(){const c=await init();if(!c)return null;const {data}=await c.auth.getSession();return data?.session?.access_token||null;}
-  async function adminSignIn(username,password){const expected=String(cfg.adminUsername||'').trim();if(!expected||username.trim()!==expected)throw new Error('Incorrect username or password.');const c=await init();if(!c)throw new Error('Supabase is not configured.');const {data,error}=await c.auth.signInWithPassword({email:cfg.adminEmail,password});if(error)throw error;return data;}
+  async function adminSignIn(username,password){const expected=String(cfg./* adminUsername removed: stored in Supabase */||'').trim();if(!expected||username.trim()!==expected)throw new Error('Incorrect username or password.');const c=await init();if(!c)throw new Error('Supabase is not configured.');const {data,error}=await c.auth.signInWithPassword({email:cfg./* adminEmail removed: stored in Supabase */,password});if(error)throw error;return data;}
   async function signOut(){const c=await init();if(c)await c.auth.signOut();}
   async function updatePassword(password){const c=await init();if(!c)throw new Error('Supabase is not configured.');const {data,error}=await c.auth.updateUser({password});if(error)throw error;return data;}
-  window.MBAAuth={init,getUser,getAccessToken,adminSignIn,signOut,updatePassword,configured:()=>Boolean(cfg.url&&cfg.anonKey&&cfg.adminUsername&&cfg.adminEmail)};
+  window.MBAAuth={init,getUser,getAccessToken,adminSignIn,signOut,updatePassword,configured:()=>Boolean(cfg.url&&cfg.anonKey&&cfg./* adminUsername removed: stored in Supabase */&&cfg./* adminEmail removed: stored in Supabase */)};
 })();
