@@ -17,24 +17,23 @@
     }};
   }
   function getClass(car){
-    if(String(car?.brand||'Mercedes-Benz').toLowerCase()!=='mercedes-benz')return 'Other Brands';
+    const brand=String(car?.brand||'Mercedes-Benz').trim().toLowerCase();
+    if(brand && brand!=='mercedes-benz')return null;
     const n=String(car?.name||'').toUpperCase();
     const explicit=['G-CLASS','MAYBACH','AMG','GLS','GLE','GLC','GLB','GLA','CLS','CLA','SLC','SL','GT','EQ'];
     for(const key of explicit)if(new RegExp(`\\b${key.replace('-','[- ]')}\\b`).test(n))return key==='G-CLASS'?'G-Class':key;
     const m=n.match(/\\b([ABCEGS])\\s?[-]?\\s?\\d{2,3}\\b/);if(m)return `${m[1]} Class`;
     for(const key of ['A','B','C','E','S','G'])if(new RegExp(`^MERCEDES[- ]BENZ\\s+${key}\\b`).test(n))return `${key} Class`;
-    const known=['TOYOTA','LEXUS','HONDA','BMW','AUDI','VOLKSWAGEN','VOLVO','FORD','KIA','HYUNDAI','LAND ROVER','RANGE ROVER','NISSAN','PEUGEOT','PORSHE','PORSCHE','JEEP'];
-    for(const b of known)if(n.includes(b))return 'Other Brands';
-    return 'Other Brands';
+    return 'Other Mercedes';
   }
   function initInventoryPage(){
     const list=document.getElementById('inventory-list'),empty=document.getElementById('empty-state');if(!list||!empty||!window.MBStore)return;
     const input=document.getElementById('inventory-search-input');
     function card(car){return `<article class="car-card" data-id="${esc(car.id)}" tabindex="0" role="button" aria-label="View ${esc(car.name)}"><div class="car-media"><img src="${esc(car.image)}" alt="${esc(car.name)}" loading="lazy"></div><div class="car-body"><div class="car-heading"><h3>${esc(car.name)}</h3><span class="car-price">${window.MBStore.formatNGN(car.priceNGN)}</span></div><div class="car-specs"><span>${esc(car.year)}</span><span>${esc(car.specTag)}</span><span>${window.MBStore.formatKm(car.mileageKm)}</span></div><p class="desc">${esc(car.description||'')}</p><div class="car-cta"><span class="car-view-link">View vehicle →</span><span class="car-whatsapp-hint">WhatsApp seller</span></div></div></article>`;}
     function render(){
-      const q=(input?.value||'').trim().toLowerCase();let cars=window.MBStore.getCars().filter(c=>c.active!==false).slice();if(q)cars=cars.filter(c=>[c.name,c.year,c.specTag,c.description].join(' ').toLowerCase().includes(q));
+      const q=(input?.value||'').trim().toLowerCase();let cars=window.MBStore.getCars().filter(c=>c.active!==false && String(c.brand||'Mercedes-Benz').toLowerCase()==='mercedes-benz').slice();if(q)cars=cars.filter(c=>[c.name,c.year,c.specTag,c.description].join(' ').toLowerCase().includes(q));
       const groups=new Map();cars.forEach(c=>{const key=getClass(c);if(!groups.has(key))groups.set(key,[]);groups.get(key).push(c);});
-      const order=['A Class','B Class','C Class','CLA','CLS','E Class','S Class','G-Class','GLA','GLB','GLC','GLE','GLS','SL','SLC','GT','EQ','Maybach','AMG','Other Mercedes','Other Brands'];
+      const order=['A Class','B Class','C Class','CLA','CLS','E Class','S Class','G-Class','GLA','GLB','GLC','GLE','GLS','SL','SLC','GT','EQ','Maybach','AMG','Other Mercedes'];
       const ordered=[...groups.entries()].sort((a,b)=>{const ai=order.indexOf(a[0]),bi=order.indexOf(b[0]);return (ai<0?999:ai)-(bi<0?999:bi)||a[0].localeCompare(b[0]);});
       list.innerHTML=ordered.map(([group,items])=>`<section class="inventory-category"><div class="inventory-category-head"><h2>${esc(group)}</h2></div><div class="inventory-carousel"><button class="inventory-scroll prev" type="button" aria-label="Previous ${esc(group)} vehicles">‹</button><div class="inventory-track">${items.map(card).join('')}</div><button class="inventory-scroll next" type="button" aria-label="Next ${esc(group)} vehicles">›</button></div></section>`).join('');
       empty.hidden=cars.length>0;const count=document.getElementById('inventory-search-count');if(count)count.textContent=q?`${cars.length} result${cars.length===1?'':'s'}`:'';
