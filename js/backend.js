@@ -21,11 +21,29 @@
     return { ok:r.ok, configured:true, data, status:r.status };
   }
 
+  async function rpc(fn, params = {}) {
+    if (!ready) return { ok:false, configured:false, data:null };
+    const r = await fetch(`${cfg.url}/rest/v1/rpc/${encodeURIComponent(fn)}`, {
+      method: 'POST',
+      headers: {
+        apikey: cfg.anonKey,
+        Authorization: `Bearer ${cfg.anonKey}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=representation'
+      },
+      body: JSON.stringify(params)
+    });
+    let data = null;
+    try { data = await r.json(); } catch {}
+    return { ok:r.ok, configured:true, data, status:r.status };
+  }
+
   window.MBBackend = {
     ready,
     get:(t,q='')=>request(t,{query:q}),
     post:(t,b)=>request(t,{method:'POST',body:b}),
     patch:(t,q,b)=>request(t,{method:'PATCH',query:q,body:b}),
-    remove:(t,q)=>request(t,{method:'DELETE',query:q})
+    remove:(t,q)=>request(t,{method:'DELETE',query:q}),
+    rpc
   };
 })();

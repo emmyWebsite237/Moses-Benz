@@ -51,7 +51,7 @@
   }
   async function loadSiteSettingsForm(){
     const form=document.getElementById('site-settings-form'); if(!form||!api()?.ready)return;
-    const c=adminCreds(); const r=await api().rpc('admin_site_settings_get',{p_username:c.username||'',p_password:c.password||{}});
+    const c=adminCreds(); const r=await api().rpc('admin_site_settings_get',{p_username:c.username||'',p_password:c.password||''});
     if(r?.ok&&Array.isArray(r.data)&&r.data[0]){const x=r.data[0];['phone','whatsapp','email','instagram','facebook','youtube','tiktok','x'].forEach(k=>{if(form.elements[k])form.elements[k].value=x[k]||'';});}
   }
   function bindSiteSettings(){
@@ -75,6 +75,6 @@
     document.getElementById('admin-logout')?.addEventListener('click',()=>{sessionStorage.removeItem('mbac_admin_session');location.replace('/mbac-control-7x4k9');});
     document.getElementById('migrate-legacy-data')?.addEventListener('click',async()=>{const status=document.getElementById('migration-status');try{status.textContent='Migrating…';const n=await window.MBData.migrateLegacyLocalData();status.textContent=`Migration complete: ${n} records sent to Supabase.`;await renderCars();await renderBeforeAfter();}catch(ex){status.textContent=ex.message||'Migration failed.';}});
   }
-  async function boot(){if(!(await ensure()))return;document.querySelector('.site-header')?.style.removeProperty('visibility');document.getElementById('page-content')?.style.removeProperty('visibility');sectionNav();bindTimeModal();bindBlog();bindSiteSettings();bindForms();await Promise.all([window.MBData?.hydrate?.(true),window.MBStore?.hydrate?.()]);await renderCars();await renderAppointments();await renderBeforeAfter();await renderCredentials();await renderBlog();await renderBlogComments();await loadSiteSettingsForm();}
+  async function boot(){if(!(await ensure()))return;document.querySelector('.site-header')?.style.removeProperty('visibility');document.getElementById('page-content')?.style.removeProperty('visibility');sectionNav();bindTimeModal();bindBlog();bindSiteSettings();bindForms();await Promise.allSettled([window.MBData?.hydrate?.(true),window.MBStore?.hydrate?.()]);await Promise.allSettled([renderCars(),renderAppointments(),renderBeforeAfter(),renderCredentials(),renderBlog(),renderBlogComments(),loadSiteSettingsForm()]);}
   document.addEventListener('DOMContentLoaded',boot);
 })();

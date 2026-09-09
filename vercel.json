@@ -1,8 +1,15 @@
 {
+  "git": {
+    "deploymentEnabled": false
+  },
   "rewrites": [
     {
       "source": "/inventory",
       "destination": "/inventory.html"
+    },
+    {
+      "source": "/blog",
+      "destination": "/blog.html"
     },
     {
       "source": "/appointments",
@@ -17,8 +24,8 @@
       "destination": "/credentials.html"
     },
     {
-      "source": "/workshop",
-      "destination": "/workshop.html"
+      "source": "/mercedes",
+      "destination": "/mercedes.html"
     },
     {
       "source": "/mbac-control-7x4k9",
@@ -27,13 +34,6 @@
     {
       "source": "/mbac-control-7x4k9/portal",
       "destination": "/mbac-control-7x4k9-portal.html"
-    },
-    {
-      "source": "/blog",
-      "destination": "/blog.html"
     }
-  ],
-  "git": {
-    "deploymentEnabled": false
-  }
+  ]
 }
