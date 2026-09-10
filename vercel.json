@@ -28,6 +28,10 @@
       "destination": "/mercedes.html"
     },
     {
+      "source": "/careers",
+      "destination": "/careers.html"
+    },
+    {
       "source": "/mbac-control-7x4k9",
       "destination": "/mbac-control-7x4k9-login.html"
     },

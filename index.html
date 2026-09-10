@@ -3,10 +3,46 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Moses Benz Auto Care — Mercedes-Benz Repairs, Servicing &amp; Sales, Idimu, Lagos</title>
-<meta name="description" content="Moses Benz Auto Care — Mercedes-Benz Repairs, Servicing &amp; Sales, Idimu, Lagos — Mercedes-Benz specialist servicing, vehicle health checks and vehicle sales in Idimu, Lagos.">
-<link rel="icon" type="image/png" href="images/moses-benz-logo.png">
+<title>Moses Benz Auto Care | Mercedes-Benz Specialist, Repairs, Servicing & Sales in Lagos</title>
+<meta name="description" content="Mercedes-Benz specialist workshop in Idimu, Lagos for diagnostics, repairs, servicing, maintenance, inspections and Mercedes-Benz vehicle sales. Book an appointment or browse our inventory.">
+
+<link rel="icon" type="image/png" sizes="512x512" href="/images/moses-benz-logo-icon.png">
+<link rel="apple-touch-icon" href="/images/moses-benz-logo-icon.png">
+<link rel="canonical" href="https://moses-benz.com/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Moses Benz Auto Care | Mercedes-Benz Specialist, Repairs, Servicing & Sales in Lagos">
+<meta property="og:description" content="Mercedes-Benz specialist workshop in Idimu, Lagos for diagnostics, repairs, servicing, maintenance, inspections and Mercedes-Benz vehicle sales. Book an appointment or browse our inventory.">
+<meta property="og:url" content="https://moses-benz.com/">
+<meta property="og:site_name" content="Moses Benz Auto Care">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Moses Benz Auto Care | Mercedes-Benz Specialist, Repairs, Servicing & Sales in Lagos">
+<meta name="twitter:description" content="Mercedes-Benz specialist workshop in Idimu, Lagos for diagnostics, repairs, servicing, maintenance, inspections and Mercedes-Benz vehicle sales. Book an appointment or browse our inventory.">
+
 <link rel="stylesheet" href="styles.css">
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"AutoRepair",
+  "name":"Moses Benz Auto Care",
+  "url":"https://moses-benz.com/",
+  "logo":"https://moses-benz.com/images/moses-benz-logo-icon.png",
+  "image":"https://moses-benz.com/images/workshop-yard.jpg",
+  "description":"Mercedes-Benz specialist workshop in Idimu, Lagos providing diagnostics, repairs, servicing, maintenance, inspections and Mercedes-Benz vehicle sales.",
+  "telephone":"+2349061526267",
+  "address":{
+    "@type":"PostalAddress",
+    "streetAddress":"11 Lasu Rd, Idimu",
+    "addressLocality":"Lagos",
+    "addressCountry":"NG"
+  },
+  "areaServed":{"@type":"City","name":"Lagos"},
+  "openingHoursSpecification":[
+    {"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday"],"opens":"08:00","closes":"19:00"},
+    {"@type":"OpeningHoursSpecification","dayOfWeek":"Saturday","opens":"08:00","closes":"15:00"}
+  ]
+}
+</script>
 </head>
 <body>
 <header class="site-header">
@@ -133,11 +169,15 @@
         <h2 style="color:var(--white);">Cars we've prepared ourselves.</h2>
         <p>Every car listed here passed through our own bay — full inspection, fresh service history, no surprises — before it went up for sale. Prices in Naira.</p>
       </div>
-      <a href="/inventory" class="btn btn-ghost-dark">View full inventory</a>
+      <a href="/inventory" class="btn btn-primary page-route">View Full Inventory</a>
     </div>
 
     <div class="inventory-grid reveal" id="home-inventory-list">
       <!-- Cars are rendered here by js/home-inventory.js -->
+    </div>
+
+    <div class="inventory-more reveal">
+      <a href="/inventory" class="btn btn-primary page-route">View Full Inventory →</a>
     </div>
   </div>
 </section>
