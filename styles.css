@@ -1972,14 +1972,25 @@ body{background:#f6f4ef;color:#17181b;}
 @media(max-width:900px){.nav-label-desktop{display:none}.nav-label-mobile{display:inline}.vehicle-detail-grid{grid-template-columns:1fr}.vehicle-detail-media,.vehicle-detail-media img{min-height:360px}.vehicle-spec-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.vehicle-features ul{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.contact-fab-stack{right:12px;bottom:14px}.contact-fab{width:52px;height:52px}.vehicle-detail{padding-top:34px}.vehicle-detail-media,.vehicle-detail-media img{min-height:270px}.vehicle-detail-panel{padding:24px 18px}.vehicle-spec-grid{grid-template-columns:1fr}.vehicle-features ul{grid-template-columns:1fr}.vehicle-detail-copy h1{font-size:42px}}
 
+/* Short, non-blocking first-load curtain. SPA navigation and browser Back/Forward do not replay it. */
+.mb-page-loader{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--porcelain,#f7f5f0);color:var(--ink,#17191c);font:11px var(--font-mono,monospace);letter-spacing:.12em;text-transform:uppercase;opacity:1;visibility:visible;transition:opacity .35s ease,visibility .35s ease}
+.mb-page-loader.is-hidden{opacity:0;visibility:hidden;pointer-events:none}
+.mb-loader-mark{width:58px;height:58px;border:1px solid currentColor;border-radius:50%;display:grid;place-items:center;font-weight:800;letter-spacing:0}
+.inventory-category,.car-card,.vehicle-detail-media,.vehicle-detail-panel,.inventory-search,.home-career-card{border-radius:22px}
+.car-card{border-radius:20px}
+.car-media{border-radius:20px 20px 0 0}
+.inventory-track{padding-left:4px;padding-right:4px}
+.vehicle-detail-media{border-radius:24px}
+.vehicle-detail-panel{border-radius:24px}
 
-/* Page readiness gate: reveal public content only after dynamic content, fonts and images are ready. */
-body:not(.mb-page-ready) #page-content{visibility:hidden}
-.mb-page-loader{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:rgba(255,255,255,.98);opacity:1;transition:opacity .3s ease}
-.mb-page-loader.is-hidden{opacity:0;pointer-events:none}
-.mb-loader-card{display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;color:var(--ink,#12181f);padding:28px 34px}
-.mb-loader-card strong{font-size:15px;letter-spacing:.01em}
-.mb-loader-card span:last-child{font-size:12px;opacity:.62}
-.mb-loader-mark{width:34px;height:34px;border:3px solid rgba(18,24,31,.12);border-top-color:currentColor;border-radius:50%;animation:mb-spin .75s linear infinite}
-@keyframes mb-spin{to{transform:rotate(360deg)}}
-@media(prefers-reduced-motion:reduce){.mb-page-loader{transition:none}.mb-loader-mark{animation:none}}
+/* Homepage workshop photo carousel — no dots; loops continuously. */
+.workshop-gallery-carousel{position:relative;margin-top:42px;border-radius:24px;overflow:hidden;background:var(--paper,#fff);border:1px solid var(--line-light,#ddd)}
+.workshop-gallery-viewport{overflow:hidden}
+.workshop-gallery-track{position:relative;min-height:520px}
+.workshop-gallery-slide{position:absolute;inset:0;margin:0;opacity:0;visibility:hidden;transform:translateX(5%);transition:opacity .55s ease,transform .55s ease,visibility .55s ease}
+.workshop-gallery-slide.is-active{opacity:1;visibility:visible;transform:translateX(0);position:relative}
+.workshop-gallery-slide img{display:block;width:100%;height:520px;object-fit:cover}
+.workshop-gallery-slide figcaption{position:absolute;left:20px;right:20px;bottom:20px;padding:12px 16px;border-radius:14px;background:rgba(0,0,0,.68);color:#fff;font-size:13px}
+.workshop-gallery-arrow{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.6);background:rgba(0,0,0,.55);color:#fff;font-size:28px;line-height:1;z-index:3}
+.workshop-gallery-arrow.prev{left:18px}.workshop-gallery-arrow.next{right:18px}
+@media(max-width:700px){.workshop-gallery-track,.workshop-gallery-slide img{height:360px}.workshop-gallery-slide figcaption{left:12px;right:12px;bottom:12px}}

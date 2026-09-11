@@ -1,6 +1,6 @@
 {
   "git": {
-    "deploymentEnabled": false
+    "deploymentEnabled": true
   },
   "rewrites": [
     {
@@ -22,10 +22,6 @@
     {
       "source": "/contact",
       "destination": "/contact.html"
-    },
-    {
-      "source": "/credentials",
-      "destination": "/credentials.html"
     },
     {
       "source": "/mercedes",

@@ -205,7 +205,7 @@ This remains a no-build static site. Upload the complete folder to any static ho
 - Admin can add/remove appointment **services**, add/remove **diagnostic options**, create/remove **queue slots**, and move appointment requests through `requested → confirmed → in_progress → done → cancelled`.
 - Marking an appointment **Done** exposes a `Request review` action that opens WhatsApp to the customer's number with a unique internal review-page link.
 - `review.html` collects a 1–5 rating and written feedback.
-- WhatsApp DM links now use **08106958638** (international form: `[configured in Supabase Site Settings]`).
+- Contact phone and WhatsApp values are configured privately through the Admin portal → Site Settings and stored in Supabase.
 - The mobile menu uses the same hamburger/X control; the X is visible while the menu is open and closes the panel.
 - `Our Workshop` is forced onto one line on desktop navigation.
 - The Diagnostics hero image is offset downward so the fixed header does not crowd the top of the image.
