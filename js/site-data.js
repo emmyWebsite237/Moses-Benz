@@ -35,5 +35,5 @@
       emit();
     }catch(e){console.warn('Moses Benz data hydration skipped',e);emit();}
   }
-  window.MBData={getServices,saveServices,getAppointments,addAppointment,updateAppointment,deleteAppointment,getReviews,addReview,getBeforeAfter,addBeforeAfter,removeBeforeAfter,hydrate,migrateLegacyLocalData,KEYS};
+  window.MBData={getServices,saveServices,getAppointments,addAppointment,updateAppointment,deleteAppointment,getReviews,addReview,getBeforeAfter,addBeforeAfter,removeBeforeAfter,hydrate,KEYS};
 })();
