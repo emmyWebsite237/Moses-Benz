@@ -50,7 +50,7 @@
         (payload.message ? `About me: ${payload.message}` : '');
 
       const emailed = await formSubmit(payload).catch(() => false);
-      window.open('https://wa.me/2348106958638?text=' + encodeURIComponent(waMessage), '_blank', 'noopener');
+      const wa=String(window.MBSiteSettings?.whatsapp||'').replace(/\D/g,''); if(wa) window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(waMessage), '_blank', 'noopener');
 
       if (status) {
         status.textContent = emailed

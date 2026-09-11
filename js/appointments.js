@@ -9,7 +9,7 @@
       catch{}
       const msg=`Hello Moses Benz Auto Care. I would like to book an appointment.\nFull Name: ${payload.name}\nEmail: ${payload.email}\nWhatsApp: ${payload.phone}\nVehicle: ${payload.model} (${payload.year})\nLocation: ${payload.location}\nWhat is the car doing: ${payload.message}`;
       if(status)status.textContent=saved?'Request saved. Opening WhatsApp so the workshop can respond directly…':'Opening WhatsApp so the workshop can respond directly…';
-      window.setTimeout(()=>{const wa=(window.MBSiteSettings?.whatsapp||'2348106958638').replace(/\D/g,'');window.location.href=`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`;},250);
+      window.setTimeout(()=>{const wa=(window.MBSiteSettings?.whatsapp||'').replace(/\D/g,'');window.location.href=`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`;},250);
       if(btn)btn.disabled=false;
     });
   }

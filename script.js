@@ -35,7 +35,7 @@
   }
   function initBookingForm(){
     const form=qs('#booking-form'); if(!form||form.dataset.bound)return; form.dataset.bound='1';
-    form.addEventListener('submit',e=>{e.preventDefault();const name=qs('#bf-name')?.value.trim();const model=qs('#bf-model')?.value.trim();const phone=qs('#bf-phone')?.value.trim();const msg=`Hello Moses Benz Auto Care. I would like to request a callback.\nName: ${name}\nMercedes: ${model}\nPhone: ${phone}`;const wa=(window.MBSiteSettings?.whatsapp||'2348106958638').replace(/\D/g,'');window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg),'_blank','noopener');});
+    form.addEventListener('submit',e=>{e.preventDefault();const name=qs('#bf-name')?.value.trim();const model=qs('#bf-model')?.value.trim();const phone=qs('#bf-phone')?.value.trim();const msg=`Hello Moses Benz Auto Care. I would like to request a callback.\nName: ${name}\nMercedes: ${model}\nPhone: ${phone}`;const wa=(window.MBSiteSettings?.whatsapp||'').replace(/\D/g,'');window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg),'_blank','noopener');});
   }
   function initContactRoutes(){
     qsa('a[href^="tel:"],a[href^="https://wa.me/"],a[target="_blank"]').forEach(a=>{a.addEventListener('click',()=>{const nav=qs('.main-nav');const t=qs('#nav-toggle');if(nav&&t){nav.classList.remove('is-open');t.classList.remove('is-open');t.setAttribute('aria-expanded','false');}});});

@@ -4,6 +4,10 @@
   },
   "rewrites": [
     {
+      "source": "/inventory/:carId",
+      "destination": "/car.html?car=:carId"
+    },
+    {
       "source": "/inventory",
       "destination": "/inventory.html"
     },
@@ -26,10 +30,6 @@
     {
       "source": "/mercedes",
       "destination": "/mercedes.html"
-    },
-    {
-      "source": "/careers",
-      "destination": "/careers.html"
     },
     {
       "source": "/mbac-control-7x4k9",
