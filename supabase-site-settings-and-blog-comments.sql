@@ -20,7 +20,7 @@ for select to anon, authenticated using (id=1);
 grant select on public.site_settings to anon, authenticated;
 
 insert into public.site_settings(id,phone,whatsapp,email,instagram,facebook,youtube,tiktok,x)
-values (1,'2349061526267','2348106958638','','','','','','')
+values (1,'','','','','','','')
 on conflict (id) do nothing;
 
 create table if not exists public.blog_comments (

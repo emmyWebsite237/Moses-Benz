@@ -1971,3 +1971,15 @@ body{background:#f6f4ef;color:#17181b;}
 .vehicle-spec-grid>div{background:var(--paper);padding:18px}.vehicle-spec-grid span{display:block;font:10px var(--font-mono);text-transform:uppercase;color:var(--ink-soft);margin-bottom:7px}.vehicle-spec-grid strong{font-size:15px}.vehicle-features{margin-top:32px}.vehicle-features ul{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 22px;padding-left:18px}.vehicle-note{margin:28px 0 0;color:var(--ink-soft);font-size:13px;line-height:1.7}
 @media(max-width:900px){.nav-label-desktop{display:none}.nav-label-mobile{display:inline}.vehicle-detail-grid{grid-template-columns:1fr}.vehicle-detail-media,.vehicle-detail-media img{min-height:360px}.vehicle-spec-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.vehicle-features ul{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.contact-fab-stack{right:12px;bottom:14px}.contact-fab{width:52px;height:52px}.vehicle-detail{padding-top:34px}.vehicle-detail-media,.vehicle-detail-media img{min-height:270px}.vehicle-detail-panel{padding:24px 18px}.vehicle-spec-grid{grid-template-columns:1fr}.vehicle-features ul{grid-template-columns:1fr}.vehicle-detail-copy h1{font-size:42px}}
+
+
+/* Page readiness gate: reveal public content only after dynamic content, fonts and images are ready. */
+body:not(.mb-page-ready) #page-content{visibility:hidden}
+.mb-page-loader{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:rgba(255,255,255,.98);opacity:1;transition:opacity .3s ease}
+.mb-page-loader.is-hidden{opacity:0;pointer-events:none}
+.mb-loader-card{display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;color:var(--ink,#12181f);padding:28px 34px}
+.mb-loader-card strong{font-size:15px;letter-spacing:.01em}
+.mb-loader-card span:last-child{font-size:12px;opacity:.62}
+.mb-loader-mark{width:34px;height:34px;border:3px solid rgba(18,24,31,.12);border-top-color:currentColor;border-radius:50%;animation:mb-spin .75s linear infinite}
+@keyframes mb-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.mb-page-loader{transition:none}.mb-loader-mark{animation:none}}

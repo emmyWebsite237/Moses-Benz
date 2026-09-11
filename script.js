@@ -20,17 +20,64 @@
     document.addEventListener('keydown',e=>{if(e.key==='Escape')close();});
   }
   function loadScript(src){return new Promise((resolve,reject)=>{const old=document.querySelector(`script[data-module="${src}"]`);if(old){resolve();return;}const s=document.createElement('script');s.src=src;s.dataset.module=src;s.onload=resolve;s.onerror=reject;document.body.appendChild(s);});}
+  function ensurePageLoader(){
+    if(document.querySelector('.mb-page-loader'))return;
+    const el=document.createElement('div');
+    el.className='mb-page-loader';
+    el.setAttribute('role','status');
+    el.setAttribute('aria-live','polite');
+    el.innerHTML='<div class="mb-loader-card"><span class="mb-loader-mark"></span><strong>Loading Moses Benz Auto Care</strong><span>Preparing the page…</span></div>';
+    document.body.appendChild(el);
+  }
+  function preloadPageImages(){
+    const imgs=qsa('#page-content img');
+    imgs.forEach(img=>{img.loading='eager';img.decoding='sync';});
+    const urls=new Set();
+    imgs.forEach(img=>{
+      const src=img.currentSrc||img.getAttribute('src')||img.dataset.src;
+      if(src)urls.add(new URL(src,location.href).href);
+    });
+    qsa('#page-content *').forEach(el=>{
+      const bg=getComputedStyle(el).backgroundImage||'';
+      const m=bg.matchAll(/url\(["']?(.*?)["']?\)/g);
+      for(const x of m)if(x[1])urls.add(new URL(x[1],location.href).href);
+    });
+    const waits=[...urls].map(src=>new Promise(resolve=>{
+      const im=new Image();
+      im.onload=im.onerror=()=>resolve();
+      im.src=src;
+      if(im.complete)resolve();
+    }));
+    const imgWaits=imgs.map(img=>new Promise(resolve=>{
+      if(img.complete&&img.naturalWidth>0)return resolve();
+      const done=()=>{img.removeEventListener('load',done);img.removeEventListener('error',done);resolve();};
+      img.addEventListener('load',done,{once:true});img.addEventListener('error',done,{once:true});
+    }));
+    return Promise.all([...waits,...imgWaits]);
+  }
+  async function waitForPageReady(){
+    ensurePageLoader();
+    const loader=document.querySelector('.mb-page-loader');
+    const timeout=new Promise(resolve=>setTimeout(resolve,20000));
+    await Promise.race([
+      Promise.allSettled([preloadPageImages(),document.fonts?.ready||Promise.resolve()]),
+      timeout
+    ]);
+    document.body.classList.add('mb-page-ready');
+    loader?.classList.add('is-hidden');
+    setTimeout(()=>loader?.remove(),350);
+  }
   async function initModules(){
-    await loadScript('js/site-data.js');
-    await loadScript('js/form-config.js');
-    await window.MBData?.hydrate?.(); await window.MBSiteSettingsAPI?.load?.();
-    if(qs('#home-inventory-list')){await loadScript('js/home-inventory.js');window.initHomeInventory?.();}
-    if(qs('#inventory-list')){await loadScript('js/inventory.js');window.initInventoryPage?.();}
-    if(qs('#appointment-form')){await loadScript('js/searchable-select.js');await loadScript('js/appointments.js');window.initAppointmentPage?.();}
-    if(qs('#career-form')){await loadScript('js/careers.js');window.initCareerPage?.();}
-    if(qs('#blog-list')||qs('#blog-post')||qs('#home-blog-grid')){await loadScript('js/blog.js');window.initBlogPage?.();}
-    if(qs('#public-reviews-grid')){await loadScript('js/reviews.js');window.initReviews?.();}
-    if(qs('#before-after-grid')||qs('#credentials-grid')||qs('#home-credentials-strip')){await loadScript('js/media.js');window.initBeforeAfter?.();window.initCredentials?.();window.initHomeCredentials?.();}
+    await loadScript('/js/site-data.js');
+    await loadScript('/js/form-config.js');
+    await window.MBData?.hydrate?.(); await window.MBSiteSettingsAPI?.load?.(); await window.MBStore?.hydrate?.();
+    if(qs('#home-inventory-list')){await loadScript('/js/home-inventory.js');window.initHomeInventory?.();}
+    if(qs('#inventory-list')){await loadScript('/js/inventory.js');window.initInventoryPage?.();}
+    if(qs('#appointment-form')){await loadScript('/js/searchable-select.js');await loadScript('/js/appointments.js');window.initAppointmentPage?.();}
+    if(qs('#career-form')){await loadScript('/js/careers.js');window.initCareerPage?.();}
+    if(qs('#blog-list')||qs('#blog-post')||qs('#home-blog-grid')){await loadScript('/js/blog.js');window.initBlogPage?.();}
+    if(qs('#public-reviews-grid')){await loadScript('/js/reviews.js');window.initReviews?.();}
+    if(qs('#before-after-grid')||qs('#credentials-grid')||qs('#home-credentials-strip')){await loadScript('/js/media.js');window.initBeforeAfter?.();window.initCredentials?.();window.initHomeCredentials?.();}
     initReveal();initMarquee();initBookingForm();initContactRoutes();
   }
   function initBookingForm(){
@@ -45,14 +92,14 @@
     const target=new URL(url,location.href); if(target.origin!==location.origin)return;
     const current=qs('#page-content'); if(!current)return window.location.href=target.href;
     try{
-      document.body.classList.add('is-navigating');
+      document.body.classList.add('is-navigating'); document.body.classList.remove('mb-page-ready'); ensurePageLoader();
       const res=await fetch(target.href,{headers:{'X-Requested-With':'MosesBenzRouter'}}); if(!res.ok)throw new Error('Page not found');
       const text=await res.text(); const doc=new DOMParser().parseFromString(text,'text/html'); const next=doc.querySelector('#page-content'); if(!next)throw new Error('Invalid page shell');
       if(!reduced){current.classList.add('page-leave');await new Promise(r=>setTimeout(r,220));}
       current.innerHTML=next.innerHTML; current.className='page-transition page-enter';
       document.title=doc.title; const desc=doc.querySelector('meta[name="description"]'); const ours=qs('meta[name="description"]'); if(desc&&ours)ours.setAttribute('content',desc.content);
       if(push)history.pushState({url:target.href},'',target.href);
-      setActive(target.href); window.scrollTo({top:0,behavior:reduced?'auto':'smooth'}); await initModules();
+      setActive(target.href); window.scrollTo({top:0,behavior:reduced?'auto':'smooth'}); try{await initModules();}catch(err){console.error('Moses Benz page initialisation failed',err);} await waitForPageReady();
       requestAnimationFrame(()=>current.classList.add('page-enter-active'));
       setTimeout(()=>{current.classList.remove('page-enter','page-enter-active');document.body.classList.remove('is-navigating');},520);
     }catch(err){document.body.classList.remove('is-navigating');window.location.href=target.href;}
@@ -62,5 +109,5 @@
     document.addEventListener('click',e=>{const a=e.target.closest('a.page-route');if(!a)return;const href=a.getAttribute('href');if(!href||href.startsWith('#')||a.target==='_blank'||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;e.preventDefault();navigate(href,true);});
     window.addEventListener('popstate',()=>navigate(location.href,false));
   }
-  document.addEventListener('DOMContentLoaded',()=>{initHeader();initRouter();setActive(location.href);initModules();const year=qs('#year');if(year)year.textContent=new Date().getFullYear();});
+  document.addEventListener('DOMContentLoaded',async()=>{ensurePageLoader();initHeader();initRouter();setActive(location.href);try{await initModules();}catch(err){console.error('Moses Benz page initialisation failed',err);}const year=qs('#year');if(year)year.textContent=new Date().getFullYear();await waitForPageReady();});
 })();
