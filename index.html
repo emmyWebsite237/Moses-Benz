@@ -99,38 +99,16 @@
 </div>
 
 <!-- =========================================================
-     REAL WORKSHOP GALLERY
+     INVENTORY CTA — full catalogue lives on inventory.html
      ========================================================= -->
-<section class="gallery" id="workshop">
-  <div class="container">
-    <div class="section-head reveal">
-      <span class="eyebrow">The Actual Place</span>
-      <h2>No stock photos past this point.</h2>
-      <p>This is our yard on Lasu Rd, Idimu — real cars, real technicians, real work.</p>
+<section class="inventory-cta" id="inventory">
+  <div class="container inventory-cta-inner reveal">
+    <div class="section-head on-dark" style="margin-bottom:0;">
+      <span class="eyebrow on-dark">Mercedes-Benz Sales</span>
+      <h2 style="color:var(--white);">Prepared Mercedes-Benz vehicles, ready when you are.</h2>
+      <p>See the complete current catalogue, vehicle details and availability in our full inventory.</p>
     </div>
-
-    <div id="workshop-gallery-carousel" class="workshop-gallery-carousel reveal"></div>
-  </div>
-</section>
-
-<!-- =========================================================
-     INVENTORY (teaser — full list lives on inventory.html,
-     rendered live from js/store.js so it never goes stale)
-     ========================================================= -->
-<section class="inventory" id="inventory">
-  <div class="container">
-    <div class="inventory-top reveal">
-      <div class="section-head on-dark" style="margin-bottom:0;">
-        <span class="eyebrow on-dark">For Sale</span>
-        <h2 style="color:var(--white);">Selected Mercedes-Benz vehicles for sale.</h2>
-        <p>Browse Mercedes-Benz vehicles currently in our catalogue. Open any vehicle for its full details, then chat with us on WhatsApp about the exact car.</p>
-      </div>
-      <a href="/inventory" class="btn btn-ghost-dark">View full inventory</a>
-    </div>
-
-    <div class="inventory-grid reveal" id="home-inventory-list">
-      <!-- Cars are rendered here by js/home-inventory.js -->
-    </div>
+    <a href="/inventory" class="btn btn-ghost-dark page-route">View Full Inventory</a>
   </div>
 </section>
 
@@ -293,12 +271,18 @@
         </a>
         <p>Mercedes-Benz repairs, maintenance and auto sales in Idimu, Lagos. Honest communication, careful diagnosis and prepared vehicles.</p>
         <div class="footer-social" aria-label="Social media">
-          <a data-contact="whatsapp" data-contact="whatsapp" href="#" target="_blank" rel="noopener" aria-label="WhatsApp">WhatsApp</a>
-          <a data-contact="instagram" href="#" target="_blank" rel="noopener" aria-label="Instagram" hidden>Instagram</a>
-          <a data-contact="facebook" href="#" target="_blank" rel="noopener" aria-label="Facebook" hidden>Facebook</a>
-          <a data-contact="youtube" href="#" target="_blank" rel="noopener" aria-label="YouTube" hidden>YouTube</a>
-          <a data-contact="tiktok" href="#" target="_blank" rel="noopener" aria-label="TikTok" hidden>TikTok</a>
-          <a data-contact="x" href="#" target="_blank" rel="noopener" aria-label="X" hidden>X</a>
+          <a data-contact="whatsapp" href="#" target="_blank" rel="noopener" aria-label="WhatsApp" title="WhatsApp">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5a9.5 9.5 0 0 0-8.2 14.3L2.6 21.5l4.8-1.2A9.5 9.5 0 1 0 12 2.5Zm0 17.1a7.6 7.6 0 0 1-3.9-1.1l-.3-.2-2.8.7.7-2.7-.2-.3A7.6 7.6 0 1 1 12 19.6Zm4.2-5.7c-.2-.1-1.2-.6-1.4-.7-.2-.1-.3-.1-.5.1-.1.2-.5.7-.6.8-.1.2-.2.2-.4.1-.2-.1-.8-.3-1.6-1-.6-.5-1-1.1-1.1-1.3-.1-.2 0-.3.1-.4l.3-.4c.1-.1.1-.2.2-.3.1-.1 0-.2 0-.3 0-.1-.5-1.2-.7-1.6-.2-.4-.4-.3-.5-.3h-.4c-.1 0-.3 0-.4.2-.2.2-.6.6-.6 1.5s.6 1.8.7 1.9c.1.2 1.2 1.9 3 2.7 1.8.8 1.8.5 2.1.5.3 0 1.2-.5 1.4-.9.2-.4.2-.8.2-.9 0-.1-.1-.1-.3-.2Z" fill="currentColor"/></svg>
+          </a>
+          <a data-contact="facebook" href="#" target="_blank" rel="noopener" aria-label="Facebook" title="Facebook">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 8.2V6.9c0-.6.4-.9 1-.9h1.7V3h-2.6c-2.5 0-3.8 1.5-3.8 3.7v1.5H8v3.1h1.8V21h3.7v-9.7H16l.4-3.1h-2.9Z" fill="currentColor"/></svg>
+          </a>
+          <a data-contact="instagram" href="#" target="_blank" rel="noopener" aria-label="Instagram" title="Instagram">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="17.4" cy="6.7" r="1.1" fill="currentColor"/></svg>
+          </a>
+          <a data-contact="tiktok" href="#" target="_blank" rel="noopener" aria-label="TikTok" title="TikTok">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.2 3h3.1c.2 1.7 1.2 3.1 2.7 3.9v3.2c-1.4-.1-2.7-.6-3.8-1.4v6.5a5.8 5.8 0 1 1-5-5.7v3.2a2.6 2.6 0 1 0 1.9 2.5V3Z" fill="currentColor"/></svg>
+          </a>
         </div>
       </div>
       <div class="footer-col">
@@ -315,7 +299,6 @@
         <h4>Contact</h4>
         <ul>
           <li><a data-contact="phone" href="#">Call the Workshop</a></li>
-          <li><a data-contact="whatsapp" href="#" target="_blank" rel="noopener">WhatsApp the Workshop</a></li>
           <li><a data-contact="email" data-contact-label="button" data-email-action="1" href="#" data-email-action="1">Email Us</a></li>
           <li><address>11 Lasu Rd,<br>beside Federal Peace Estate,<br>Idimu, Lagos 102213</address></li>
           <li><a href="https://www.google.com/maps/place/?q=place_id:ChIJ9wS7aQCROxARHinfFB1ds1w" target="_blank" rel="noopener">Get directions on Google Maps →</a></li>
@@ -338,7 +321,7 @@
 <script src="js/supabase-config.js"></script>
 <script src="js/backend.js"></script>
 <script src="js/site-data.js"></script>
-<script src="js/site-settings.js"></script><script src="js/workshop-gallery.js"></script>
+<script src="js/site-settings.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

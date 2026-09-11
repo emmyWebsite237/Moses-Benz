@@ -30,7 +30,6 @@
     window.MBStore?.hydrate?.();
 
     const loads=[];
-    if(qs('#home-inventory-list'))loads.push(loadScript('js/home-inventory.js').then(()=>window.initHomeInventory?.()));
     if(qs('#inventory-list'))loads.push(loadScript('js/inventory.js').then(()=>window.initInventoryPage?.()));
     if(qs('#appointment-form'))loads.push(loadScript('js/searchable-select.js').then(()=>loadScript('js/appointments.js')).then(()=>window.initAppointmentPage?.()));
     if(qs('#career-form'))loads.push(loadScript('js/careers.js').then(()=>window.initCareerPage?.()));
@@ -70,10 +69,35 @@
     window.addEventListener('popstate',()=>navigate(location.href,false));
   }
   function initShortLoader(){
-    const loader=qs('#mb-page-loader'); if(!loader)return;
+    const loader=qs('#mb-page-loader');
+    const page=qs('#page-content');
+    if(!loader||!page)return;
+
+    // Do not hold the whole site behind a long opaque curtain. The static
+    // header/hero are the critical first paint; everything else hydrates after it.
     const nav=performance.getEntriesByType?.('navigation')?.[0];
-    if(nav?.type==='back_forward'){loader.remove();return;}
-    window.setTimeout(()=>{loader.classList.add('is-hidden');window.setTimeout(()=>loader.remove(),350);},1800);
+    if(nav?.type==='back_forward'){
+      loader.remove();
+      page.classList.add('critical-ready');
+      return;
+    }
+
+    let shown=false;
+    const reveal=()=>{
+      if(shown)return;
+      shown=true;
+      page.classList.add('critical-ready');
+      loader.classList.add('is-hidden');
+      window.setTimeout(()=>loader.remove(),300);
+    };
+
+    const hero=qs('.hero-media img');
+    if(hero?.complete) window.setTimeout(reveal,250);
+    else if(hero) {
+      hero.addEventListener('load',()=>window.setTimeout(reveal,100),{once:true});
+      hero.addEventListener('error',reveal,{once:true});
+    }
+    window.setTimeout(reveal,900);
   }
   document.addEventListener('DOMContentLoaded',()=>{initShortLoader();initHeader();initRouter();setActive(location.href);initModules();const year=qs('#year');if(year)year.textContent=new Date().getFullYear();});
 
