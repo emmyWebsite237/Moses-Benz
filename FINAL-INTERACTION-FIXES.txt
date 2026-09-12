@@ -1,0 +1,21 @@
+Moses Benz Auto Care — Final interaction/linking pass
+
+Changes in this build:
+- Fixed /mbac-control-7x4k9 so it resolves to the admin login page on Vercel.
+- Added direct directory index fallbacks for /mbac-control-7x4k9 and /mbac-control-7x4k9/portal.
+- Fixed public Supabase configuration usage so the frontend uses js/supabase-config.js instead of a stale inline key.
+- Public site now renders immediately; Supabase settings hydrate in the background.
+- Added working 1-second internal navigation transition and automatic mobile-menu closing after navigation.
+- Restored working inventory/card navigation and automatic horizontal inventory movement.
+- Added automatic workshop gallery movement.
+- Changed Certified technicians to 20+.
+- Added continuous, slow-moving public reviews carousel.
+- Added public review submission form backed by Supabase.
+- Added comments + public comment form to every blog article, with admin reply/delete support retained.
+- Expanded the built-in fallback blog to 10 longer articles with justified paragraphs.
+- Added a complete career application form with email/FormSubmit when an admin email is configured and WhatsApp handoff.
+- Connected phone, WhatsApp, email, Instagram, Facebook, YouTube, TikTok and X buttons to Supabase site settings.
+- Improved floating call/WhatsApp buttons with real SVG icons.
+- Added SUPABASE-PUBLIC-COMMENTS-REVIEWS-FIX.sql as a safe patch if blog_comments/public review permissions are missing.
+
+No AppDeploy deployment was used.

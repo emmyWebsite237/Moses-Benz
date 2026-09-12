@@ -87,3 +87,29 @@
   .gallery-input-row{grid-template-columns:1fr}
   .gallery-remove{width:100%}
 }
+
+/* Final interaction fixes */
+.reviews-window{overflow:hidden;width:100%}
+#reviews.review-grid{display:flex;gap:18px;transform:translateX(0);will-change:transform}
+#reviews .review{flex:0 0 min(360px,82vw)}
+.review small{display:block;color:var(--muted);margin-top:2px}
+.stars{letter-spacing:2px;color:#c90b2f;font-size:13px}
+.comments{margin-top:70px;padding-top:45px;border-top:1px solid var(--line)}
+.comment-list{display:grid;gap:16px;margin:25px 0 30px}
+.comment{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow)}
+.comment>div{display:flex;justify-content:space-between;gap:15px}
+.comment small{color:var(--muted)}
+.comment p{margin-bottom:0;text-align:justify}
+.admin-reply{margin-top:16px;padding:15px;border-left:3px solid var(--red);background:#f7f4f0;border-radius:8px}
+.admin-reply p{margin:5px 0 0}
+.muted{color:var(--muted)}
+.article-body p{text-align:justify;line-height:1.85}
+.career-form{margin-top:28px}
+@media(max-width:700px){
+  .mobile-menu{position:absolute;left:0;right:0;top:100%;background:#090a0d;color:#fff;border-top:1px solid #25262b;box-shadow:0 18px 35px rgba(0,0,0,.3)}
+  .mobile-menu a{color:#fff}
+  .mobile-menu .btn.red{color:#fff}
+  #reviews .review{flex-basis:84vw}
+  .review-form{margin-top:25px}
+}
+.fab svg{width:24px;height:24px;fill:currentColor}.fab a{cursor:pointer}.fab a[href="#"]{opacity:.45;pointer-events:none}
