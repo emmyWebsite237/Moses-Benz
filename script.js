@@ -69,35 +69,14 @@
     window.addEventListener('popstate',()=>navigate(location.href,false));
   }
   function initShortLoader(){
-    const loader=qs('#mb-page-loader');
-    const page=qs('#page-content');
-    if(!loader||!page)return;
-
-    // Do not hold the whole site behind a long opaque curtain. The static
-    // header/hero are the critical first paint; everything else hydrates after it.
-    const nav=performance.getEntriesByType?.('navigation')?.[0];
-    if(nav?.type==='back_forward'){
-      loader.remove();
-      page.classList.add('critical-ready');
-      return;
-    }
-
-    let shown=false;
-    const reveal=()=>{
-      if(shown)return;
-      shown=true;
-      page.classList.add('critical-ready');
-      loader.classList.add('is-hidden');
-      window.setTimeout(()=>loader.remove(),300);
-    };
-
-    const hero=qs('.hero-media img');
-    if(hero?.complete) window.setTimeout(reveal,250);
-    else if(hero) {
-      hero.addEventListener('load',()=>window.setTimeout(reveal,100),{once:true});
-      hero.addEventListener('error',reveal,{once:true});
-    }
-    window.setTimeout(reveal,900);
+    const loader=qs('#mb-page-loader'); if(!loader)return;
+    // The loader is only a brief first-visit visual cue. It never blocks content
+    // and is not replayed for browser Back/Forward or subsequent visits in this tab.
+    let nav=null; try{nav=performance.getEntriesByType?.('navigation')?.[0];}catch{}
+    let seen=false; try{seen=sessionStorage.getItem('mbac_loader_seen')==='1';}catch{}
+    if(seen || nav?.type==='back_forward'){loader.remove();return;}
+    try{sessionStorage.setItem('mbac_loader_seen','1');}catch{}
+    window.setTimeout(()=>{loader.classList.add('is-hidden');window.setTimeout(()=>loader.remove(),360);},2000);
   }
   document.addEventListener('DOMContentLoaded',()=>{initShortLoader();initHeader();initRouter();setActive(location.href);initModules();const year=qs('#year');if(year)year.textContent=new Date().getFullYear();});
 

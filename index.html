@@ -99,16 +99,31 @@
 </div>
 
 <!-- =========================================================
-     INVENTORY CTA — full catalogue lives on inventory.html
+     INVENTORY PREVIEW
      ========================================================= -->
-<section class="inventory-cta" id="inventory">
-  <div class="container inventory-cta-inner reveal">
-    <div class="section-head on-dark" style="margin-bottom:0;">
-      <span class="eyebrow on-dark">Mercedes-Benz Sales</span>
-      <h2 style="color:var(--white);">Prepared Mercedes-Benz vehicles, ready when you are.</h2>
-      <p>See the complete current catalogue, vehicle details and availability in our full inventory.</p>
+<section class="home-inventory" id="inventory">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Mercedes-Benz Sales</span>
+      <h2>Mercedes-Benz vehicles available through Moses Benz.</h2>
+      <p>A quick look at selected vehicles from the full catalogue. Open any vehicle for its full details.</p>
     </div>
-    <a href="/inventory" class="btn btn-ghost-dark page-route">View Full Inventory</a>
+    <div id="home-inventory-list" class="home-inventory-grid reveal" aria-live="polite"></div>
+    <div class="center-actions"><a href="/inventory" class="btn btn-primary page-route">View Full Inventory</a></div>
+  </div>
+</section>
+
+<!-- =========================================================
+     WORKSHOP GALLERY
+     ========================================================= -->
+<section class="workshop-gallery-section">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Inside Moses Benz</span>
+      <h2>Real work. Real cars. Our workshop.</h2>
+      <p>More photographs from the yard and workshop will be added here as they become available.</p>
+    </div>
+    <div id="workshop-gallery-carousel" class="workshop-gallery-carousel reveal" aria-label="Moses Benz Auto Care workshop photographs"></div>
   </div>
 </section>
 
