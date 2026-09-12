@@ -1,0 +1,32 @@
+Moses Benz Auto Care — cleanup performed for the clean navigation rebuild
+
+SAFE TO DELETE / ALREADY REMOVED FROM THIS ZIP:
+- appointments.html
+- blog.html
+- car.html
+- careers.html
+- contact.html
+- inventory.html
+- mercedes.html
+- js/script.js
+- js/home-inventory.js
+- js/workshop-gallery.js
+
+KEEP:
+- cars/ and every Mercedes vehicle folder/image
+- js/cars.js
+- js/supabase-config.js
+- js/backend.js
+- js/store.js
+- js/site-data.js
+- js/admin-login.js
+- js/admin.js
+- mbac-control-7x4k9-login.html
+- mbac-control-7x4k9-portal.html
+- js/cloudinary-config.js
+- js/cloudinary.js
+- all Supabase SQL files
+- images/ and the existing workshop/car assets
+
+The public site now uses index.html + app.js + styles.css.
+The private admin portal remains separate and continues to use Supabase.
