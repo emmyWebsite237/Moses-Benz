@@ -49,6 +49,8 @@
   function setActive(url){const path=new URL(url,location.href).pathname.replace(/\/$/,'')||'/';qsa('.main-nav a').forEach(a=>{const p=new URL(a.href,location.href).pathname.replace(/\/$/,'')||'/';a.toggleAttribute('aria-current',p===path);});}
   async function navigate(url,push=true){
     const target=new URL(url,location.href); if(target.origin!==location.origin)return;
+    const sameDocument=target.pathname===location.pathname && target.search===location.search && target.hash===location.hash;
+    if(sameDocument){ window.location.reload(); return; }
     const current=qs('#page-content'); if(!current)return window.location.href=target.href;
     try{
       document.body.classList.add('is-navigating');

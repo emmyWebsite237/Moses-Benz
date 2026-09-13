@@ -30,7 +30,14 @@ async function loadSettings(){
   }
   return settings;
 }
-function applyContacts(){const digits=v=>String(v||'').replace(/\D/g,'');document.querySelectorAll('[data-contact="phone"]').forEach(a=>a.href=settings.phone?'tel:+'+digits(settings.phone):'#');document.querySelectorAll('[data-contact="whatsapp"]').forEach(a=>a.href=settings.whatsapp?'https://wa.me/'+digits(settings.whatsapp):'#');['facebook','instagram','youtube','tiktok','x'].forEach(k=>document.querySelectorAll('[data-contact="'+k+'"]').forEach(a=>{a.hidden=!settings[k];if(settings[k])a.href=settings[k]}));document.querySelectorAll('[data-email]').forEach(a=>a.onclick=e=>{e.preventDefault();if(!settings.email)return;const to=encodeURIComponent(settings.email),web='https://mail.google.com/mail/?view=cm&fs=1&to='+to;if(/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)){location.href='googlegmail:///co?to='+to;setTimeout(()=>location.href=web,900)}else window.open(web,'_blank')})}
+function applyContacts(){
+  const digits=v=>String(v||'').replace(/\D/g,'');
+  document.querySelectorAll('[data-contact="phone"]').forEach(a=>{a.href=settings.phone?'tel:+'+digits(settings.phone):'#';a.removeAttribute('aria-disabled');if(!settings.phone)a.setAttribute('aria-disabled','true');});
+  document.querySelectorAll('[data-contact="whatsapp"]').forEach(a=>{a.href=settings.whatsapp?'https://wa.me/'+digits(settings.whatsapp):'#';a.removeAttribute('aria-disabled');if(!settings.whatsapp)a.setAttribute('aria-disabled','true');});
+  ['facebook','instagram','youtube','tiktok','x'].forEach(k=>document.querySelectorAll('[data-contact="'+k+'"]').forEach(a=>{a.hidden=!settings[k];if(settings[k])a.href=settings[k]}));
+  const emailLinks=[...document.querySelectorAll('[data-contact="email"],[data-email]')];
+  emailLinks.forEach(a=>{a.href='#';a.onclick=e=>{e.preventDefault();if(!settings.email)return;const to=encodeURIComponent(settings.email),web='https://mail.google.com/mail/?view=cm&fs=1&to='+to;if(/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)){location.href='googlegmail:///co?to='+to;setTimeout(()=>location.href=web,900)}else window.open(web,'_blank','noopener')}});
+}
 function footer(){const f=$('#footer');f.innerHTML='<div class="wrap footer-grid"><div><h3>Moses Benz Auto Care</h3><p>Mercedes-Benz repairs, maintenance, diagnosis and vehicle sales in Idimu, Lagos.</p><div class="social"><a data-contact="facebook">Facebook</a><a data-contact="tiktok">TikTok</a><a data-contact="instagram">Instagram</a><a data-contact="whatsapp">WhatsApp</a></div></div><div><h4>Explore</h4><a href="#home">Home</a><a href="#inventory">Inventory</a><a href="#blog">Blog</a><a href="#appointments">Book an Appointment</a><a href="#guide">Mercedes-Benz Guide</a></div><div><h4>Contact</h4><a data-contact="phone">Call the Workshop</a><a data-contact="email">Email Us</a><p>11 Lasu Rd, beside Federal Peace Estate, Idimu, Lagos.</p></div><div><h4>Hours</h4><p>Mon–Fri 8:00 AM–7:00 PM</p><p>Saturday 8:00 AM–3:00 PM</p><p>Sunday Closed</p></div></div><div class="footer-bottom">© 2026 Moses Benz Auto Care</div>';applyContacts()}
 function fab(){if($('.fab'))return;const d=document.createElement('div');d.className='fab';d.innerHTML='<a data-contact="phone" aria-label="Call the workshop" title="Call the workshop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 2.5 9.1 2a1.7 1.7 0 0 1 1.9 1.1l1.2 3.1a1.7 1.7 0 0 1-.4 1.8L10.4 9.4a13.2 13.2 0 0 0 4.2 4.2l1.4-1.4a1.7 1.7 0 0 1 1.8-.4l3.1 1.2A1.7 1.7 0 0 1 22 15l-.5 2.5a2 2 0 0 1-2.1 1.6C10.6 18.5 5.5 13.4 4.9 4.6A2 2 0 0 1 6.6 2.5Z"/></svg></a><a data-contact="whatsapp" aria-label="WhatsApp" title="WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5a9.3 9.3 0 0 0-8 14.1L3 21l4.6-1a9.5 9.5 0 1 0 4.4-17.5Zm0 16.8a7.4 7.4 0 0 1-3.8-1l-.3-.2-2.7.6.7-2.6-.2-.3A7.4 7.4 0 1 1 12 19.3Zm4.1-5.4c-.2-.1-1.2-.6-1.4-.7-.2-.1-.3-.1-.5.1l-.6.8c-.2.2-.3.2-.5.1a6 6 0 0 1-1.8-1.1 7 7 0 0 1-1.3-1.6c-.1-.2 0-.3.1-.4l.4-.5.2-.4c.1-.1 0-.3 0-.4l-.7-1.6c-.2-.4-.3-.4-.5-.4h-.4c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.3c.1.2 1.6 2.5 3.9 3.5 1.4.6 2 .7 2.4.6.4-.1 1.2-.5 1.4-1 .2-.5.2-.9.1-1-.1-.1-.2-.1-.4-.2Z"/></svg></a>';document.body.appendChild(d);applyContacts()}
 
@@ -91,19 +98,25 @@ function initReviewsCarousel(){
   const root=$('#reviews');
   if(!root||root.dataset.carouselBound)return;
   root.dataset.carouselBound='1';
+  let timer=null;
   const move=()=>{
     if(root.children.length<2)return;
     const first=root.firstElementChild;
     const width=first.getBoundingClientRect().width+18;
-    root.style.transform=`translateX(-${width}px)`;
-    root.style.transition='transform 1.2s ease';
-    setTimeout(()=>{
+    root.style.transition='transform 1.8s ease-in-out';
+    root.style.transform='translateX(-'+width+'px)';
+    window.setTimeout(()=>{
+      if(!root.isConnected)return;
       root.style.transition='none';
       root.appendChild(root.firstElementChild);
       root.style.transform='translateX(0)';
-    },1250);
+      void root.offsetWidth;
+    },1850);
   };
-  window.setInterval(()=>{if(!document.hidden)move();},3800);
+  const start=()=>{if(timer)clearInterval(timer);timer=window.setInterval(()=>{if(!document.hidden)move();},4600);};
+  root.addEventListener('mouseenter',()=>timer&&clearInterval(timer),{passive:true});
+  root.addEventListener('mouseleave',start,{passive:true});
+  start();
 }
 
 function carCard(c){return '<article class="car-card" data-slug="'+esc(c.slug)+'"><img src="'+BASE+esc(c.image)+'" alt="'+esc(c.name)+'" loading="lazy"><div><div class="car-title"><h3>'+esc(c.name)+'</h3><b>'+fmt(c.priceNGN)+'</b></div><p>'+esc(c.year)+' · '+esc(c.specTag)+' · '+Number(c.mileageKm||0).toLocaleString()+' km</p><span>View full details →</span></div></article>'}
@@ -201,7 +214,7 @@ function bindCareerForm(){
   };
 }
 function guide(){return `<section class="page-head"><div class="wrap"><span class="eyebrow">Mercedes-Benz Guide</span><h1>Mercedes-Benz ownership guidance.</h1></div></section><section class="section white"><div class="wrap prose"><h2>Diagnosis before parts</h2><p>A warning code is a clue, not automatically a command to replace a part. Good diagnosis combines fault codes, live information, physical inspection and the owner's description of the problem.</p><h2>Maintenance in Lagos</h2><p>Heat, traffic, dust and repeated short trips make regular inspection important. Keep records of oil, filters, brakes, tyres, battery and major repairs.</p><h2>Buying a used Mercedes-Benz</h2><p>Check documentation, body condition, service history, mechanical behaviour and diagnostic information before money changes hands.</p></div></section>`}
-async function render(){const hash=location.hash.replace(/^#/,'')||'home',parts=hash.split('/'),route=parts[0],arg=parts.slice(1).join('/');let html=route==='home'?home():route==='inventory'?await inventory():route==='car'?await car(decodeURIComponent(arg)):route==='blog'?await blog(arg?decodeURIComponent(arg):''):route==='appointments'?appointments():route==='contact'?contact():route==='careers'?careers():route==='guide'?guide():home();$('#app').innerHTML=html;$('#route-transition')?.classList.remove('is-active');window.scrollTo({top:0,behavior:'instant'});footer();fab();applyContacts();if(route==='home'){bindCards();homeReviews();bindReviewForm();initGallery()}if(route==='inventory'){renderInventory();initMobileRails();}if(route==='car')bindCar(decodeURIComponent(arg));if(route==='appointments')bindAppointment();if(route==='careers')bindCareerForm();if(route==='blog'){bindCards();if(arg){bindBlogArticle(decodeURIComponent(arg));}}}
+async function render(){const hash=location.hash.replace(/^#/,'')||'home',parts=hash.split('/'),route=parts[0],arg=parts.slice(1).join('/');let html=route==='home'?home():route==='inventory'?await inventory():route==='car'?await car(decodeURIComponent(arg)):route==='blog'?await blog(arg?decodeURIComponent(arg):''):route==='appointments'?appointments():route==='contact'?contact():route==='careers'?careers():route==='guide'?guide():home();$('#app').innerHTML=html;$('#route-transition')?.classList.remove('is-active');window.scrollTo({top:0,behavior:'instant'});footer();fab();applyContacts();if(route==='home'){bindCards();homeReviews();bindReviewForm();initGallery();initMobileRails()}if(route==='inventory'){renderInventory();initMobileRails();}if(route==='car')bindCar(decodeURIComponent(arg));if(route==='appointments')bindAppointment();if(route==='careers')bindCareerForm();if(route==='blog'){bindCards();if(arg){bindBlogArticle(decodeURIComponent(arg));}}}
 async function homeReviews(){
   const r=await api('reviews?select=*&approved=eq.true&order=created_at.desc&limit=12'),root=$('#reviews');
   if(root&&r.ok&&Array.isArray(r.data)&&r.data.length){
@@ -224,8 +237,10 @@ function bindReviewForm(){
 function boot(){
   const bar=$('#top-progress'); if(bar){bar.style.width='100%';setTimeout(()=>bar.remove(),350)}
   const menu=document.querySelector('.menu-btn'),drawer=document.querySelector('.mobile-menu');
-  menu?.addEventListener('click',()=>drawer?.classList.toggle('open'));
-  drawer?.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>drawer.classList.remove('open')));
+  const syncMenu=()=>{const open=drawer?.classList.contains('open');if(menu){menu.textContent=open?'×':'☰';menu.setAttribute('aria-label',open?'Close menu':'Open menu');menu.setAttribute('aria-expanded',open?'true':'false');}};
+  menu?.addEventListener('click',()=>{drawer?.classList.toggle('open');syncMenu();});
+  drawer?.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{drawer.classList.remove('open');syncMenu();}));
+  syncMenu();
   document.addEventListener('click',e=>{
     const a=e.target.closest('a[href^="#"]');
     if(!a)return;
