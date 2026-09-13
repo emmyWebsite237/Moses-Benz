@@ -6,22 +6,7 @@
   const readLocal=()=>{try{const x=JSON.parse(localStorage.getItem(VIS_KEY)||'{}');return x&&typeof x==='object'?x:{};}catch{return {};}};
   const writeLocal=x=>{try{localStorage.setItem(VIS_KEY,JSON.stringify(x));}catch{}};
   const applyVisibility=(list,flags)=>list.map(c=>({...c,active:flags[c.id]!==undefined?!!flags[c.id]:c.active!==false}));
-  const staticById=()=>{const m=new Map();(global.MBCars||[]).forEach(c=>m.set(String(c.id),c));return m;};
-  const fromRow=(x,baseMap)=>{
-    const base=baseMap.get(String(x.id))||{};
-    return {
-      id:x.id,slug:x.slug||base.slug||x.id,name:x.name||base.name||'Mercedes-Benz',
-      year:x.year??base.year??null,priceNGN:Number(x.price_ngn)>0?Number(x.price_ngn):Number(base.priceNGN||0),
-      mileageKm:Number(x.mileage_km)>0?Number(x.mileage_km):Number(base.mileageKm||0),
-      specTag:x.spec_tag||base.specTag||'',status:x.status||base.status||'available',
-      brand:x.brand||base.brand||'Mercedes-Benz',image:x.image_url||base.image||'',
-      description:x.description||base.description||'',condition:x.condition||base.condition||'',fuel:x.fuel||base.fuel||'',
-      transmission:x.transmission||base.transmission||'',body:x.body||base.body||'',drivetrain:x.drivetrain||base.drivetrain||'',
-      engineSize:x.engine_size||base.engineSize||'',cylinders:x.cylinders||base.cylinders||'',horsepower:x.horsepower||base.horsepower||'',
-      color:x.color||base.color||'',interiorColor:x.interior_color||base.interiorColor||'',seats:x.seats||base.seats||'',
-      registered:x.registered||base.registered||'',active:x.active!==false,searchAliases:base.searchAliases||[]
-    };
-  };
+  const fromRow=x=>({id:x.id,slug:x.slug||x.id,name:x.name,year:x.year,priceNGN:Number(x.price_ngn||0),mileageKm:Number(x.mileage_km||0),specTag:x.spec_tag||'',status:x.status||'available',brand:x.brand||'Mercedes-Benz',image:x.image_url||'',description:x.description||'',condition:x.condition||'',fuel:x.fuel||'',transmission:x.transmission||'',body:x.body||'',drivetrain:x.drivetrain||'',engineSize:x.engine_size||'',cylinders:x.cylinders||'',horsepower:x.horsepower||'',color:x.color||'',interiorColor:x.interior_color||'',seats:x.seats||'',registered:x.registered||'',active:x.active!==false});
   function getCars(){if(cache.cars)return clone(cache.cars);const flags=readLocal();cache.cars=applyVisibility((global.MBCars||[]),flags);return clone(cache.cars);}
   async function hydrate(){
     const fallback=(global.MBCars||[]).map(c=>({...c,active:true}));
@@ -29,7 +14,7 @@
     if(global.MBBackend?.ready){
       try{
         const r=await global.MBBackend.get('inventory','select=*');
-        if(r.ok&&Array.isArray(r.data)&&r.data.length){const bm=staticById();cars=r.data.map(x=>fromRow(x,bm));}
+        if(r.ok&&Array.isArray(r.data)&&r.data.length) cars=r.data.map(fromRow);
       }catch{}
       try{const r=await global.MBBackend.get('car_visibility','select=id,active');if(r.ok&&Array.isArray(r.data)){r.data.forEach(x=>{flags[x.id]=x.active!==false;});writeLocal(flags);}}catch{}
     }
@@ -56,7 +41,7 @@
   }
   async function syncStatic(){
     if(!global.MBBackend?.ready)return false;
-    try{const existing=await global.MBBackend.get('inventory','select=id&limit=1');if(existing.ok&&Array.isArray(existing.data)&&existing.data.length){await hydrate();return true;}}catch{}
+    try{const existing=await global.MBBackend.get('inventory','select=id&brand=eq.Mercedes-Benz&limit=1');if(existing.ok&&Array.isArray(existing.data)&&existing.data.length){await hydrate();return true;}}catch{}
     const cars=(global.MBCars||[]).map(c=>({...c,active:true}));
     let ok=true;
     for(const c of cars){try{await saveCar(c);}catch{ok=false;}}
