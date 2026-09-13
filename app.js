@@ -248,6 +248,12 @@ function boot(){
     if(!href||href==='#'||a.closest('form')||a.dataset.noDelay==='true')return;
     e.preventDefault();
     drawer?.classList.remove('open');
+    const targetHash=href.replace(/^#/,'')||'home';
+    const currentHash=location.hash.replace(/^#/,'')||'home';
+    if(targetHash===currentHash){
+      window.scrollTo({top:0,behavior:'smooth'});
+      return;
+    }
     goRoute(href);
   });
   render();
