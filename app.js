@@ -21,7 +21,7 @@ function loadRemoteConfig(){return Promise.resolve(window.MBAC_SUPABASE||null)}
 async function api(path,opts={}){try{const r=await fetch(SB.url+'/rest/v1/'+path,{...opts,headers:{apikey:SB.anonKey,Authorization:'Bearer '+SB.anonKey,'Content-Type':'application/json',Prefer:'return=representation',...(opts.headers||{})}});let data=null;try{data=await r.json()}catch{}return {ok:r.ok,data,status:r.status}}catch{return {ok:false,data:null,status:0}}}
 const rpc=(fn,body)=>api('rpc/'+encodeURIComponent(fn),{method:'POST',body:JSON.stringify(body)});
 function fmt(n){return new Intl.NumberFormat('en-NG',{style:'currency',currency:'NGN',maximumFractionDigits:0}).format(n||0)}
-function cars(){return window.MBCars||[]}
+function cars(){return window.MBStore?.getCars?.()||window.MBCars||[]}
 async function loadSettings(){
   const r=await api('site_settings?select=*&id=eq.1');
   if(r.ok&&r.data?.[0]){
@@ -41,13 +41,36 @@ function applyContacts(){
 function footer(){const f=$('#footer');f.innerHTML='<div class="wrap footer-grid"><div><h3>Moses Benz Auto Care</h3><p>Mercedes-Benz repairs, maintenance, diagnosis and vehicle sales in Idimu, Lagos.</p><div class="social"><a data-contact="facebook">Facebook</a><a data-contact="tiktok">TikTok</a><a data-contact="instagram">Instagram</a><a data-contact="whatsapp">WhatsApp</a></div></div><div><h4>Explore</h4><a href="#home">Home</a><a href="#inventory">Inventory</a><a href="#blog">Blog</a><a href="#appointments">Book an Appointment</a><a href="#guide">Mercedes-Benz Guide</a></div><div><h4>Contact</h4><a data-contact="phone">Call the Workshop</a><a data-contact="email">Email Us</a><p>11 Lasu Rd, beside Federal Peace Estate, Idimu, Lagos.</p></div><div><h4>Hours</h4><p>Mon–Fri 8:00 AM–7:00 PM</p><p>Saturday 8:00 AM–3:00 PM</p><p>Sunday Closed</p></div></div><div class="footer-bottom">© 2026 Moses Benz Auto Care</div>';applyContacts()}
 function fab(){if($('.fab'))return;const d=document.createElement('div');d.className='fab';d.innerHTML='<a data-contact="phone" aria-label="Call the workshop" title="Call the workshop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 2.5 9.1 2a1.7 1.7 0 0 1 1.9 1.1l1.2 3.1a1.7 1.7 0 0 1-.4 1.8L10.4 9.4a13.2 13.2 0 0 0 4.2 4.2l1.4-1.4a1.7 1.7 0 0 1 1.8-.4l3.1 1.2A1.7 1.7 0 0 1 22 15l-.5 2.5a2 2 0 0 1-2.1 1.6C10.6 18.5 5.5 13.4 4.9 4.6A2 2 0 0 1 6.6 2.5Z"/></svg></a><a data-contact="whatsapp" aria-label="WhatsApp" title="WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5a9.3 9.3 0 0 0-8 14.1L3 21l4.6-1a9.5 9.5 0 1 0 4.4-17.5Zm0 16.8a7.4 7.4 0 0 1-3.8-1l-.3-.2-2.7.6.7-2.6-.2-.3A7.4 7.4 0 1 1 12 19.3Zm4.1-5.4c-.2-.1-1.2-.6-1.4-.7-.2-.1-.3-.1-.5.1l-.6.8c-.2.2-.3.2-.5.1a6 6 0 0 1-1.8-1.1 7 7 0 0 1-1.3-1.6c-.1-.2 0-.3.1-.4l.4-.5.2-.4c.1-.1 0-.3 0-.4l-.7-1.6c-.2-.4-.3-.4-.5-.4h-.4c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.3c.1.2 1.6 2.5 3.9 3.5 1.4.6 2 .7 2.4.6.4-.1 1.2-.5 1.4-1 .2-.5.2-.9.1-1-.1-.1-.2-.1-.4-.2Z"/></svg></a>';document.body.appendChild(d);applyContacts()}
 
+let routeTimer=null;
+function normalizeRouteHash(value){
+  const raw=String(value||'').trim();
+  if(!raw||raw==='#')return 'home';
+  const hash=raw.startsWith('#')?raw.slice(1):raw;
+  return hash.replace(/^\/+|\/+$/g,'')||'home';
+}
 function goRoute(hash){
   if(!hash)return;
   const next=String(hash).startsWith('#')?String(hash):'#'+String(hash);
+  const current=normalizeRouteHash(location.hash);
+  const target=normalizeRouteHash(next);
   const overlay=$('#route-transition');
   document.querySelector('.mobile-menu')?.classList.remove('open');
-  if(overlay) overlay.classList.add('is-active');
-  window.setTimeout(()=>{ location.hash=next.slice(1); },1000);
+
+  // Re-selecting the page that is already open must be a plain browser reload.
+  // Do not start the route transition: that overlay is only for real page changes.
+  if(target===current){
+    if(routeTimer){window.clearTimeout(routeTimer);routeTimer=null;}
+    if(overlay)overlay.classList.remove('is-active');
+    window.location.reload();
+    return;
+  }
+
+  if(routeTimer){window.clearTimeout(routeTimer);routeTimer=null;}
+  if(overlay)overlay.classList.add('is-active');
+  routeTimer=window.setTimeout(()=>{
+    routeTimer=null;
+    location.hash=next.slice(1);
+  },1000);
 }
 function initMobileRails(){
   document.querySelectorAll('.car-rail').forEach(rail=>{
@@ -119,18 +142,116 @@ function initReviewsCarousel(){
   start();
 }
 
-function carCard(c){return '<article class="car-card" data-slug="'+esc(c.slug)+'"><img src="'+BASE+esc(c.image)+'" alt="'+esc(c.name)+'" loading="lazy"><div><div class="car-title"><h3>'+esc(c.name)+'</h3><b>'+fmt(c.priceNGN)+'</b></div><p>'+esc(c.year)+' · '+esc(c.specTag)+' · '+Number(c.mileageKm||0).toLocaleString()+' km</p><span>View full details →</span></div></article>'}
+function carCard(c,opts={}){
+  const popular=opts.popular||false;
+  const title=[c.name,c.year,c.color].filter(Boolean).join(' ');
+  const meta=[c.year,c.specTag,c.mileageKm?Number(c.mileageKm).toLocaleString()+' km':''].filter(Boolean).join(' · ');
+  const condition=c.condition?`<span class="stock-meta">${esc(c.condition)}</span>`:'';
+  return `<article class="car-card inventory-card${popular?' is-popular':''}" data-slug="${esc(c.slug)}">
+    <div class="car-card-media">
+      <img src="${BASE+esc(c.image)}" alt="${esc(title||c.name)}" loading="lazy">
+      ${popular?'<span class="car-badge popular-badge">Popular</span>':''}
+    </div>
+    <div class="car-card-body">
+      <div class="car-title"><h3>${esc(title||c.name)}</h3><b>${fmt(c.priceNGN)}</b></div>
+      ${meta?`<p>${esc(meta)}</p>`:''}
+      ${condition}
+      <span class="card-link">View full details <i>→</i></span>
+    </div>
+  </article>`;
+}
 function bindCards(){
   document.querySelectorAll('.car-card').forEach(x=>x.onclick=()=>{
     goRoute('#car/'+encodeURIComponent(x.dataset.slug));
   });
 }
-function home(){return `<section class="hero"><div class="hero-bg"></div><div class="wrap hero-content"><span class="eyebrow">Idimu, Lagos · Mercedes-Benz Specialists</span><h1>Keep the <i>star</i> running true.</h1><p>Mercedes-Benz diagnosis, servicing, repair and vehicle sales from a specialist workshop in Idimu, Lagos.</p><div class="actions"><a class="btn red" href="#appointments">Book an Appointment</a><a class="btn light" href="#inventory">Browse Inventory</a></div><div class="stats"><div><b>20+</b><span>Certified technicians</span></div><div><b>12+</b><span>Years of experience</span></div><div><b>Mercedes-Benz</b><span>Specialist workshop</span></div><div><b>Idimu</b><span>Lagos</span></div></div></div></section><div class="marquee"><div>C-CLASS · E-CLASS · S-CLASS · GLE · G-CLASS · AMG GT · CLA · EQ · MAYBACH · </div></div><section class="section white"><div class="wrap"><div class="section-head"><span class="eyebrow">Mercedes-Benz Sales</span><h2>Selected vehicles available through Moses Benz.</h2><p>Browse a few vehicles from the full catalogue.</p></div><div id="home-cars" class="car-grid home-car-rail">${cars().filter(c=>c.active!==false).slice(0,3).map(carCard).join('')}</div><div class="center"><a class="btn red" href="#inventory">View Full Inventory</a></div></div></section><section class="section gallery-section"><div class="wrap"><div class="section-head"><span class="eyebrow">Inside Moses Benz</span><h2>Real work. Real cars. Our workshop.</h2></div><div class="gallery"><div class="gallery-track">${['workshop-yard.jpg','street-cars.jpg','workshop-technicians.jpg','front.jpg','workshop-detail.jpg','customer-car.jpg'].map((p,i)=>`<figure><img src="${BASE}/images/workshop-gallery/${p}" alt="Moses Benz workshop photo ${i+1}" loading="lazy"><figcaption>Moses Benz Auto Care workshop</figcaption></figure>`).join('')}</div></div></div></section><section class="section dark"><div class="wrap"><div class="section-head"><span class="eyebrow">How It Works</span><h2>From booking to collection.</h2></div><div class="steps"><article><b>01</b><h3>Book</h3><p>Tell us the Mercedes model and what is happening.</p></article><article><b>02</b><h3>Diagnose</h3><p>We investigate the cause before recommending parts.</p></article><article><b>03</b><h3>Approve & Repair</h3><p>You understand the work before it begins.</p></article><article><b>04</b><h3>Collect</h3><p>We explain what was done and what to watch next.</p></article></div></div></section><section class="section white"><div class="wrap"><div class="section-head"><span class="eyebrow">From the Workshop</span><h2>Useful things to know about your car.</h2></div><div class="blog-grid">${POSTS.slice(0,3).map(postCard).join('')}</div><div class="center"><a class="btn red" href="#blog">Read the Blog</a></div></div></section><section class="section soft"><div class="wrap"><div class="section-head"><span class="eyebrow">Reviews</span><h2>Owners who trust us with the star.</h2></div><div class="reviews-window"><div id="reviews" class="review-grid"><article class="review"><b>Moses Benz Auto Care</b><p>Professional Mercedes-Benz diagnosis, servicing and repair.</p></article><article class="review"><b>Your experience matters</b><p>Share your experience with the workshop below.</p></article></div></div><form id="review-form" class="form-card review-form"><div class="two"><label>Your name *<input name="name" required maxlength="80"></label><label>Mercedes-Benz model<input name="model" maxlength="80" placeholder="C 300"></label></div><label>Rating *<select name="rating" required><option value="">Choose a rating</option><option value="5">5 — Excellent</option><option value="4">4 — Very good</option><option value="3">3 — Good</option><option value="2">2 — Fair</option><option value="1">1 — Poor</option></select></label><label>Your review *<textarea name="review" rows="4" required maxlength="2000"></textarea></label><button class="btn red" type="submit">Submit Review</button><p id="review-status" class="status"></p></form></div></section><section class="section white"><div class="wrap career-card"><div><span class="eyebrow">Careers</span><h2>Build your career around Mercedes-Benz.</h2><p>We are interested in skilled, disciplined people who care about proper automotive work.</p></div><a class="btn red" href="#careers">Explore Careers</a></div></section><section class="find"><div class="map"><iframe src="https://www.google.com/maps?q=Moses+Benz+Auto+Care,+11+Lasu+Rd,+Idimu,+Lagos&output=embed" loading="lazy" title="Moses Benz Auto Care map"></iframe></div><div class="find-copy"><span class="eyebrow">Find Us</span><h2>11 Lasu Rd, Idimu, Lagos.</h2><p>Beside Federal Peace Estate, just off the Lasu-Isheri axis.</p><a class="btn red" href="https://www.google.com/maps/place/?q=place_id:ChIJ9wS7aQCROxARHinfFB1ds1w" target="_blank">Open in Google Maps</a></div></section>`}
-function postCard(p){return '<article class="blog-card"><img src="'+BASE+'/images/workshop-yard.jpg" alt="'+esc(p.title)+'" loading="lazy"><div><span class="eyebrow">'+esc(p.category)+'</span><h2>'+esc(p.title)+'</h2><p>'+esc(p.excerpt)+'</p><a href="#blog/'+encodeURIComponent(p.slug)+'">Read article →</a></div></article>'}
-async function inventory(){const q=norm(new URLSearchParams(location.hash.split('?')[1]||'').get('q')||'');return `<section class="page-head"><div class="wrap"><span class="eyebrow">For Sale</span><h1>Mercedes-Benz inventory.</h1><p>Search C300, C 300, C-300, G63, G 63 or any common model spelling.</p></div></section><section class="section white"><div class="wrap"><div class="search-row"><input id="inventory-search" value="${esc(q)}" type="search" placeholder="Search Mercedes model, year, engine…"><span id="inventory-count"></span></div><div id="inventory-list"></div></div></section>`}
-function renderInventory(){const root=$('#inventory-list'),input=$('#inventory-search');if(!root)return;const render=()=>{const q=norm(input.value),list=cars().filter(c=>c.active!==false&&(!q||norm([c.name,c.slug,c.description,c.specTag,c.year,...(c.searchAliases||[])].join(' ')).includes(q)));$('#inventory-count').textContent=list.length+' vehicles';const groups={};list.forEach(c=>{const m=c.name.match(/^([A-Z]+)/i);const key=m?m[1].toUpperCase():'AMG';(groups[key]??=[]).push(c)});root.innerHTML=Object.entries(groups).map(([g,items])=>'<section class="inventory-group"><div class="group-head"><h2>'+esc(g)+' Class</h2><span>'+items.length+' vehicles</span></div><div class="car-rail">'+items.map(carCard).join('')+'</div></section>').join('')||'<div class="empty">No Mercedes-Benz vehicle matched that search.</div>';bindCards()};input.oninput=render;render()}
-async function car(slug){const c=cars().find(x=>x.slug===slug);if(!c)return '<section class="section white"><div class="wrap empty"><h1>Vehicle not found</h1><a class="btn red" href="#inventory">Back to Inventory</a></div></section>';return `<section class="section white"><div class="wrap"><a class="back" href="#inventory">← Back to Inventory</a><div class="detail-grid"><div><img class="detail-image" src="${BASE}${esc(c.image)}" alt="${esc(c.name)}"></div><div><span class="eyebrow">Mercedes-Benz · For Sale</span><h1>${esc(c.name)}</h1><div class="detail-price">${fmt(c.priceNGN)}</div><p>${esc(c.description)}</p><button id="car-wa" class="btn red">Chat about this car on WhatsApp</button></div></div><div class="spec-panel"><h2>Full details</h2><div class="spec-grid">${[['Year',c.year],['Mileage',(c.mileageKm||0)+' km'],['Specification',c.specTag],['Condition',c.condition],['Transmission',c.transmission],['Fuel',c.fuel],['Body',c.body],['Drivetrain',c.drivetrain],['Engine',c.engineSize],['Colour',c.color],['Interior',c.interiorColor],['Seats',c.seats]].filter(x=>x[1]).map(x=>'<div><span>'+esc(x[0])+'</span><b>'+esc(x[1])+'</b></div>').join('')}</div></div></div></section>`}
-function bindCar(slug){const c=cars().find(x=>x.slug===slug),b=$('#car-wa');if(b&&c)b.onclick=()=>{const n=String(settings.whatsapp).replace(/\D/g,'');if(n)window.open('https://wa.me/'+n+'?text='+encodeURIComponent(`Hello Moses Benz Auto Care. I am interested in the ${c.name} (${c.year}). Please send me the full current details and availability.`),'_blank')}}
+const POPULAR_MODEL_PATTERNS=[
+  /\bc\s*-?\s*(180|200|300|350)\b/i,
+  /\bglk\s*350\b/i,
+  /\b(m|ml)\s*350\b/i,
+  /\bgle\s*(350|43)\b/i,
+  /\be\s*(300|350)\b/i,
+  /\bglc\s*300\b/i,
+  /\bgla\s*250\b/i,
+  /\bcla\s*250\b/i
+];
+function isPopularCar(c){return POPULAR_MODEL_PATTERNS.some(re=>re.test(String(c.name||'')+' '+String(c.slug||'')));}
+function bodyType(c){
+  const text=norm([c.body,c.name,c.slug,c.description].filter(Boolean).join(' '));
+  if(/gle|glc|glk|gla|glb|gls|ml|m class|g 400|g 450|g 500|g 550|g 63|maybach gls/.test(text))return 'SUV / Crossover';
+  if(/sl 43|sl 55|amg gt/.test(text))return 'Performance';
+  if(/v 220|v 250|v 300/.test(text))return 'MPV';
+  if(/cla|amg gt/.test(text))return 'Coupe / Fastback';
+  if(/a 180|a 200|a 250/.test(text))return 'Compact';
+  return 'Executive Sedan';
+}
+function conditionType(c){
+  const t=norm(c.condition||'');
+  if(t.includes('foreign'))return 'Foreign Used';
+  if(t.includes('nigeria')||t.includes('local'))return 'Nigeria Used';
+  return 'All conditions';
+}
+function inventoryCardData(list){return list.map(c=>({...c,_popular:isPopularCar(c),_body:bodyType(c),_condition:conditionType(c)}));}
+function inventory(){
+  const q=norm(new URLSearchParams(location.hash.split('?')[1]||'').get('q')||'');
+  return `<section class="page-head inventory-page-head"><div class="wrap"><span class="eyebrow">Mercedes-Benz Sales</span><h1>Mercedes-Benz inventory.</h1><p>Find the right Mercedes-Benz without endless horizontal scrolling. Search, refine and compare the vehicles in a clean dealership-style grid.</p></div></section>
+  <section class="section white inventory-section"><div class="wrap">
+    <div class="inventory-feature-head"><div><span class="eyebrow">Popular right now</span><h2>Most Sold &amp; Popular Cars</h2><p>High-demand Mercedes-Benz models we also stock for Lagos buyers.</p></div><button class="inventory-tab active" type="button" data-inventory-mode="popular">Most Sold &amp; Popular</button></div>
+    <div id="inventory-popular" class="car-grid inventory-popular-grid"></div>
+    <div class="inventory-layout">
+      <aside class="inventory-filters" aria-label="Inventory filters">
+        <div class="filter-heading"><h3>Refine Inventory</h3><button id="inventory-clear" class="filter-clear" type="button">Clear all</button></div>
+        <label>Search<input id="inventory-search" value="${esc(q)}" type="search" placeholder="C300, GLE, E350…"></label>
+        <label>Vehicle type<select id="inventory-type"><option value="all">All types</option><option>SUV / Crossover</option><option>Executive Sedan</option><option>Coupe / Fastback</option><option>Performance</option><option>Compact</option><option>MPV</option></select></label>
+        <label>Condition<select id="inventory-condition"><option value="all">All conditions</option><option>Foreign Used</option><option>Nigeria Used</option></select></label>
+        <label>Sort by<select id="inventory-sort"><option value="popular">Most popular</option><option value="newest">Newest year</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option><option value="name">Model name</option></select></label>
+        <div class="filter-note"><b id="inventory-count">0 vehicles</b><span>No location field — vehicles are presented as a clean Moses Benz catalogue.</span></div>
+      </aside>
+      <main class="inventory-results">
+        <div class="results-head"><div><span class="eyebrow">Full catalogue</span><h2>Available vehicles</h2></div><button class="inventory-tab" type="button" data-inventory-mode="all">Show All Vehicles</button></div>
+        <div id="inventory-list" class="car-grid inventory-grid"></div>
+        <nav id="inventory-pagination" class="inventory-pagination" aria-label="Inventory pages"></nav>
+      </main>
+    </div>
+  </div></section>`;
+}
+function renderInventory(){
+  const root=$('#inventory-list'), input=$('#inventory-search');
+  if(!root||!input)return;
+  const popularRoot=$('#inventory-popular'),typeEl=$('#inventory-type'),conditionEl=$('#inventory-condition'),sortEl=$('#inventory-sort'),countEl=$('#inventory-count'),pager=$('#inventory-pagination');
+  let page=1,mode='all'; const pageSize=12;
+  const source=inventoryCardData(cars().filter(c=>c.active!==false));
+  const apply=()=>{
+    const q=norm(input.value);
+    let list=source.filter(c=>!q||norm([c.name,c.slug,c.description,c.specTag,c.year,...(c.searchAliases||[])].join(' ')).includes(q));
+    if(typeEl.value!=='all')list=list.filter(c=>c._body===typeEl.value);
+    if(conditionEl.value!=='all')list=list.filter(c=>c._condition===conditionEl.value);
+    if(mode==='popular')list=list.filter(c=>c._popular);
+    switch(sortEl.value){
+      case 'newest': list.sort((a,b)=>Number(b.year||0)-Number(a.year||0));break;
+      case 'price-low': list.sort((a,b)=>Number(a.priceNGN||0)-Number(b.priceNGN||0));break;
+      case 'price-high': list.sort((a,b)=>Number(b.priceNGN||0)-Number(a.priceNGN||0));break;
+      case 'name': list.sort((a,b)=>String(a.name||'').localeCompare(String(b.name||'')));break;
+      default: list.sort((a,b)=>Number(b._popular)-Number(a._popular)||Number(b.year||0)-Number(a.year||0));
+    }
+    const pages=Math.max(1,Math.ceil(list.length/pageSize)); if(page>pages)page=pages;
+    const slice=list.slice((page-1)*pageSize,page*pageSize);
+    root.innerHTML=slice.map(c=>carCard(c,{popular:c._popular})).join('')||'<div class="empty inventory-empty">No Mercedes-Benz vehicle matched those filters.</div>';
+    countEl.textContent=list.length+' vehicle'+(list.length===1?'':'s'); bindCards();
+    pager.innerHTML=Array.from({length:pages},(_,i)=>`<button type="button" class="page-btn${i+1===page?' active':''}" data-page="${i+1}">${i+1}</button>`).join('');
+    pager.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{page=Number(b.dataset.page);renderCurrent();document.querySelector('.inventory-results')?.scrollIntoView({behavior:'smooth',block:'start'});});
+  };
+  const renderPopular=()=>{
+    const popular=source.filter(c=>c._popular).sort((a,b)=>Number(b.year||0)-Number(a.year||0)).slice(0,8);
+    popularRoot.innerHTML=popular.map(c=>carCard(c,{popular:true})).join('')||'<div class="empty">Popular models will appear here as stock is added.</div>';
+    bindCards();
+  };
+  const renderCurrent=()=>{document.querySelectorAll('[data-inventory-mode]').forEach(b=>b.classList.toggle('active',b.dataset.inventoryMode===mode));apply();};
+  document.querySelectorAll('[data-inventory-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.inventoryMode;page=1;renderCurrent();});
+  [input,typeEl,conditionEl,sortEl].forEach(el=>el.addEventListener(el.tagName==='INPUT'?'input':'change',()=>{page=1;renderCurrent();}));
+  $('#inventory-clear').onclick=()=>{input.value='';typeEl.value='all';conditionEl.value='all';sortEl.value='popular';mode='all';page=1;renderCurrent();};
+  renderPopular(); renderCurrent();
+}
 async function blog(slug){
   if(slug){
     const r=await api('blog_posts?select=*&published=eq.true&slug=eq.'+encodeURIComponent(slug));
@@ -189,7 +310,7 @@ function bindAppointment(){
   };
 }
 
-function contact(){return `<section class="page-head"><div class="wrap"><span class="eyebrow">Contact</span><h1>Talk to Moses Benz Auto Care.</h1><p>Call, WhatsApp, email or book an appointment.</p></div></section><section class="section white"><div class="wrap contact-grid"><div class="contact-card"><span>01</span><h2>Call the Workshop</h2><p>Speak directly with the workshop.</p><a data-contact="phone" class="btn red">Call Us</a></div><div class="contact-card"><span>02</span><h2>WhatsApp</h2><p>Send a message and include your vehicle model.</p><a data-contact="whatsapp" class="btn red" target="_blank">WhatsApp Us</a></div><div class="contact-card"><span>03</span><h2>Book an Appointment</h2><p>Send the vehicle details and the issue directly to the workshop.</p><a class="btn red" href="#appointments">Book an Appointment</a></div><div class="contact-card"><span>04</span><h2>Email</h2><p>Use email when you prefer a written request.</p><a data-contact="email" class="btn red">Email Us</a></div><div class="contact-card"><span>05</span><h2>Facebook</h2><p>Follow workshop updates.</p><a data-contact="facebook" class="btn red" target="_blank">Facebook</a></div><div class="contact-card"><span>06</span><h2>TikTok</h2><p>See workshop clips and vehicle content.</p><a data-contact="tiktok" class="btn red" target="_blank">TikTok</a></div><div class="contact-card"><span>07</span><h2>Instagram</h2><p>Follow workshop updates and Mercedes-Benz content.</p><a data-contact="instagram" class="btn red" target="_blank">Instagram</a></div><div class="contact-card"><span>08</span><h2>YouTube</h2><p>Watch workshop videos and useful guides.</p><a data-contact="youtube" class="btn red" target="_blank">YouTube</a></div><div class="contact-card"><span>09</span><h2>X</h2><p>Follow workshop news and updates.</p><a data-contact="x" class="btn red" target="_blank">X</a></div></div></section>`}
+function contact(){return `<section class="page-head"><div class="wrap"><span class="eyebrow">Contact</span><h1>Talk to Moses Benz Auto Care.</h1><p>Call, WhatsApp, email or book an appointment.</p></div></section><section class="section white"><div class="wrap contact-grid"><div class="contact-card"><span>01</span><h2>Call the Workshop</h2><p>Speak directly with the workshop.</p><a data-contact="phone" class="btn red">Call Us</a></div><div class="contact-card"><span>02</span><h2>WhatsApp</h2><p>Send a message and include your vehicle model.</p><a data-contact="whatsapp" class="btn red" target="_blank">WhatsApp Us</a></div><div class="contact-card"><span>03</span><h2>Book an Appointment</h2><p>Send the vehicle details and the issue directly to the workshop.</p><a class="btn red" href="#appointments">Book an Appointment</a></div><div class="contact-card"><span>04</span><h2>Email</h2><p>Use email when you prefer a written request.</p><a data-contact="email" class="btn red">Email Us</a></div><div class="contact-card"><span>05</span><h2>Facebook</h2><p>Follow workshop updates.</p><a data-contact="facebook" class="btn red" target="_blank">Facebook</a></div><div class="contact-card"><span>06</span><h2>TikTok</h2><p>See workshop clips and vehicle content.</p><a data-contact="tiktok" class="btn red" target="_blank">TikTok</a></div></div></section>`}
 function careers(){return `<section class="page-head"><div class="wrap"><span class="eyebrow">Careers</span><h1>Work with a Mercedes-Benz specialist.</h1><p>We are interested in skilled, disciplined people who care about proper automotive work.</p></div></section><section class="section white"><div class="wrap narrow prose"><h2>Join Moses Benz Auto Care</h2><p>Tell us about your experience, the kind of work you do best and why you want to work around Mercedes-Benz vehicles.</p><form id="career-form" class="form-card career-form"><div class="two"><label>Full Name *<input name="name" required maxlength="120"></label><label>Phone / WhatsApp *<input name="phone" required maxlength="40"></label></div><label>Email<input name="email" type="email" maxlength="160"></label><label>Role you are applying for *<input name="role" required placeholder="Mercedes-Benz Technician, Auto Electrician, etc."></label><label>Experience *<textarea name="experience" rows="4" required placeholder="Tell us about your experience and skills."></textarea></label><label>Anything else<textarea name="message" rows="4" placeholder="Qualifications, certifications or other information"></textarea></label><button class="btn red" type="submit">Submit Application</button><p id="career-status" class="status"></p></form></div></section>`}
 function bindCareerForm(){
   const f=$('#career-form'); if(!f||f.dataset.bound)return; f.dataset.bound='1';
@@ -248,16 +369,11 @@ function boot(){
     if(!href||href==='#'||a.closest('form')||a.dataset.noDelay==='true')return;
     e.preventDefault();
     drawer?.classList.remove('open');
-    const targetHash=href.replace(/^#/,'')||'home';
-    const currentHash=location.hash.replace(/^#/,'')||'home';
-    if(targetHash===currentHash){
-      window.scrollTo({top:0,behavior:'smooth'});
-      return;
-    }
     goRoute(href);
   });
   render();
   loadSettings().then(()=>{applyContacts();footer();});
+  if(window.MBStore?.hydrate){window.MBStore.hydrate().then(()=>render()).catch(()=>{});}
   window.addEventListener('hashchange',render);
 }
 boot();
