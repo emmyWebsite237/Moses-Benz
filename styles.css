@@ -130,26 +130,18 @@
 .btn:hover{color:#fff}
 .admin-directory button:hover,.admin-directory button.is-active{background:linear-gradient(135deg,var(--brand-purple),var(--brand-purple-bright));color:#fff;border-color:transparent}
 .inventory-section{padding-top:70px}
-.inventory-feature-head{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:24px}
-.inventory-feature-head h2,.results-head h2{margin:0 0 8px;font-size:clamp(28px,4vw,44px);line-height:1.05;letter-spacing:-.035em}
-.inventory-feature-head p{margin:0;color:var(--muted)}
-.inventory-tab{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:11px 16px;font-weight:900;cursor:pointer;transition:.2s ease;white-space:nowrap}
-.inventory-tab:hover,.inventory-tab.active{background:var(--brand-purple);border-color:var(--brand-purple);color:#fff;box-shadow:0 10px 22px rgba(42,20,95,.18)}
-.inventory-popular-grid{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:70px}
+.results-head h2{margin:0 0 8px;font-size:clamp(28px,4vw,44px);line-height:1.05;letter-spacing:-.035em}
+.results-head p{margin:0;color:var(--muted)}
 .inventory-card{position:relative}
 .inventory-card .car-card-media{position:relative;overflow:hidden;background:#eee}
 .inventory-card img{height:235px;object-fit:cover;transition:transform .35s ease}
 .inventory-card:hover img{transform:scale(1.035)}
 .car-badge{position:absolute;top:12px;left:12px;background:var(--brand-purple);color:#fff;padding:6px 10px;border-radius:999px;font-size:11px;font-weight:900;letter-spacing:.04em;box-shadow:0 8px 18px rgba(0,0,0,.18)}
-.car-card-body{padding:18px 18px 20px}
-.car-card-body>.car-title{gap:10px}
-.car-title h3{line-height:1.12}
-.car-title b{white-space:nowrap}
-.stock-meta{display:inline-block;margin-top:7px;font-size:11px;font-weight:800;color:var(--brand-purple)}
-.card-link{display:inline-flex;align-items:center;gap:5px;margin-top:12px;color:var(--ink);font-weight:900;font-size:12px}
-.card-link i{font-style:normal;transition:transform .2s ease}
-.car-card:hover .card-link{color:var(--brand-purple)}
-.car-card:hover .card-link i{transform:translateX(4px)}
+.car-card-body{padding:14px}
+.card-price{display:block;font-size:17px;font-weight:900;color:var(--ink);margin-bottom:4px}
+.car-card-body h3{margin:0 0 6px;font-size:14px;font-weight:700;line-height:1.32;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-meta{margin:0 0 8px;color:var(--muted);font-size:12px}
+.car-card-body .stock-meta{display:inline-block;padding:3px 9px;border-radius:999px;background:#f1eee7;font-size:11px;font-weight:800;color:var(--brand-purple)}
 .inventory-layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:34px;align-items:start}
 .inventory-filters{position:sticky;top:105px;border:1px solid var(--line);background:#fff;border-radius:18px;padding:20px;box-shadow:var(--shadow)}
 .filter-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
@@ -171,6 +163,6 @@
 .page-btn:hover,.page-btn.active{background:var(--brand-purple);border-color:var(--brand-purple);color:#fff}
 .detail-price{color:var(--brand-purple)}
 .back{color:var(--brand-purple)}
-@media(max-width:1050px){.inventory-popular-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.inventory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.inventory-layout{grid-template-columns:220px minmax(0,1fr)}}
-@media(max-width:760px){.inventory-feature-head,.results-head{display:block}.inventory-feature-head .inventory-tab,.results-head .inventory-tab{margin-top:16px}.inventory-layout{grid-template-columns:1fr}.inventory-filters{position:static}.inventory-popular-grid,.inventory-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.inventory-card img{height:190px}}
-@media(max-width:500px){.inventory-popular-grid,.inventory-grid{grid-template-columns:1fr}.inventory-card img{height:220px}.inventory-feature-head h2,.results-head h2{font-size:31px}.inventory-section{padding-top:55px}}
+@media(max-width:1050px){.inventory-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.inventory-layout{grid-template-columns:220px minmax(0,1fr)}}
+@media(max-width:760px){.results-head{display:block}.inventory-layout{grid-template-columns:1fr}.inventory-filters{position:static}.inventory-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.inventory-card img{height:130px}.car-card-body{padding:10px}.card-price{font-size:15px}.car-card-body h3{font-size:12.5px}}
+@media(max-width:500px){.inventory-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.inventory-card img{height:115px}.results-head h2{font-size:26px}.inventory-section{padding-top:55px}}

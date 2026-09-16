@@ -144,19 +144,18 @@ function initReviewsCarousel(){
 
 function carCard(c,opts={}){
   const popular=opts.popular||false;
-  const title=[c.name,c.year,c.color].filter(Boolean).join(' ');
-  const meta=[c.year,c.specTag,c.mileageKm?Number(c.mileageKm).toLocaleString()+' km':''].filter(Boolean).join(' · ');
+  const meta=[c.specTag,c.mileageKm?Number(c.mileageKm).toLocaleString()+' km':''].filter(Boolean).join(' · ');
   const condition=c.condition?`<span class="stock-meta">${esc(c.condition)}</span>`:'';
   return `<article class="car-card inventory-card${popular?' is-popular':''}" data-slug="${esc(c.slug)}">
     <div class="car-card-media">
-      <img src="${BASE+esc(c.image)}" alt="${esc(title||c.name)}" loading="lazy">
+      <img src="${BASE+esc(c.image)}" alt="${esc(c.name)}" loading="lazy">
       ${popular?'<span class="car-badge popular-badge">Popular</span>':''}
     </div>
     <div class="car-card-body">
-      <div class="car-title"><h3>${esc(title||c.name)}</h3><b>${fmt(c.priceNGN)}</b></div>
-      ${meta?`<p>${esc(meta)}</p>`:''}
+      <b class="card-price">${fmt(c.priceNGN)}</b>
+      <h3>${esc(c.name)}</h3>
+      ${meta?`<p class="card-meta">${esc(meta)}</p>`:''}
       ${condition}
-      <span class="card-link">View full details <i>→</i></span>
     </div>
   </article>`;
 }
@@ -200,8 +199,6 @@ function inventory(){
   const q=norm(new URLSearchParams(location.hash.split('?')[1]||'').get('q')||'');
   return `<section class="page-head inventory-page-head"><div class="wrap"><span class="eyebrow">Mercedes-Benz Sales</span><h1>Mercedes-Benz inventory.</h1><p>Find the right Mercedes-Benz without endless horizontal scrolling. Search, refine and compare the vehicles in a clean dealership-style grid.</p></div></section>
   <section class="section white inventory-section"><div class="wrap">
-    <div class="inventory-feature-head"><div><span class="eyebrow">Popular right now</span><h2>Most Sold &amp; Popular Cars</h2><p>High-demand Mercedes-Benz models we also stock for Lagos buyers.</p></div><button class="inventory-tab active" type="button" data-inventory-mode="popular">Most Sold &amp; Popular</button></div>
-    <div id="inventory-popular" class="car-grid inventory-popular-grid"></div>
     <div class="inventory-layout">
       <aside class="inventory-filters" aria-label="Inventory filters">
         <div class="filter-heading"><h3>Refine Inventory</h3><button id="inventory-clear" class="filter-clear" type="button">Clear all</button></div>
@@ -212,7 +209,7 @@ function inventory(){
         <div class="filter-note"><b id="inventory-count">0 vehicles</b><span>No location field — vehicles are presented as a clean Moses Benz catalogue.</span></div>
       </aside>
       <main class="inventory-results">
-        <div class="results-head"><div><span class="eyebrow">Full catalogue</span><h2>Available vehicles</h2></div><button class="inventory-tab" type="button" data-inventory-mode="all">Show All Vehicles</button></div>
+        <div class="results-head"><div><span class="eyebrow">Full catalogue</span><h2>Available vehicles</h2><p>Popular models are shown first.</p></div></div>
         <div id="inventory-list" class="car-grid inventory-grid"></div>
         <nav id="inventory-pagination" class="inventory-pagination" aria-label="Inventory pages"></nav>
       </main>
@@ -222,15 +219,14 @@ function inventory(){
 function renderInventory(){
   const root=$('#inventory-list'), input=$('#inventory-search');
   if(!root||!input)return;
-  const popularRoot=$('#inventory-popular'),typeEl=$('#inventory-type'),conditionEl=$('#inventory-condition'),sortEl=$('#inventory-sort'),countEl=$('#inventory-count'),pager=$('#inventory-pagination');
-  let page=1,mode='all'; const pageSize=12;
+  const typeEl=$('#inventory-type'),conditionEl=$('#inventory-condition'),sortEl=$('#inventory-sort'),countEl=$('#inventory-count'),pager=$('#inventory-pagination');
+  let page=1; const pageSize=12;
   const source=inventoryCardData(cars().filter(c=>c.active!==false));
   const apply=()=>{
     const q=norm(input.value);
     let list=source.filter(c=>!q||norm([c.name,c.slug,c.description,c.specTag,c.year,...(c.searchAliases||[])].join(' ')).includes(q));
     if(typeEl.value!=='all')list=list.filter(c=>c._body===typeEl.value);
     if(conditionEl.value!=='all')list=list.filter(c=>c._condition===conditionEl.value);
-    if(mode==='popular')list=list.filter(c=>c._popular);
     switch(sortEl.value){
       case 'newest': list.sort((a,b)=>Number(b.year||0)-Number(a.year||0));break;
       case 'price-low': list.sort((a,b)=>Number(a.priceNGN||0)-Number(b.priceNGN||0));break;
@@ -243,18 +239,11 @@ function renderInventory(){
     root.innerHTML=slice.map(c=>carCard(c,{popular:c._popular})).join('')||'<div class="empty inventory-empty">No Mercedes-Benz vehicle matched those filters.</div>';
     countEl.textContent=list.length+' vehicle'+(list.length===1?'':'s'); bindCards();
     pager.innerHTML=Array.from({length:pages},(_,i)=>`<button type="button" class="page-btn${i+1===page?' active':''}" data-page="${i+1}">${i+1}</button>`).join('');
-    pager.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{page=Number(b.dataset.page);renderCurrent();document.querySelector('.inventory-results')?.scrollIntoView({behavior:'smooth',block:'start'});});
+    pager.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{page=Number(b.dataset.page);apply();document.querySelector('.inventory-results')?.scrollIntoView({behavior:'smooth',block:'start'});});
   };
-  const renderPopular=()=>{
-    const popular=source.filter(c=>c._popular).sort((a,b)=>Number(b.year||0)-Number(a.year||0)).slice(0,8);
-    popularRoot.innerHTML=popular.map(c=>carCard(c,{popular:true})).join('')||'<div class="empty">Popular models will appear here as stock is added.</div>';
-    bindCards();
-  };
-  const renderCurrent=()=>{document.querySelectorAll('[data-inventory-mode]').forEach(b=>b.classList.toggle('active',b.dataset.inventoryMode===mode));apply();};
-  document.querySelectorAll('[data-inventory-mode]').forEach(b=>b.onclick=()=>{mode=b.dataset.inventoryMode;page=1;renderCurrent();});
-  [input,typeEl,conditionEl,sortEl].forEach(el=>el.addEventListener(el.tagName==='INPUT'?'input':'change',()=>{page=1;renderCurrent();}));
-  $('#inventory-clear').onclick=()=>{input.value='';typeEl.value='all';conditionEl.value='all';sortEl.value='popular';mode='all';page=1;renderCurrent();};
-  renderPopular(); renderCurrent();
+  [input,typeEl,conditionEl,sortEl].forEach(el=>el.addEventListener(el.tagName==='INPUT'?'input':'change',()=>{page=1;apply();}));
+  $('#inventory-clear').onclick=()=>{input.value='';typeEl.value='all';conditionEl.value='all';sortEl.value='popular';page=1;apply();};
+  apply();
 }
 async function blog(slug){
   if(slug){
