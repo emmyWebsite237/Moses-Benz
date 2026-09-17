@@ -1,4 +1,4 @@
-/* Moses Benz Auto Care — shared car catalogue. Supabase is the editable source of truth; static cars remain the safe fallback. */
+/* Moses Benz Auto Care — shared car catalogue. Local /cars assets are the public image source of truth; Supabase supplies editable metadata and visibility. */
 (function(global){
   const VIS_KEY='mbac_car_visibility_v1';
   const cache={cars:null};
@@ -7,21 +7,22 @@
   const writeLocal=x=>{try{localStorage.setItem(VIS_KEY,JSON.stringify(x));}catch{}};
   const applyVisibility=(list,flags)=>list.map(c=>({...c,active:flags[c.id]!==undefined?!!flags[c.id]:c.active!==false}));
   const staticById=()=>{const m=new Map();(global.MBCars||[]).forEach(c=>m.set(String(c.id),c));return m;};
-  const fromRow=(x,baseMap)=>{
-    const base=baseMap.get(String(x.id))||{};
-    return {
-      id:x.id,slug:x.slug||base.slug||x.id,name:x.name||base.name||'Mercedes-Benz',
-      year:x.year??base.year??null,priceNGN:Number(x.price_ngn)>0?Number(x.price_ngn):Number(base.priceNGN||0),
-      mileageKm:Number(x.mileage_km)>0?Number(x.mileage_km):Number(base.mileageKm||0),
-      specTag:x.spec_tag||base.specTag||'',status:x.status||base.status||'available',
-      brand:x.brand||base.brand||'Mercedes-Benz',image:x.image_url||base.image||'',
-      description:x.description||base.description||'',condition:x.condition||base.condition||'',fuel:x.fuel||base.fuel||'',
-      transmission:x.transmission||base.transmission||'',body:x.body||base.body||'',drivetrain:x.drivetrain||base.drivetrain||'',
-      engineSize:x.engine_size||base.engineSize||'',cylinders:x.cylinders||base.cylinders||'',horsepower:x.horsepower||base.horsepower||'',
-      color:x.color||base.color||'',interiorColor:x.interior_color||base.interiorColor||'',seats:x.seats||base.seats||'',
-      registered:x.registered||base.registered||'',active:x.active!==false,searchAliases:base.searchAliases||[]
-    };
-  };
+  // Local GitHub catalogue images are the public source of truth.
+  // Supabase may still hold older image_url values from the previous catalogue;
+  // those must never overwrite the current /cars/*.jpg asset for a matching car.
+  const fromRow=(x={},base={})=>({
+    id:x.id||base.id,slug:x.slug||base.slug||x.id||base.id,name:x.name||base.name||'Mercedes-Benz',
+    year:x.year??base.year??null,priceNGN:Number(x.price_ngn)>0?Number(x.price_ngn):Number(base.priceNGN||0),
+    mileageKm:Number(x.mileage_km)>0?Number(x.mileage_km):Number(base.mileageKm||0),
+    specTag:x.spec_tag||base.specTag||'',status:x.status||base.status||'available',
+    brand:x.brand||base.brand||'Mercedes-Benz',
+    image:base.image||x.image_url||'',
+    description:x.description||base.description||'',condition:x.condition||base.condition||'',fuel:x.fuel||base.fuel||'',
+    transmission:x.transmission||base.transmission||'',body:x.body||base.body||'',drivetrain:x.drivetrain||base.drivetrain||'',
+    engineSize:x.engine_size||base.engineSize||'',cylinders:x.cylinders||base.cylinders||'',horsepower:x.horsepower||base.horsepower||'',
+    color:x.color||base.color||'',interiorColor:x.interior_color||base.interiorColor||'',seats:x.seats||base.seats||'',
+    registered:x.registered||base.registered||'',active:x.active!==false,searchAliases:base.searchAliases||[]
+  });
   function getCars(){if(cache.cars)return clone(cache.cars);const flags=readLocal();cache.cars=applyVisibility((global.MBCars||[]),flags);return clone(cache.cars);}
   async function hydrate(){
     const fallback=(global.MBCars||[]).map(c=>({...c,active:true}));
@@ -29,7 +30,16 @@
     if(global.MBBackend?.ready){
       try{
         const r=await global.MBBackend.get('inventory','select=*');
-        if(r.ok&&Array.isArray(r.data)&&r.data.length){const bm=staticById();cars=r.data.map(x=>fromRow(x,bm));}
+        if(r.ok&&Array.isArray(r.data)&&r.data.length){
+          const bm=staticById();
+          const rowsById=new Map(r.data.map(x=>[String(x.id),x]));
+          // Start from the current GitHub catalogue so its image paths always win.
+          // Supabase contributes editable metadata and visibility, and unknown DB
+          // rows remain available as extras when there is no static catalogue entry.
+          const merged=(global.MBCars||[]).map(base=>fromRow(rowsById.get(String(base.id))||{},base));
+          const extras=r.data.filter(x=>!bm.has(String(x.id))).map(x=>fromRow(x,{}));
+          cars=merged.concat(extras);
+        }
       }catch{}
       try{const r=await global.MBBackend.get('car_visibility','select=id,active');if(r.ok&&Array.isArray(r.data)){r.data.forEach(x=>{flags[x.id]=x.active!==false;});writeLocal(flags);}}catch{}
     }
