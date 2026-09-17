@@ -1,0 +1,66 @@
+MOSES BENZ — VEHICLE IMAGE REPLACEMENT MAP
+
+All catalogue vehicle images below are individual crops with the generated name/year captions removed.
+The filenames remain unchanged so the website automatically places each image with the matching vehicle record.
+
+01. a-180-2021.jpg  <- generated catalog position 1
+02. a-200-2022.jpg  <- generated catalog position 2
+03. a-250-2023.jpg  <- generated catalog position 3
+04. cla-200-2022.jpg  <- generated catalog position 4
+05. cla-250-2023.jpg  <- generated catalog position 5
+06. cla-250-e-2024.jpg  <- generated catalog position 6
+07. c-180-2020.jpg  <- generated catalog position 7
+08. c-200-2021.jpg  <- generated catalog position 8
+09. c-300-2022.jpg  <- generated catalog position 9
+10. c-300-e-2022.jpg  <- generated catalog position 10
+11. c-43-amg-2022.jpg  <- generated catalog position 11
+12. c-63-s-amg-2021.jpg  <- generated catalog position 12
+13. e-200-2020.jpg  <- generated catalog position 13
+14. e-220d-2021.jpg  <- generated catalog position 14
+15. e-300-2021.jpg  <- generated catalog position 15
+16. e-350-2022.jpg  <- generated catalog position 16
+17. e-350e-2024.jpg  <- generated catalog position 17
+18. e-450-4matic-2022.jpg  <- generated catalog position 18
+19. e-53-amg-2022.jpg  <- generated catalog position 19
+20. e-63-s-amg-2021.jpg  <- generated catalog position 20
+21. s-450-2021.jpg  <- generated catalog position 21
+22. s-500-2022.jpg  <- generated catalog position 22
+23. s-580-2022.jpg  <- generated catalog position 23
+24. maybach-s-580-2022.jpg  <- generated catalog position 24
+25. maybach-s-680-2023.jpg  <- generated catalog position 25
+26. gla-200-2024.jpg  <- generated catalog position 26
+27. gla-250-2022.jpg  <- generated catalog position 27
+28. gla-250-e-2023.jpg  <- generated catalog position 28
+29. gla-35-amg-2022.jpg  <- generated catalog position 29
+30. gla-45-amg-2023.jpg  <- generated catalog position 30
+31. glb-200-2022.jpg  <- generated catalog position 31
+32. glb-200d-2022.jpg  <- generated catalog position 32
+33. glb-250-2022.jpg  <- generated catalog position 33
+34. glb-35-amg-2022.jpg  <- generated catalog position 34
+35. glc-300-2022.jpg  <- generated catalog position 35
+36. glc-300-coupe-2023.jpg  <- generated catalog position 36
+37. glc-43-amg-2022.jpg  <- generated catalog position 37
+38. glc-63-s-amg-2022.jpg  <- generated catalog position 38
+39. gle-350-2020.jpg  <- generated catalog position 39
+40. gle-450-2021.jpg  <- generated catalog position 40
+41. gle-450-coupe-2022.jpg  <- generated catalog position 41
+42. gle-53-amg-2022.jpg  <- generated catalog position 42
+43. gle-63-s-amg-2021.jpg  <- generated catalog position 43
+44. gls-450-2021.jpg  <- generated catalog position 44
+45. gls-580-2022.jpg  <- generated catalog position 45
+46. gls-63-amg-2021.jpg  <- generated catalog position 46
+47. maybach-gls-600-2022.jpg  <- generated catalog position 47
+48. g-400d-2021.jpg  <- generated catalog position 48
+49. g-500-2021.jpg  <- generated catalog position 49
+50. g-550-2020.jpg  <- generated catalog position 50
+51. g-63-amg-2023.jpg  <- generated catalog position 51
+52. g-450d-2024.jpg  <- generated catalog position 52
+53. v-220d-2020.jpg  <- generated catalog position 53
+54. v-250d-2021.jpg  <- generated catalog position 54
+55. v-300d-2022.jpg  <- generated catalog position 55
+56. sl-43-amg-2023.jpg  <- generated catalog position 56
+57. sl-55-amg-2022.jpg  <- generated catalog position 57
+58. amg-gt-55-2024.jpg  <- generated catalog position 58
+59. amg-gt-63-2024.jpg  <- generated catalog position 59
+
+vehicle-placeholder.jpg is retained as the generic grey fallback for any future vehicle that does not yet have a replacement sample.
