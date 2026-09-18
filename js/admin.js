@@ -47,16 +47,46 @@
 
   async function renderBlogComments(){
     const list=document.getElementById('admin-blog-comments'); if(!list||!api()?.ready)return;
-    const c=adminCreds(); const r=await api().rpc('admin_blog_comments_list',{p_username:c.username||'',p_password:c.password||''});
+    const c=adminCreds();
+    const [r,rr]=await Promise.all([
+      api().rpc('admin_blog_comments_list',{p_username:c.username||'',p_password:c.password||''}),
+      api().rpc('admin_blog_comment_replies_list',{p_username:c.username||'',p_password:c.password||''})
+    ]);
     const items=r?.ok&&Array.isArray(r.data)?r.data:[];
-    list.innerHTML=items.length?items.map(x=>`<article class="admin-item"><div class="admin-item-main"><strong>${esc(x.post_slug)}</strong><small>${esc(x.name)} · ${new Date(x.created_at).toLocaleString('en-NG')}</small><p>${esc(x.comment)}</p>${x.admin_reply?`<div class="admin-reply"><strong>Your reply</strong><p>${esc(x.admin_reply)}</p></div>`:''}</div><div class="admin-item-actions"><button class="btn btn-ghost-light reply-comment" data-id="${esc(x.id)}">${x.admin_reply?'Edit Reply':'Reply'}</button><button class="btn btn-ghost-light delete-comment" data-id="${esc(x.id)}">Delete</button></div></article>`).join(''):'<p class="admin-card-note">No public comments yet.</p>';
+    const allReplies=rr?.ok&&Array.isArray(rr.data)?rr.data:[];
+    const byComment={}; allReplies.forEach(x=>{(byComment[x.comment_id]=byComment[x.comment_id]||[]).push(x);});
+    list.innerHTML=items.length?items.map(x=>{
+      const reps=(byComment[x.id]||[]).sort((a,b)=>(b.is_admin-a.is_admin)||String(a.created_at).localeCompare(String(b.created_at)));
+      return `<article class="admin-item" data-comment-id="${esc(x.id)}">
+        <div class="admin-item-main">
+          <strong>${esc(x.post_slug)}</strong>
+          <small>${esc(x.name)} · ${new Date(x.created_at).toLocaleString('en-NG')} · ${Number(x.likes)||0} like${Number(x.likes)===1?'':'s'}</small>
+          <p>${esc(x.comment)}</p>
+          ${reps.length?`<button type="button" class="btn btn-ghost-light admin-toggle-replies" data-toggle="${esc(x.id)}">View ${reps.length} repl${reps.length===1?'y':'ies'}</button>
+          <div class="admin-reply-thread" data-thread="${esc(x.id)}" hidden>${reps.map(rp=>`<div class="admin-reply${rp.is_admin?' is-admin':''}"><strong>${rp.is_admin?'Your reply (Team)':esc(rp.name)}</strong><p>${esc(rp.reply)}</p><button type="button" class="admin-delete-reply" data-reply-id="${esc(rp.id)}">Delete</button></div>`).join('')}</div>`:''}
+        </div>
+        <div class="admin-item-actions">
+          <button class="btn btn-ghost-light reply-comment" data-id="${esc(x.id)}">Reply</button>
+          <button class="btn btn-ghost-light delete-comment" data-id="${esc(x.id)}">Delete comment</button>
+        </div>
+      </article>`;
+    }).join(''):'<p class="admin-card-note">No public comments yet.</p>';
+    list.querySelectorAll('.admin-toggle-replies').forEach(b=>b.onclick=()=>{
+      const box=list.querySelector(`[data-thread="${b.dataset.toggle}"]`); if(!box)return;
+      box.hidden=!box.hidden; b.textContent=box.hidden?b.textContent.replace('Hide','View'):b.textContent.replace('View','Hide');
+    });
     list.querySelectorAll('.reply-comment').forEach(b=>b.onclick=async()=>{
-      const reply=prompt('Reply to this comment:',items.find(x=>x.id===b.dataset.id)?.admin_reply||''); if(reply===null)return;
-      const q=await api().rpc('admin_blog_comment_reply',{p_username:c.username||'',p_password:c.password||'',p_id:b.dataset.id,p_reply:reply.trim()});
+      const reply=prompt('Reply to this comment (visible to everyone, shown first among replies):',''); if(reply===null||!reply.trim())return;
+      const q=await api().rpc('admin_blog_comment_reply_add',{p_username:c.username||'',p_password:c.password||'',p_comment_id:b.dataset.id,p_reply:reply.trim()});
       if(!q.ok)alert('Could not save reply.'); else renderBlogComments();
     });
+    list.querySelectorAll('.admin-delete-reply').forEach(b=>b.onclick=async()=>{
+      if(!confirm('Delete this reply?'))return;
+      const q=await api().rpc('admin_blog_reply_delete',{p_username:c.username||'',p_password:c.password||'',p_id:b.dataset.replyId});
+      if(!q.ok)alert('Could not delete reply.'); else renderBlogComments();
+    });
     list.querySelectorAll('.delete-comment').forEach(b=>b.onclick=async()=>{
-      if(!confirm('Delete this public comment?'))return;
+      if(!confirm('Delete this public comment and all its replies?'))return;
       const q=await api().rpc('admin_blog_comment_delete',{p_username:c.username||'',p_password:c.password||'',p_id:b.dataset.id});
       if(!q.ok)alert('Could not delete comment.'); else renderBlogComments();
     });
