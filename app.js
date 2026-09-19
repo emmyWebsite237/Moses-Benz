@@ -425,7 +425,134 @@ function bindCareerForm(){
   };
 }
 function guide(){return `<section class="page-head"><div class="wrap"><span class="eyebrow">Mercedes-Benz Guide</span><h1>Mercedes-Benz ownership guidance.</h1></div></section><section class="section white"><div class="wrap prose"><h2>Diagnosis before parts</h2><p>A warning code is a clue, not automatically a command to replace a part. Good diagnosis combines fault codes, live information, physical inspection and the owner's description of the problem.</p><h2>Maintenance in Lagos</h2><p>Heat, traffic, dust and repeated short trips make regular inspection important. Keep records of oil, filters, brakes, tyres, battery and major repairs.</p><h2>Buying a used Mercedes-Benz</h2><p>Check documentation, body condition, service history, mechanical behaviour and diagnostic information before money changes hands.</p></div></section>`}
-async function render(){const hash=location.hash.replace(/^#/,'')||'home',parts=hash.split('/'),route=parts[0],arg=parts.slice(1).join('/');let html=route==='home'?home():route==='inventory'?await inventory():route==='car'?await car(decodeURIComponent(arg)):route==='blog'?await blog(arg?decodeURIComponent(arg):''):route==='appointments'?appointments():route==='contact'?contact():route==='careers'?careers():route==='guide'?guide():home();$('#app').innerHTML=html;$('#route-transition')?.classList.remove('is-active');window.scrollTo({top:0,behavior:'instant'});footer();fab();applyContacts();if(route==='home'){bindCards();homeReviews();bindReviewForm();initGallery();initMobileRails()}if(route==='inventory'){renderInventory();initMobileRails();}if(route==='car')bindCar(decodeURIComponent(arg));if(route==='appointments')bindAppointment();if(route==='careers')bindCareerForm();if(route==='blog'){bindCards();if(arg){bindBlogArticle(decodeURIComponent(arg));}}}
+let lastRenderedRoute=null;
+function shouldShowSplash(){
+  try{
+    const n=(parseInt(localStorage.getItem('mbac_home_visits')||'0',10)||0)+1;
+    localStorage.setItem('mbac_home_visits',String(n));
+    return (n%5)===1;
+  }catch(e){return false;}
+}
+function splashEngineSound(){
+  try{
+    const Ctx=window.AudioContext||window.webkitAudioContext; if(!Ctx)return;
+    const ctx=new Ctx(),osc=ctx.createOscillator(),gain=ctx.createGain();
+    osc.type='sawtooth';
+    osc.frequency.setValueAtTime(65,ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(210,ctx.currentTime+.45);
+    osc.frequency.exponentialRampToValueAtTime(100,ctx.currentTime+1.05);
+    gain.gain.setValueAtTime(0.0001,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.12,ctx.currentTime+.08);
+    gain.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+1.05);
+    osc.connect(gain);gain.connect(ctx.destination);
+    osc.start();osc.stop(ctx.currentTime+1.1);
+  }catch(e){}
+}
+function splashParticleMorph(canvas,img,w,h,onDone){
+  const dpr=Math.min(window.devicePixelRatio||1,2);
+  canvas.width=w*dpr;canvas.height=h*dpr;canvas.style.width=w+'px';canvas.style.height=h+'px';
+  const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);
+  const off=document.createElement('canvas');off.width=w;off.height=h;
+  const octx=off.getContext('2d');
+  let data;
+  try{octx.drawImage(img,0,0,w,h);data=octx.getImageData(0,0,w,h).data;}catch(e){onDone();return;}
+  const step=Math.max(2,Math.round(w/64));
+  const particles=[];
+  for(let y=0;y<h;y+=step)for(let x=0;x<w;x+=step){
+    const i=(y*w+x)*4,a=data[i+3];
+    if(a>80){
+      const angle=Math.random()*Math.PI*2,dist=50+Math.random()*130;
+      particles.push({tx:x,ty:y,sx:w/2+Math.cos(angle)*dist,sy:h/2+Math.sin(angle)*dist*.85,
+        color:`rgb(${data[i]},${data[i+1]},${data[i+2]})`,delay:Math.random()*260,size:1+Math.random()*1.2});
+    }
+  }
+  const dur=820,start=performance.now();let raf,cancelled=false;
+  function frame(now){
+    if(cancelled)return;
+    ctx.clearRect(0,0,w,h);
+    let allDone=true;
+    for(const p of particles){
+      let t=(now-start-p.delay)/dur;
+      if(t<1)allDone=false;
+      t=Math.max(0,Math.min(1,t));
+      const e=1-Math.pow(1-t,3);
+      ctx.globalAlpha=0.25+0.75*e;
+      ctx.fillStyle=p.color;
+      ctx.beginPath();ctx.arc(p.sx+(p.tx-p.sx)*e,p.sy+(p.ty-p.sy)*e,p.size,0,Math.PI*2);ctx.fill();
+    }
+    ctx.globalAlpha=1;
+    if(!allDone)raf=requestAnimationFrame(frame); else onDone();
+  }
+  raf=requestAnimationFrame(frame);
+  return ()=>{cancelled=true;if(raf)cancelAnimationFrame(raf);};
+}
+function showSplash(){
+  if(document.getElementById('splash'))return;
+  const splash=document.createElement('div');
+  splash.id='splash';splash.className='splash';splash.setAttribute('role','dialog');splash.setAttribute('aria-label','Moses Benz Auto Care intro');
+  splash.innerHTML=`<div class="splash-scene">
+    <svg class="splash-road" viewBox="0 0 800 40" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="20" x2="800" y2="20"/></svg>
+    <svg class="splash-car" viewBox="0 0 240 90" aria-hidden="true">
+      <g class="splash-car-body">
+        <path d="M10 62 Q10 34 46 30 L78 30 Q96 14 132 14 L168 14 Q198 14 210 30 L222 30 Q234 30 234 46 L234 62 Z" fill="#11131a"/>
+        <path d="M92 30 Q104 18 132 18 L162 18 Q186 18 198 30 Z" fill="#3a3d48"/>
+        <circle class="splash-wheel" cx="62" cy="64" r="15" fill="#0a0b0e"/>
+        <circle class="splash-wheel" cx="196" cy="64" r="15" fill="#0a0b0e"/>
+        <circle cx="62" cy="64" r="6" fill="#8a8d99"/><circle cx="196" cy="64" r="6" fill="#8a8d99"/>
+        <circle class="splash-headlight" cx="228" cy="42" r="4" fill="#fff"/>
+      </g>
+    </svg>
+    <div class="splash-brand" id="splash-brand">
+      <span class="splash-emblem-wrap"><canvas id="splash-canvas" class="splash-canvas"></canvas><img class="splash-logo" id="splash-logo-img" src="images/moses-benz-logo.png" alt="Moses Benz Auto Care"></span>
+      <span class="splash-word" id="splash-word"><b>Moses Benz</b><small>Auto Care · Idimu, Lagos</small></span>
+    </div>
+  </div>
+  <button type="button" id="splash-skip" class="splash-skip">Tap to skip <i class="fa-solid fa-forward"></i></button>`;
+  document.body.appendChild(splash);
+  const brand=$('#splash-brand'),skipBtn=$('#splash-skip'),canvas=$('#splash-canvas'),logoImg=$('#splash-logo-img'),word=$('#splash-word');
+  const emblemWrap=splash.querySelector('.splash-emblem-wrap');
+  let done=false,cancelParticles=null,particlesDone=false;
+  function revealCrisp(){
+    if(particlesDone)return; particlesDone=true;
+    canvas.classList.add('is-out');logoImg.classList.add('is-in');word.classList.add('is-in');
+  }
+  function dock(){
+    if(done)return; done=true;
+    if(cancelParticles)cancelParticles();
+    revealCrisp();
+    const target=document.querySelector('.header .brand');
+    if(target&&brand){
+      const t=target.getBoundingClientRect(),s=brand.getBoundingClientRect();
+      const scale=t.height/s.height;
+      const sCenterX=s.left+s.width/2,sCenterY=s.top+s.height/2,tCenterX=t.left+t.width/2,tCenterY=t.top+t.height/2;
+      brand.classList.add('splash-dock');
+      brand.style.left=s.left+'px';brand.style.top=s.top+'px';brand.style.width=s.width+'px';brand.style.height=s.height+'px';
+      brand.getBoundingClientRect();
+      brand.style.transform=`translate(${tCenterX-sCenterX}px,${tCenterY-sCenterY}px) scale(${scale})`;
+    }
+    setTimeout(()=>splash.classList.add('splash-gone'),150);
+    setTimeout(()=>splash.remove(),1150);
+  }
+  function skip(){splashEngineSound();dock();}
+  skipBtn.addEventListener('click',e=>{e.stopPropagation();skip();});
+  splash.addEventListener('click',skip);
+  const splashStart=performance.now();
+  function startMorph(){
+    if(done||particlesDone)return;
+    const rect=emblemWrap.getBoundingClientRect();
+    cancelParticles=splashParticleMorph(canvas,img,Math.round(rect.width)||220,Math.round(rect.height)||124,revealCrisp);
+  }
+  const img=new Image();
+  img.onload=()=>{
+    const elapsed=performance.now()-splashStart,delay=Math.max(60,950-elapsed);
+    setTimeout(startMorph,delay);
+  };
+  img.onerror=revealCrisp;
+  img.src='images/moses-benz-logo.png';
+  setTimeout(skip,4200);
+}
+async function render(){const hash=location.hash.replace(/^#/,'')||'home',parts=hash.split('/'),route=parts[0],arg=parts.slice(1).join('/');let html=route==='home'?home():route==='inventory'?await inventory():route==='car'?await car(decodeURIComponent(arg)):route==='blog'?await blog(arg?decodeURIComponent(arg):''):route==='appointments'?appointments():route==='contact'?contact():route==='careers'?careers():route==='guide'?guide():home();$('#app').innerHTML=html;$('#route-transition')?.classList.remove('is-active');window.scrollTo({top:0,behavior:'instant'});footer();fab();applyContacts();if(route==='home'){bindCards();homeReviews();bindReviewForm();initGallery();initMobileRails();if(lastRenderedRoute!=='home'&&shouldShowSplash())showSplash();}
+lastRenderedRoute=route;if(route==='inventory'){renderInventory();initMobileRails();}if(route==='car')bindCar(decodeURIComponent(arg));if(route==='appointments')bindAppointment();if(route==='careers')bindCareerForm();if(route==='blog'){bindCards();if(arg){bindBlogArticle(decodeURIComponent(arg));}}}
 async function homeReviews(){
   const r=await api('reviews?select=*&approved=eq.true&order=created_at.desc&limit=12'),root=$('#reviews');
   if(root&&r.ok&&Array.isArray(r.data)&&r.data.length){
