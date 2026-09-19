@@ -34,6 +34,27 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<div id="splash" class="splash" role="dialog" aria-label="Moses Benz Auto Care intro">
+  <div class="splash-scene">
+    <svg class="splash-road" viewBox="0 0 800 40" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="20" x2="800" y2="20"/></svg>
+    <svg class="splash-car" viewBox="0 0 240 90" aria-hidden="true">
+      <g class="splash-car-body">
+        <path d="M10 62 Q10 34 46 30 L78 30 Q96 14 132 14 L168 14 Q198 14 210 30 L222 30 Q234 30 234 46 L234 62 Z" fill="#11131a"/>
+        <path d="M92 30 Q104 18 132 18 L162 18 Q186 18 198 30 Z" fill="#3a3d48"/>
+        <circle class="splash-wheel" cx="62" cy="64" r="15" fill="#0a0b0e"/>
+        <circle class="splash-wheel" cx="196" cy="64" r="15" fill="#0a0b0e"/>
+        <circle cx="62" cy="64" r="6" fill="#8a8d99"/>
+        <circle cx="196" cy="64" r="6" fill="#8a8d99"/>
+        <circle class="splash-headlight" cx="228" cy="42" r="4" fill="#fff"/>
+      </g>
+    </svg>
+    <div class="splash-brand" id="splash-brand">
+      <img class="splash-logo" src="images/moses-benz-logo.png" alt="Moses Benz Auto Care">
+      <span class="splash-word"><b>Moses Benz</b><small>Auto Care · Idimu, Lagos</small></span>
+    </div>
+  </div>
+  <button type="button" id="splash-skip" class="splash-skip">Tap to skip <i class="fa-solid fa-forward"></i></button>
+</div>
 <div class="top-progress" id="top-progress"></div>
 <header class="header">
   <div class="wrap nav-wrap">
@@ -68,5 +89,53 @@
 <script src="js/backend.js"></script>
 <script src="js/store.js"></script>
 <script src="app.js"></script>
+<script>
+(function(){
+  var splash=document.getElementById('splash');
+  if(!splash)return;
+  try{if(sessionStorage.getItem('mbac_splash_seen')){splash.remove();return;}}catch(e){}
+  var brand=document.getElementById('splash-brand');
+  var skipBtn=document.getElementById('splash-skip');
+  var done=false;
+  function engineSound(){
+    try{
+      var Ctx=window.AudioContext||window.webkitAudioContext; if(!Ctx)return;
+      var ctx=new Ctx();
+      var osc=ctx.createOscillator(),gain=ctx.createGain();
+      osc.type='sawtooth';
+      osc.frequency.setValueAtTime(65,ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(210,ctx.currentTime+.45);
+      osc.frequency.exponentialRampToValueAtTime(100,ctx.currentTime+1.05);
+      gain.gain.setValueAtTime(0.0001,ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.12,ctx.currentTime+.08);
+      gain.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+1.05);
+      osc.connect(gain);gain.connect(ctx.destination);
+      osc.start();osc.stop(ctx.currentTime+1.1);
+    }catch(e){}
+  }
+  function finish(){
+    if(done)return; done=true;
+    var target=document.querySelector('.header .brand');
+    if(target&&brand){
+      var t=target.getBoundingClientRect(),s=brand.getBoundingClientRect();
+      var scale=t.height/s.height;
+      var sCenterX=s.left+s.width/2, sCenterY=s.top+s.height/2;
+      var tCenterX=t.left+t.width/2, tCenterY=t.top+t.height/2;
+      brand.classList.add('splash-dock');
+      brand.style.left=s.left+'px'; brand.style.top=s.top+'px';
+      brand.style.width=s.width+'px'; brand.style.height=s.height+'px';
+      brand.getBoundingClientRect();
+      brand.style.transform='translate('+(tCenterX-sCenterX)+'px,'+(tCenterY-sCenterY)+'px) scale('+scale+')';
+    }
+    setTimeout(function(){splash.classList.add('splash-gone');},150);
+    setTimeout(function(){splash.remove();},1150);
+    try{sessionStorage.setItem('mbac_splash_seen','1');}catch(e){}
+  }
+  setTimeout(function(){brand&&brand.classList.add('splash-brand-in');},550);
+  skipBtn&&skipBtn.addEventListener('click',function(e){e.stopPropagation();engineSound();finish();});
+  splash.addEventListener('click',function(){engineSound();finish();});
+  setTimeout(function(){engineSound();finish();},3800);
+})();
+</script>
 </body>
 </html>
