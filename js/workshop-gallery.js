@@ -1,19 +1,11 @@
 /* Moses Benz Auto Care — homepage workshop gallery. Add photographs to /images/workshop-gallery and list filenames below. */
 (() => {
-  const photos=[
-    ['workshop-yard.jpg','Our yard on Lasu Rd — several bays working at once.'],
-    ['street-cars.jpg','Cars in and around the workshop.'],
-    ['workshop-technicians.jpg','Our technicians at work.'],
-    ['front.jpg','The workshop frontage.'],
-    ['landmark-fuel-station.jpg','Our local Idimu surroundings.'],
-    ['workshop-detail.jpg','A closer look inside the workshop.'],
-    ['customer-car.jpg','A Mercedes-Benz being attended to.']
-  ];
+  const photos=Array.from({length:12},(_,i)=>[`img${i+1}`,`Moses Benz workshop image ${i+1}`]);
   const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
   function init(){
     const root=document.getElementById('workshop-gallery-carousel');if(!root)return;
     const usable=photos.filter(p=>p[0]);
-    const slides=usable.map(p=>`<figure class="workshop-gallery-slide"><img src="/images/workshop-gallery/${esc(p[0])}" alt="${esc(p[1])}" loading="lazy" decoding="async"><figcaption>${esc(p[1])}</figcaption></figure>`).join('');
+    const slides=usable.map(p=>`<figure class="workshop-gallery-slide"><img src="/images/workshop-gallery/${esc(p[0])}.jpg" alt="${esc(p[1])}" loading="lazy" decoding="async" onerror="this.dataset.ext=(Number(this.dataset.ext||0)+1);const e=['jpg','jpeg','png','webp'][Number(this.dataset.ext)];if(e)this.src='/images/workshop-gallery/${esc(p[0])}.'+e;else this.closest('figure')?.remove()"><figcaption>${esc(p[1])}</figcaption></figure>`).join('');
     root.innerHTML=`<div class="workshop-gallery-viewport"><div class="workshop-gallery-track">${slides}</div></div>`;
     const track=root.querySelector('.workshop-gallery-track'); const items=[...track.children]; if(items.length<2)return;
     // Clone once so the movement can pass the end and continue naturally.

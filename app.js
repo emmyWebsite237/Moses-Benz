@@ -4,6 +4,11 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 const norm=s=>String(s??'').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
 let settings={phone:'',whatsapp:'',email:'',instagram:'',facebook:'',youtube:'',tiktok:'',x:''};
+const IMAGE_EXTENSIONS=['jpg','jpeg','png','webp'];
+function numberedImageCandidates(folder,slot){return IMAGE_EXTENSIONS.map(ext=>`${folder}/img${slot}.${ext}`);}
+function imageFallbackScript(folder,slot){const candidates=numberedImageCandidates(folder,slot);return `this.dataset.tryIndex=String(Number(this.dataset.tryIndex||0)+1);const i=Number(this.dataset.tryIndex);if(i<${candidates.length}){this.src='${candidates[0]}'.replace('jpg', ['jpg','jpeg','png','webp'][i]);}else{this.closest('article,figure')?.remove();}`;}
+function whatsappNumber(){return String(settings.whatsapp||'').match(/wa\.me\/(\d+)/i)?.[1]||String(settings.whatsapp||'').replace(/\D/g,'');}
+function whatsappLink(value){const raw=String(value||'').trim();if(!raw)return '';if(/^https?:\/\/\S+/i.test(raw))return raw;const n=raw.replace(/\D/g,'');return n?`https://wa.me/${n}`:'';}
 const POSTS=[
 {slug:"how-to-keep-your-mercedes-benz-healthy-in-lagos",category:"Mercedes-Benz Maintenance",title:"How to Keep Your Mercedes-Benz Healthy in Lagos",excerpt:"Practical habits for keeping a Mercedes-Benz dependable through Lagos traffic, heat, dust and stop-start driving.",content:"Owning a Mercedes-Benz in Lagos rewards consistency more than any single expensive repair ever will. The most useful maintenance habit is not waiting for a major fault before visiting a specialist. Keep the service history, follow the correct service intervals for your specific model and pay close attention to changes in sound, smell, vibration or performance, because those small signals almost always arrive well before an actual breakdown does.\n\nTraffic changes how a car is used in ways that owners rarely plan around. Long periods of idling, repeated acceleration and braking, short trips and hot weather can place far more demand on cooling, braking, transmission and electrical systems than the same car would experience on an open highway. A car that feels completely normal today can still benefit from a scheduled inspection, simply because Lagos driving conditions quietly work components harder than distance alone would suggest.\n\nCheck the basics between services rather than waiting for the next appointment to reveal them. Look at tyre pressures and tread depth, make sure every exterior light actually works, watch the coolant and washer-fluid levels, and look underneath a parked vehicle for fresh fluid marks on the ground. Do not ignore a warning simply because the car still drives normally; a vehicle can continue running for a long time while a real problem quietly develops underneath.\n\nWhen a warning light appears, diagnosis should always come before parts are ordered. Clearing a fault code may remove the dashboard message temporarily without ever fixing the underlying cause, which usually means the same warning returns within days or weeks. A proper inspection combines fault codes, live sensor data, physical checks and the driver's own description of when and how the problem happens.\n\nKeep records of oil and filter changes, brake work, tyres, battery replacement and any major repairs carried out on the vehicle. A clear, organised history makes future diagnosis considerably easier for whoever works on the car next, and it also helps preserve the resale value of the vehicle by showing a prospective buyer exactly how it has been looked after.\n\nFinally, choose a workshop that genuinely understands Mercedes-Benz systems rather than treating every vehicle as a generic car with generic problems. Specialist knowledge saves real time and money because the technician starts with the right questions, recognises model-specific patterns immediately, and follows the correct diagnostic approach instead of guessing their way toward an answer."},
 {slug:"what-dashboard-warning-lights-are-trying-to-tell-you",category:"Mercedes-Benz Knowledge",title:"What Dashboard Warning Lights Are Trying to Tell You",excerpt:"Understand what your Mercedes-Benz is trying to communicate before you reset a warning and carry on driving.",content:"Dashboard warnings are the car's way of communicating that a system needs attention right now rather than at some vague point in the future. They should not automatically be treated as proof that one particular part has failed, because a single warning light can sit at the end of a chain of possible causes that only a proper inspection can actually narrow down.\n\nThe first question is always whether the warning is red, amber or accompanied by a serious change in how the vehicle actually drives. A red warning, or a major braking, steering, overheating or engine problem, deserves immediate attention rather than a wait-and-see approach. If the car feels unsafe to continue driving in any way, stop as soon as it is safe to do so and arrange professional assistance straight away.\n\nAmber warnings still deserve proper investigation even though they feel less urgent. A sensor, battery condition, wiring problem, fluid issue or another system fault can all trigger the same message on the dashboard. Resetting the warning without finding its actual cause can allow the underlying problem to keep developing quietly until it eventually becomes a far more expensive repair than it needed to be.\n\nMercedes-Benz vehicles use multiple control units that constantly communicate with one another behind the scenes. This means one relatively small fault can create several different symptoms across seemingly unrelated systems. A technician should read the stored fault information, examine live values where appropriate, and physically inspect the vehicle before recommending any parts be replaced.\n\nWrite down exactly what happened when the warning first appeared, because those details are more useful than they might seem. Note whether the engine was cold or hot, whether the vehicle was accelerating or idling, and whether you noticed any loss of power, vibration or unusual noise alongside the message. Those small observations can genuinely save diagnostic time once the car is on the ramp.\n\nIf a warning disappears after restarting the vehicle, do not assume the underlying problem has gone away with it. Intermittent faults can be particularly important precisely because they tend to return under the same conditions that triggered them the first time. Keep the message in mind, note when it happened, and arrange a proper check rather than simply hoping it stays away."},
@@ -39,7 +44,7 @@ async function loadSettings(){
 function applyContacts(){
   const digits=v=>String(v||'').replace(/\D/g,'');
   document.querySelectorAll('[data-contact="phone"]').forEach(a=>{a.href=settings.phone?'tel:+'+digits(settings.phone):'#';a.removeAttribute('aria-disabled');if(!settings.phone)a.setAttribute('aria-disabled','true');});
-  document.querySelectorAll('[data-contact="whatsapp"]').forEach(a=>{a.href=settings.whatsapp?'https://wa.me/'+digits(settings.whatsapp):'#';a.removeAttribute('aria-disabled');if(!settings.whatsapp)a.setAttribute('aria-disabled','true');});
+  document.querySelectorAll('[data-contact="whatsapp"]').forEach(a=>{a.href=whatsappLink(settings.whatsapp)||'#';a.removeAttribute('aria-disabled');if(!settings.whatsapp)a.setAttribute('aria-disabled','true');});
   ['facebook','instagram','youtube','tiktok','x'].forEach(k=>document.querySelectorAll('[data-contact="'+k+'"]').forEach(a=>{a.hidden=!settings[k];if(settings[k])a.href=settings[k]}));
   const emailLinks=[...document.querySelectorAll('[data-contact="email"],[data-email]')];
   emailLinks.forEach(a=>{a.href='#';a.onclick=e=>{e.preventDefault();if(!settings.email)return;const to=encodeURIComponent(settings.email),web='https://mail.google.com/mail/?view=cm&fs=1&to='+to;if(/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)){location.href='googlegmail:///co?to='+to;setTimeout(()=>location.href=web,900)}else window.open(web,'_blank','noopener')}});
@@ -152,9 +157,12 @@ function carCard(c,opts={}){
   const popular=opts.popular||false;
   const meta=[c.specTag,c.mileageKm?Number(c.mileageKm).toLocaleString()+' km':''].filter(Boolean).join(' · ');
   const condition=c.condition?`<span class="stock-meta">${esc(c.condition)}</span>`:'';
+  const slot=Number(String(c.image||'').match(/img(\d+)/i)?.[1]||0);
+  const image=slot?`/cars/img${slot}.jpg`:(c.image||'');
+  const fallback=slot?`this.dataset.ext=(Number(this.dataset.ext||0)+1);const e=['jpg','jpeg','png','webp'][Number(this.dataset.ext)];if(e){this.src='/cars/img${slot}.'+e;}else{this.closest('.car-card')?.remove();}`:"this.closest('.car-card')?.remove();";
   return `<article class="car-card inventory-card${popular?' is-popular':''}" data-slug="${esc(c.slug)}">
     <div class="car-card-media">
-      <img src="${BASE+esc(c.image)}" alt="${esc(c.name)}" loading="lazy">
+      <img src="${esc(image)}" alt="${esc(c.name)}" loading="lazy" onerror="${fallback}">
       ${popular?'<span class="car-badge popular-badge">Popular</span>':''}
     </div>
     <div class="car-card-body">
@@ -166,7 +174,7 @@ function carCard(c,opts={}){
   </article>`;
 }
 function sendCarDM(c){
-  const n=String(settings.whatsapp||'').replace(/\D/g,'');
+  const n=whatsappNumber();
   if(!n){goRoute('#contact');return;}
   const message=`Hello Moses Benz Auto Care. Is the ${c.name}${c.year?` (${c.year})`:''} currently available? Please send me the current details. Thank you.`;
   window.open('https://wa.me/'+n+'?text='+encodeURIComponent(message),'_blank','noopener');
@@ -179,8 +187,8 @@ function bindCards(){
     if(dm&&c)dm.onclick=e=>{e.preventDefault();e.stopPropagation();sendCarDM(c);};
   });
 }
-function home(){return `<section class="hero"><div class="hero-bg"></div><div class="wrap hero-content"><span class="eyebrow">Idimu, Lagos · Mercedes-Benz Specialists</span><h1>Keep the <i>star</i> running true.</h1><p>Mercedes-Benz diagnosis, servicing, repair and vehicle sales from a specialist workshop in Idimu, Lagos.</p><div class="actions"><a class="btn red" href="#appointments">Book an Appointment</a><a class="btn light" href="#inventory">Browse Inventory</a></div><div class="stats"><div><b>20+</b><span>Certified technicians</span></div><div><b>12+</b><span>Years of experience</span></div><div><b>Mercedes-Benz</b><span>Specialist workshop</span></div><div><b>Idimu</b><span>Lagos</span></div></div></div></section><div class="marquee"><div>C-CLASS · E-CLASS · S-CLASS · GLE · G-CLASS · AMG GT · CLA · EQ · MAYBACH · </div></div><section class="section white"><div class="wrap"><div class="section-head"><span class="eyebrow">Mercedes-Benz Sales</span><h2>Selected vehicles available through Moses Benz.</h2><p>Browse a few vehicles from the full catalogue.</p></div><div id="home-cars" class="car-grid home-car-rail">${cars().filter(c=>c.active!==false).slice(0,3).map(carCard).join('')}</div><div class="center"><a class="btn red" href="#inventory">View Full Inventory</a></div></div></section><section class="section gallery-section"><div class="wrap"><div class="section-head"><span class="eyebrow">Inside Moses Benz</span><h2>Real work. Real cars. Our workshop.</h2></div><div class="gallery"><div class="gallery-track">${['IMG_3708.jpeg','IMG_3786.jpeg','IMG_3790.jpeg','IMG_3791.jpeg','IMG_3793.jpeg','IMG_3798.jpeg','IMG_3806.jpeg','workshop-yard.jpg','workshop-technicians.jpg','street-cars.jpg','landmark-fuel-station.jpg'].map((p,i)=>`<figure><img src="${BASE}/images/workshop-gallery/${p}" alt="Moses Benz workshop photo ${i+1}" loading="lazy"></figure>`).join('')}</div></div></div></section><section class="section dark"><div class="wrap"><div class="section-head"><span class="eyebrow">How It Works</span><h2>From booking to collection.</h2></div><div class="steps"><article><b>01</b><h3>Book</h3><p>Tell us the Mercedes model and what is happening.</p></article><article><b>02</b><h3>Diagnose</h3><p>We investigate the cause before recommending parts.</p></article><article><b>03</b><h3>Approve & Repair</h3><p>You understand the work before it begins.</p></article><article><b>04</b><h3>Collect</h3><p>We explain what was done and what to watch next.</p></article></div></div></section><section class="section white"><div class="wrap"><div class="section-head"><span class="eyebrow">From the Workshop</span><h2>Useful things to know about your car.</h2></div><div class="blog-grid">${POSTS.slice(0,3).map(postCard).join('')}</div><div class="center"><a class="btn red" href="#blog">Read the Blog</a></div></div></section><section class="section soft"><div class="wrap"><div class="section-head"><span class="eyebrow">Reviews</span><h2>Owners who trust us with the star.</h2></div><div class="reviews-window"><div id="reviews" class="review-grid"><article class="review"><b>Moses Benz Auto Care</b><p>Professional Mercedes-Benz diagnosis, servicing and repair.</p></article><article class="review"><b>Your experience matters</b><p>Share your experience with the workshop below.</p></article></div></div><form id="review-form" class="form-card review-form"><div class="two"><label>Your name *<input name="name" required maxlength="80"></label><label>Mercedes-Benz model<input name="model" maxlength="80" placeholder="C 300"></label></div><label>Rating *<select name="rating" required><option value="">Choose a rating</option><option value="5">5 — Excellent</option><option value="4">4 — Very good</option><option value="3">3 — Good</option><option value="2">2 — Fair</option><option value="1">1 — Poor</option></select></label><label>Your review *<textarea name="review" rows="4" required maxlength="2000"></textarea></label><button class="btn red" type="submit">Submit Review</button><p id="review-status" class="status"></p></form></div></section><section class="section white"><div class="wrap career-card"><div><span class="eyebrow">Careers</span><h2>Build your career around Mercedes-Benz.</h2><p>We are interested in skilled, disciplined people who care about proper automotive work.</p></div><a class="btn red" href="#careers">Explore Careers</a></div></section><section class="find"><div class="map"><iframe src="https://www.google.com/maps?q=Moses+Benz+Auto+Care,+11+Lasu+Rd,+Idimu,+Lagos&output=embed" loading="lazy" title="Moses Benz Auto Care map"></iframe></div><div class="find-copy"><span class="eyebrow">Find Us</span><h2>11 Lasu Rd, Idimu, Lagos.</h2><p>Beside Federal Peace Estate, just off the Lasu-Isheri axis.</p><a class="btn red" href="https://www.google.com/maps/place/?q=place_id:ChIJ9wS7aQCROxARHinfFB1ds1w" target="_blank">Open in Google Maps</a></div></section>`}
-function postCard(p){return '<article class="blog-card"><img src="'+BASE+'/images/workshop-yard.jpg" alt="'+esc(p.title)+'" loading="lazy"><div><span class="eyebrow">'+esc(p.category)+'</span><h2>'+esc(p.title)+'</h2><p>'+esc(p.excerpt)+'</p><a href="#blog/'+encodeURIComponent(p.slug)+'">Read article →</a></div></article>'}
+function home(){return `<section class="hero"><div class="hero-bg"></div><div class="wrap hero-content"><span class="eyebrow">Idimu, Lagos · Mercedes-Benz Specialists</span><h1>Keep the <i>star</i> running true.</h1><p>Mercedes-Benz diagnosis, servicing, repair and vehicle sales from a specialist workshop in Idimu, Lagos.</p><div class="actions"><a class="btn red" href="#appointments">Book an Appointment</a><a class="btn light" href="#inventory">Browse Inventory</a></div><div class="stats"><div><b>20+</b><span>Certified technicians</span></div><div><b>12+</b><span>Years of experience</span></div><div><b>Mercedes-Benz</b><span>Specialist workshop</span></div><div><b>Idimu</b><span>Lagos</span></div></div></div></section><div class="marquee"><div>C-CLASS · E-CLASS · S-CLASS · GLE · G-CLASS · AMG GT · CLA · EQ · MAYBACH · </div></div><section class="section white"><div class="wrap"><div class="section-head"><span class="eyebrow">Mercedes-Benz Sales</span><h2>Selected vehicles available through Moses Benz.</h2><p>Browse a few vehicles from the full catalogue.</p></div><div id="home-cars" class="car-grid home-car-rail">${cars().filter(c=>c.active!==false).slice(0,3).map(carCard).join('')}</div><div class="center"><a class="btn red" href="#inventory">View Full Inventory</a></div></div></section><section class="section gallery-section"><div class="wrap"><div class="section-head"><span class="eyebrow">Inside Moses Benz</span><h2>Real work. Real cars. Our workshop.</h2></div><div class="gallery"><div class="gallery-track">${Array.from({length:12},(_,i)=>i+1).map(i=>`<figure><img src="/images/workshop-gallery/img${i}.jpg" alt="Moses Benz workshop photo ${i}" loading="lazy" data-image-slot="${i}" onerror="this.dataset.ext=(Number(this.dataset.ext||0)+1);const e=['jpg','jpeg','png','webp'][Number(this.dataset.ext)];if(e){this.src='/images/workshop-gallery/img${i}.'+e;}else{this.closest('figure')?.remove();}"></figure>`).join('')}</div></div></div></section><section class="section dark"><div class="wrap"><div class="section-head"><span class="eyebrow">How It Works</span><h2>From booking to collection.</h2></div><div class="steps"><article><b>01</b><h3>Book</h3><p>Tell us the Mercedes model and what is happening.</p></article><article><b>02</b><h3>Diagnose</h3><p>We investigate the cause before recommending parts.</p></article><article><b>03</b><h3>Approve & Repair</h3><p>You understand the work before it begins.</p></article><article><b>04</b><h3>Collect</h3><p>We explain what was done and what to watch next.</p></article></div></div></section><section class="section white"><div class="wrap"><div class="section-head"><span class="eyebrow">From the Workshop</span><h2>Useful things to know about your car.</h2></div><div class="blog-grid">${POSTS.slice(0,3).map(postCard).join('')}</div><div class="center"><a class="btn red" href="#blog">Read the Blog</a></div></div></section><section class="section soft"><div class="wrap"><div class="section-head"><span class="eyebrow">Reviews</span><h2>Owners who trust us with the star.</h2></div><div class="reviews-window"><div id="reviews" class="review-grid"><article class="review"><b>Moses Benz Auto Care</b><p>Professional Mercedes-Benz diagnosis, servicing and repair.</p></article><article class="review"><b>Your experience matters</b><p>Share your experience with the workshop below.</p></article></div></div><form id="review-form" class="form-card review-form"><div class="two"><label>Your name *<input name="name" required maxlength="80"></label><label>Mercedes-Benz model<input name="model" maxlength="80" placeholder="C 300"></label></div><label>Rating *<select name="rating" required><option value="">Choose a rating</option><option value="5">5 — Excellent</option><option value="4">4 — Very good</option><option value="3">3 — Good</option><option value="2">2 — Fair</option><option value="1">1 — Poor</option></select></label><label>Your review *<textarea name="review" rows="4" required maxlength="2000"></textarea></label><button class="btn red" type="submit">Submit Review</button><p id="review-status" class="status"></p></form></div></section><section class="section white"><div class="wrap career-card"><div><span class="eyebrow">Careers</span><h2>Build your career around Mercedes-Benz.</h2><p>We are interested in skilled, disciplined people who care about proper automotive work.</p></div><a class="btn red" href="#careers">Explore Careers</a></div></section><section class="find"><div class="map"><iframe src="https://www.google.com/maps?q=Moses+Benz+Auto+Care,+11+Lasu+Rd,+Idimu,+Lagos&output=embed" loading="lazy" title="Moses Benz Auto Care map"></iframe></div><div class="find-copy"><span class="eyebrow">Find Us</span><h2>11 Lasu Rd, Idimu, Lagos.</h2><p>Beside Federal Peace Estate, just off the Lasu-Isheri axis.</p><a class="btn red" href="https://www.google.com/maps/place/?q=place_id:ChIJ9wS7aQCROxARHinfFB1ds1w" target="_blank">Open in Google Maps</a></div></section>`}
+function postCard(p){const image=String(p.image_url||p.image||'').trim()||'/images/blog/img1.jpg';return `<article class="blog-card"><img src="${esc(image)}" alt="${esc(p.title)}" loading="lazy" onerror="this.style.display='none'"><div><span class="eyebrow">${esc(p.category)}</span><h2>${esc(p.title)}</h2><p>${esc(p.excerpt)}</p><a href="#blog/${encodeURIComponent(p.slug)}">Read article →</a></div></article>`}
 const MODEL_FAMILY_INFO={
 "A-Class":"The A-Class is Mercedes-Benz's entry point into the range: a compact hatchback built around everyday usability, efficient turbocharged four-cylinder engines and the brand's newer cabin technology. It suits city driving, a first Mercedes-Benz, or anyone who wants the badge and build quality without stepping up to a larger sedan.",
 "CLA":"The CLA is a four-door coupe built on the same compact platform as the A-Class, but with a lower, more sloped roofline and a sportier stance. It trades a little rear headroom and boot space for styling, making it a popular choice for buyers who want compact-executive presence at a lower price point than a C-Class.",
@@ -216,7 +224,7 @@ function modelFamily(name){
 }
 async function car(slug){const c=cars().find(x=>x.slug===slug);if(!c)return '<section class="section white"><div class="wrap empty"><h1>Vehicle not found</h1><a class="btn red" href="#inventory">Back to Inventory</a></div></section>';
   const family=modelFamily(c.name),about=MODEL_FAMILY_INFO[family];
-  return `<section class="section white"><div class="wrap"><a class="back" href="#inventory">← Back to Inventory</a><div class="detail-grid"><div><img class="detail-image" src="${BASE}${esc(c.image)}" alt="${esc(c.name)}"></div><div><span class="eyebrow">Mercedes-Benz · For Sale</span><h1>${esc(c.name)}</h1><p>${esc(c.description)}</p><button id="car-wa" class="btn red">Send a DM to ask if it is available</button></div></div><div class="spec-panel"><h2>Full details</h2><div class="spec-grid">${[['Year',c.year],['Mileage',(c.mileageKm||0)+' km'],['Specification',c.specTag],['Condition',c.condition],['Transmission',c.transmission],['Fuel',c.fuel],['Body',c.body],['Drivetrain',c.drivetrain],['Engine',c.engineSize],['Cylinders',c.cylinders],['Horsepower',c.horsepower?c.horsepower+' hp':''],['Colour',c.color],['Interior',c.interiorColor],['Seats',c.seats],['Registration',c.registered]].filter(x=>x[1]).map(x=>'<div><span>'+esc(x[0])+'</span><b>'+esc(x[1])+'</b></div>').join('')}</div>${about?`<div class="model-about"><h3>About the ${esc(family)}</h3><p>${esc(about)}</p></div>`:''}</div></div></section>`}
+  return `<section class="section white"><div class="wrap"><a class="back" href="#inventory">← Back to Inventory</a><div class="detail-grid"><div><img class="detail-image" src="${BASE}${esc(c.image)}" alt="${esc(c.name)}" onerror="this.dataset.ext=(Number(this.dataset.ext||0)+1);const e=['jpg','jpeg','png','webp'][Number(this.dataset.ext)];const n=this.src.match(/img(\d+)/)?.[1];if(e&&n)this.src='/cars/img'+n+'.'+e;"></div><div><span class="eyebrow">Mercedes-Benz · For Sale</span><h1>${esc(c.name)}</h1><p>${esc(c.description)}</p><button id="car-wa" class="btn red">Send a DM to ask if it is available</button></div></div><div class="spec-panel"><h2>Full details</h2><div class="spec-grid">${[['Year',c.year],['Mileage',(c.mileageKm||0)+' km'],['Specification',c.specTag],['Condition',c.condition],['Transmission',c.transmission],['Fuel',c.fuel],['Body',c.body],['Drivetrain',c.drivetrain],['Engine',c.engineSize],['Cylinders',c.cylinders],['Horsepower',c.horsepower?c.horsepower+' hp':''],['Colour',c.color],['Interior',c.interiorColor],['Seats',c.seats],['Registration',c.registered]].filter(x=>x[1]).map(x=>'<div><span>'+esc(x[0])+'</span><b>'+esc(x[1])+'</b></div>').join('')}</div>${about?`<div class="model-about"><h3>About the ${esc(family)}</h3><p>${esc(about)}</p></div>`:''}</div></div></section>`}
 function bindCar(slug){const c=cars().find(x=>x.slug===slug),b=$('#car-wa');if(b&&c)b.onclick=()=>sendCarDM(c)}
 const POPULAR_MODEL_PATTERNS=[
   /\bc\s*-?\s*(180|200|300|350)\b/i,
@@ -314,7 +322,10 @@ async function blog(slug){
     const paras=String(p.content||'').split(/\n\n+/).filter(Boolean).map(x=>'<p>'+esc(x)+'</p>').join('');
     return `<section class="section white"><div class="wrap article"><a href="#blog" class="back">← Back to Blog</a><span class="eyebrow">${esc(p.category)}</span><h1>${esc(p.title)}</h1><p class="article-meta">${esc(p.author||'Moses Benz Auto Care')}</p><div class="article-body">${paras}</div><section class="comments"><div class="section-head"><span class="eyebrow">Community</span><h2>Comments</h2><p>Have a question or something useful to add? Leave a comment below.</p></div><form id="blog-comment-form" class="form-card"><input type="hidden" name="post_slug" value="${esc(p.slug)}"><label>Your name *<input name="name" required maxlength="80"></label><label>Your comment *<textarea name="comment" rows="4" required maxlength="2000"></textarea></label><button class="btn red" type="submit">Post Comment</button><p id="comment-status" class="status"></p></form><div id="blog-comments" class="comment-list"><p class="muted">Loading comments…</p></div></section></div></section>`;
   }
-  return `<section class="page-head"><div class="wrap"><span class="eyebrow">Blog</span><h1>Useful things to know about your Mercedes-Benz.</h1><p>Practical maintenance, diagnosis, buying and ownership guidance from the workshop.</p></div></section><section class="section white"><div class="wrap"><div id="blog-list" class="blog-grid">${POSTS.map(postCard).join('')}</div></div></section>`;
+  const r=await api('blog_posts?select=*&published=eq.true&order=created_at.desc');
+  const published=r.ok&&Array.isArray(r.data)?r.data:[];
+  const posts=published.length?published:POSTS;
+  return `<section class="page-head"><div class="wrap"><span class="eyebrow">Blog</span><h1>Useful things to know about your Mercedes-Benz.</h1><p>Practical maintenance, diagnosis, buying and ownership guidance from the workshop.</p></div></section><section class="section white"><div class="wrap"><div id="blog-list" class="blog-grid">${posts.map(postCard).join('')}</div></div></section>`;
 }
 function likedComments(){try{return JSON.parse(localStorage.getItem('mbac_liked_comments')||'[]')}catch{return []}}
 function markLiked(id){try{const s=likedComments();if(!s.includes(id)){s.push(id);localStorage.setItem('mbac_liked_comments',JSON.stringify(s))}}catch{}}
@@ -414,7 +425,7 @@ function bindAppointment(){
     const status=$('#appointment-status');
     status.textContent='Saving request…';
     await api('appointments',{method:'POST',body:JSON.stringify(p)});
-    const n=String(settings.whatsapp).replace(/\D/g,'');
+    const n=whatsappNumber();
     status.textContent='Request received. Opening WhatsApp…';
     if(n){
       const text=`Hello Moses Benz Auto Care. I would like to book an appointment.\nFull Name: ${p.name}\nEmail: ${p.email}\nWhatsApp: ${p.phone}\nVehicle: ${p.model} (${p.year})\nLocation: ${p.location}\nWhat is the car doing: ${p.message}`;
@@ -441,7 +452,7 @@ function bindCareerForm(){
         sent=r.ok;
       }catch{}
     }
-    const wa=String(settings.whatsapp||'').replace(/\D/g,'');
+    const wa=whatsappNumber();
     if(wa)window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg),'_blank','noopener');
     status.textContent=sent?'Application sent. WhatsApp has also been opened for direct follow-up.':'WhatsApp has been opened with your application details. Tap Send there to complete it.';
     f.reset();btn.disabled=false;
@@ -457,122 +468,19 @@ function shouldShowSplash(){
   }catch(e){return false;}
 }
 function splashEngineSound(){
-  try{
-    const Ctx=window.AudioContext||window.webkitAudioContext; if(!Ctx)return;
-    const ctx=new Ctx(),osc=ctx.createOscillator(),gain=ctx.createGain();
-    osc.type='sawtooth';
-    osc.frequency.setValueAtTime(65,ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(210,ctx.currentTime+.45);
-    osc.frequency.exponentialRampToValueAtTime(100,ctx.currentTime+1.05);
-    gain.gain.setValueAtTime(0.0001,ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.12,ctx.currentTime+.08);
-    gain.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+1.05);
-    osc.connect(gain);gain.connect(ctx.destination);
-    osc.start();osc.stop(ctx.currentTime+1.1);
-  }catch(e){}
-}
-function splashParticleMorph(canvas,img,w,h,onDone){
-  const dpr=Math.min(window.devicePixelRatio||1,2);
-  canvas.width=w*dpr;canvas.height=h*dpr;canvas.style.width=w+'px';canvas.style.height=h+'px';
-  const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);
-  const off=document.createElement('canvas');off.width=w;off.height=h;
-  const octx=off.getContext('2d');
-  let data;
-  try{octx.drawImage(img,0,0,w,h);data=octx.getImageData(0,0,w,h).data;}catch(e){onDone();return;}
-  const step=Math.max(2,Math.round(w/64));
-  const particles=[];
-  for(let y=0;y<h;y+=step)for(let x=0;x<w;x+=step){
-    const i=(y*w+x)*4,a=data[i+3];
-    if(a>80){
-      const angle=Math.random()*Math.PI*2,dist=50+Math.random()*130;
-      particles.push({tx:x,ty:y,sx:w/2+Math.cos(angle)*dist,sy:h/2+Math.sin(angle)*dist*.85,
-        color:`rgb(${data[i]},${data[i+1]},${data[i+2]})`,delay:Math.random()*260,size:1+Math.random()*1.2});
-    }
-  }
-  const dur=820,start=performance.now();let raf,cancelled=false;
-  function frame(now){
-    if(cancelled)return;
-    ctx.clearRect(0,0,w,h);
-    let allDone=true;
-    for(const p of particles){
-      let t=(now-start-p.delay)/dur;
-      if(t<1)allDone=false;
-      t=Math.max(0,Math.min(1,t));
-      const e=1-Math.pow(1-t,3);
-      ctx.globalAlpha=0.25+0.75*e;
-      ctx.fillStyle=p.color;
-      ctx.beginPath();ctx.arc(p.sx+(p.tx-p.sx)*e,p.sy+(p.ty-p.sy)*e,p.size,0,Math.PI*2);ctx.fill();
-    }
-    ctx.globalAlpha=1;
-    if(!allDone)raf=requestAnimationFrame(frame); else onDone();
-  }
-  raf=requestAnimationFrame(frame);
-  return ()=>{cancelled=true;if(raf)cancelAnimationFrame(raf);};
+  try{const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;const ctx=new Ctx(),o=ctx.createOscillator(),g=ctx.createGain();o.type='sawtooth';o.frequency.setValueAtTime(70,ctx.currentTime);o.frequency.exponentialRampToValueAtTime(180,ctx.currentTime+.55);o.frequency.exponentialRampToValueAtTime(95,ctx.currentTime+1.15);g.gain.setValueAtTime(.0001,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.07,ctx.currentTime+.08);g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+1.15);o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+1.2);}catch(e){}
 }
 function showSplash(){
   if(document.getElementById('splash'))return;
-  const splash=document.createElement('div');
-  splash.id='splash';splash.className='splash';splash.setAttribute('role','dialog');splash.setAttribute('aria-label','Moses Benz Auto Care intro');
-  splash.innerHTML=`<div class="splash-scene">
-    <svg class="splash-road" viewBox="0 0 800 40" preserveAspectRatio="none" aria-hidden="true"><line x1="0" y1="20" x2="800" y2="20"/></svg>
-    <svg class="splash-car" viewBox="0 0 240 90" aria-hidden="true">
-      <g class="splash-car-body">
-        <path d="M10 62 Q10 34 46 30 L78 30 Q96 14 132 14 L168 14 Q198 14 210 30 L222 30 Q234 30 234 46 L234 62 Z" fill="#11131a"/>
-        <path d="M92 30 Q104 18 132 18 L162 18 Q186 18 198 30 Z" fill="#3a3d48"/>
-        <circle class="splash-wheel" cx="62" cy="64" r="15" fill="#0a0b0e"/>
-        <circle class="splash-wheel" cx="196" cy="64" r="15" fill="#0a0b0e"/>
-        <circle cx="62" cy="64" r="6" fill="#8a8d99"/><circle cx="196" cy="64" r="6" fill="#8a8d99"/>
-        <circle class="splash-headlight" cx="228" cy="42" r="4" fill="#fff"/>
-      </g>
-    </svg>
-    <div class="splash-brand" id="splash-brand">
-      <span class="splash-emblem-wrap"><canvas id="splash-canvas" class="splash-canvas"></canvas><img class="splash-logo" id="splash-logo-img" src="images/moses-benz-logo.png" alt="Moses Benz Auto Care"></span>
-      <span class="splash-word" id="splash-word"><b>Moses Benz</b><small>Auto Care · Idimu, Lagos</small></span>
-    </div>
-  </div>
-  <button type="button" id="splash-skip" class="splash-skip">Tap to skip <i class="fa-solid fa-forward"></i></button>`;
+  const splash=document.createElement('div');splash.id='splash';splash.className='splash';splash.setAttribute('role','dialog');splash.setAttribute('aria-label','Moses Benz Auto Care intro');
+  splash.innerHTML=`<div class="splash-stage" id="splash-stage"><div class="splash-grid"></div><div class="splash-ring"></div><div class="splash-orbit"></div><div class="splash-car-glow"></div><div class="splash-car"><svg viewBox="0 0 760 280" aria-hidden="true"><g transform="translate(18 25)"><path d="M34 188c0-52 43-84 92-88l92-7 54-45c22-18 50-27 79-27h115c48 0 92 18 125 50l53 52h39c28 0 50 22 50 50v38H34z" fill="#151820" stroke="#6e737f" stroke-width="3"/><path d="M230 91l54-44c18-15 41-23 64-23h109c39 0 75 14 103 39l32 28z" fill="#2b303b" stroke="#858a95" stroke-width="2"/><path d="M260 86l48-39c14-11 31-17 49-17h28v56zM397 30h54c30 0 58 10 80 30l28 26H397z" fill="#0d1118"/><path d="M45 160h650" stroke="#c90b2f" stroke-width="5" opacity=".9"/><circle cx="174" cy="194" r="42" fill="#090b0f" stroke="#777d88" stroke-width="7"/><circle cx="174" cy="194" r="14" fill="#c90b2f"/><circle cx="574" cy="194" r="42" fill="#090b0f" stroke="#777d88" stroke-width="7"/><circle cx="574" cy="194" r="14" fill="#c90b2f"/><path d="M700 119l28 17v24h-42" fill="#e8ebef" opacity=".9"/></g></svg></div><div class="splash-brand" id="splash-brand"><img class="splash-logo" src="images/moses-benz-logo.png" alt="Moses Benz Auto Care"><span class="splash-word"><b>Moses Benz</b><small>Auto Care · Idimu, Lagos</small></span></div><div class="splash-meta">Real cars · Real work · Mercedes-Benz specialists</div></div><button type="button" id="splash-skip" class="splash-skip">Skip intro</button>`;
   document.body.appendChild(splash);
-  const brand=$('#splash-brand'),skipBtn=$('#splash-skip'),canvas=$('#splash-canvas'),logoImg=$('#splash-logo-img'),word=$('#splash-word');
-  const emblemWrap=splash.querySelector('.splash-emblem-wrap');
-  let done=false,cancelParticles=null,particlesDone=false;
-  function revealCrisp(){
-    if(particlesDone)return; particlesDone=true;
-    canvas.classList.add('is-out');logoImg.classList.add('is-in');word.classList.add('is-in');
-  }
-  function dock(){
-    if(done)return; done=true;
-    if(cancelParticles)cancelParticles();
-    revealCrisp();
-    const target=document.querySelector('.header .brand');
-    if(target&&brand){
-      const t=target.getBoundingClientRect(),s=brand.getBoundingClientRect();
-      const scale=t.height/s.height;
-      const sCenterX=s.left+s.width/2,sCenterY=s.top+s.height/2,tCenterX=t.left+t.width/2,tCenterY=t.top+t.height/2;
-      brand.classList.add('splash-dock');
-      brand.style.left=s.left+'px';brand.style.top=s.top+'px';brand.style.width=s.width+'px';brand.style.height=s.height+'px';
-      brand.getBoundingClientRect();
-      brand.style.transform=`translate(${tCenterX-sCenterX}px,${tCenterY-sCenterY}px) scale(${scale})`;
-    }
-    setTimeout(()=>splash.classList.add('splash-gone'),150);
-    setTimeout(()=>splash.remove(),1150);
-  }
-  function skip(){splashEngineSound();dock();}
-  skipBtn.addEventListener('click',e=>{e.stopPropagation();skip();});
-  splash.addEventListener('click',skip);
-  const splashStart=performance.now();
-  function startMorph(){
-    if(done||particlesDone)return;
-    const rect=emblemWrap.getBoundingClientRect();
-    cancelParticles=splashParticleMorph(canvas,img,Math.round(rect.width)||220,Math.round(rect.height)||124,revealCrisp);
-  }
-  const img=new Image();
-  img.onload=()=>{
-    const elapsed=performance.now()-splashStart,delay=Math.max(60,950-elapsed);
-    setTimeout(startMorph,delay);
-  };
-  img.onerror=revealCrisp;
-  img.src='images/moses-benz-logo.png';
-  setTimeout(skip,4200);
+  const stage=splash.querySelector('#splash-stage'),brand=splash.querySelector('#splash-brand'),skip=splash.querySelector('#splash-skip');let done=false;
+  const tilt=e=>{if(done)return;const r=stage.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;stage.style.transform=`rotateY(${x*7}deg) rotateX(${-y*5}deg) scale(1)`;};
+  const reset=()=>{stage.style.transform='';};
+  splash.addEventListener('pointermove',tilt,{passive:true});splash.addEventListener('pointerleave',reset,{passive:true});
+  function dock(){if(done)return;done=true;splashEngineSound();const target=document.querySelector('.header .brand');if(target&&brand){const t=target.getBoundingClientRect(),b=brand.getBoundingClientRect();brand.style.position='fixed';brand.style.left=b.left+'px';brand.style.top=b.top+'px';brand.style.margin='0';brand.style.transform='none';brand.classList.add('dock');requestAnimationFrame(()=>{const scale=t.height/b.height;brand.style.transform=`translate(${t.left-b.left}px,${t.top-b.top}px) scale(${scale})`;});}splash.classList.add('splash-gone');setTimeout(()=>splash.remove(),950);}
+  skip.addEventListener('click',e=>{e.stopPropagation();dock();});setTimeout(dock,4800);
 }
 async function render(){const hash=location.hash.replace(/^#/,'')||'home',parts=hash.split('/'),route=parts[0],arg=parts.slice(1).join('/');let html=route==='home'?home():route==='inventory'?await inventory():route==='car'?await car(decodeURIComponent(arg)):route==='blog'?await blog(arg?decodeURIComponent(arg):''):route==='appointments'?appointments():route==='contact'?contact():route==='careers'?careers():route==='guide'?guide():home();$('#app').innerHTML=html;$('#route-transition')?.classList.remove('is-active');window.scrollTo({top:0,behavior:'instant'});footer();fab();applyContacts();if(route==='home'){bindCards();homeReviews();bindReviewForm();initGallery();initMobileRails();if(lastRenderedRoute!=='home'&&shouldShowSplash())showSplash();}
 lastRenderedRoute=route;if(route==='inventory'){renderInventory();initMobileRails();}if(route==='car')bindCar(decodeURIComponent(arg));if(route==='appointments')bindAppointment();if(route==='careers')bindCareerForm();if(route==='blog'){bindCards();if(arg){bindBlogArticle(decodeURIComponent(arg));}}}

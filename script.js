@@ -35,7 +35,6 @@
     if(qs('#career-form'))loads.push(loadScript('js/careers.js').then(()=>window.initCareerPage?.()));
     if(qs('#blog-list')||qs('#blog-post')||qs('#home-blog-grid'))loads.push(loadScript('js/blog.js').then(()=>window.initBlogPage?.()));
     if(qs('#public-reviews-grid'))loads.push(loadScript('js/reviews.js').then(()=>window.initReviews?.()));
-    if(qs('#before-after-grid'))loads.push(loadScript('js/media.js').then(()=>window.initBeforeAfter?.()));
     await Promise.allSettled(loads);
     initReveal();initMarquee();initBookingForm();initContactRoutes();
   }

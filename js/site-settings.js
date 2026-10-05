@@ -2,6 +2,7 @@
 (() => {
   const blank = { phone:'', whatsapp:'', email:'', instagram:'', facebook:'', youtube:'', tiktok:'', x:'' };
   const clean=v=>String(v||'').replace(/[^\d+]/g,'').replace(/^\+/,'');
+  const whatsappUrl=v=>{const raw=String(v||'').trim();if(!raw)return '';if(/^https?:\/\/\S+/i.test(raw))return raw;const n=clean(raw);return n?`https://wa.me/${n}`:''};
   const normalise=r=>({...blank,...(r||{})});
   function gmailCompose(email){
     const to=encodeURIComponent(String(email||''));
@@ -26,9 +27,9 @@
     document.body.appendChild(wrap);
   }
   function apply(s){
-    const phone=clean(s.phone), wa=clean(s.whatsapp);
+    const phone=clean(s.phone), wa=whatsappUrl(s.whatsapp);
     document.querySelectorAll('[data-contact="phone"]').forEach(a=>{a.href=phone?`tel:+${phone}`:'#'; if(!phone)a.setAttribute('aria-disabled','true');});
-    document.querySelectorAll('[data-contact="whatsapp"]').forEach(a=>{a.href=wa?`https://wa.me/${wa}`:'#'; if(!wa)a.setAttribute('aria-disabled','true');});
+    document.querySelectorAll('[data-contact="whatsapp"]').forEach(a=>{a.href=wa||'#'; if(!wa)a.setAttribute('aria-disabled','true');});
     document.querySelectorAll('[data-contact="email"]').forEach(a=>{a.href='#';});
     ['instagram','facebook','youtube','tiktok','x'].forEach(k=>document.querySelectorAll(`[data-contact="${k}"]`).forEach(a=>{if(s[k]){a.href=s[k];a.hidden=false;}else a.hidden=true;}));
     bindEmail(); ensureFloating();
