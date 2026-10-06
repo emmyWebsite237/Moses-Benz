@@ -1,0 +1,84 @@
+/* Moses Benz Auto Care — shared navigation, page transitions and forms */
+(() => {
+  const qs=(s,r=document)=>r.querySelector(s);
+  const qsa=(s,r=document)=>[...r.querySelectorAll(s)];
+  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function initReveal(root=document){
+    const els=qsa('.reveal',root); if(!els.length)return;
+    if('IntersectionObserver' in window && !reduced){const ob=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('is-visible');ob.unobserve(e.target);}}),{threshold:.12});els.forEach(e=>ob.observe(e));}
+    else els.forEach(e=>e.classList.add('is-visible'));
+  }
+  function initMarquee(root=document){qsa('.marquee-track',root).forEach(t=>{if(!t.dataset.duped){t.innerHTML+=t.innerHTML;t.dataset.duped='1';}});}
+  function initHeader(){
+    const header=qs('.site-header'); const toggle=qs('#nav-toggle'); const nav=qs('#main-nav'); if(!header||!toggle||!nav)return;
+    const onScroll=()=>header.classList.toggle('is-scrolled',window.scrollY>40); onScroll(); window.addEventListener('scroll',onScroll,{passive:true});
+    const close=()=>{nav.classList.remove('is-open');toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-label','Open navigation menu');toggle.title='Open navigation menu';toggle.classList.remove('is-open');};
+    const open=()=>{nav.classList.add('is-open');toggle.setAttribute('aria-expanded','true');toggle.setAttribute('aria-label','Close navigation menu');toggle.title='Close navigation menu';toggle.classList.add('is-open');};
+    toggle.addEventListener('click',()=>nav.classList.contains('is-open')?close():open());
+    qsa('.main-nav a',nav).forEach(a=>a.addEventListener('click',close));
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')close();});
+  }
+  function loadScript(src){return new Promise((resolve,reject)=>{const old=document.querySelector(`script[data-module="${src}"]`);if(old){resolve();return;}const s=document.createElement('script');s.src=src;s.dataset.module=src;s.onload=resolve;s.onerror=reject;document.body.appendChild(s);});}
+  async function initModules(){
+    await loadScript('js/site-data.js');
+    await loadScript('js/form-config.js');
+    // Hydrate shared content in the background. The page renders immediately from
+    // local/static data instead of waiting for a slow network request.
+    window.MBData?.hydrate?.();
+    window.MBSiteSettingsAPI?.load?.();
+    window.MBStore?.hydrate?.();
+
+    const loads=[];
+    if(qs('#inventory-list'))loads.push(loadScript('js/inventory.js').then(()=>window.initInventoryPage?.()));
+    if(qs('#appointment-form'))loads.push(loadScript('js/searchable-select.js').then(()=>loadScript('js/appointments.js')).then(()=>window.initAppointmentPage?.()));
+    if(qs('#career-form'))loads.push(loadScript('js/careers.js').then(()=>window.initCareerPage?.()));
+    if(qs('#blog-list')||qs('#blog-post')||qs('#home-blog-grid'))loads.push(loadScript('js/blog.js').then(()=>window.initBlogPage?.()));
+    if(qs('#public-reviews-grid'))loads.push(loadScript('js/reviews.js').then(()=>window.initReviews?.()));
+    await Promise.allSettled(loads);
+    initReveal();initMarquee();initBookingForm();initContactRoutes();
+  }
+  function initBookingForm(){
+    const form=qs('#booking-form'); if(!form||form.dataset.bound)return; form.dataset.bound='1';
+    form.addEventListener('submit',e=>{e.preventDefault();const name=qs('#bf-name')?.value.trim();const model=qs('#bf-model')?.value.trim();const phone=qs('#bf-phone')?.value.trim();const msg=`Hello Moses Benz Auto Care. I would like to request a callback.\nName: ${name}\nMercedes: ${model}\nPhone: ${phone}`;const wa=(window.MBSiteSettings?.whatsapp||'').replace(/\D/g,'');window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg),'_blank','noopener');});
+  }
+  function initContactRoutes(){
+    qsa('a[href^="tel:"],a[href^="https://wa.me/"],a[target="_blank"]').forEach(a=>{a.addEventListener('click',()=>{const nav=qs('.main-nav');const t=qs('#nav-toggle');if(nav&&t){nav.classList.remove('is-open');t.classList.remove('is-open');t.setAttribute('aria-expanded','false');}});});
+  }
+  function setActive(url){const path=new URL(url,location.href).pathname.replace(/\/$/,'')||'/';qsa('.main-nav a').forEach(a=>{const p=new URL(a.href,location.href).pathname.replace(/\/$/,'')||'/';a.toggleAttribute('aria-current',p===path);});}
+  async function navigate(url,push=true){
+    const target=new URL(url,location.href); if(target.origin!==location.origin)return;
+    const sameDocument=target.pathname===location.pathname && target.search===location.search && target.hash===location.hash;
+    if(sameDocument){ window.location.reload(); return; }
+    const current=qs('#page-content'); if(!current)return window.location.href=target.href;
+    try{
+      document.body.classList.add('is-navigating');
+      const res=await fetch(target.href,{headers:{'X-Requested-With':'MosesBenzRouter'}}); if(!res.ok)throw new Error('Page not found');
+      const text=await res.text(); const doc=new DOMParser().parseFromString(text,'text/html'); const next=doc.querySelector('#page-content'); if(!next)throw new Error('Invalid page shell');
+      if(!reduced){current.classList.add('page-leave');await new Promise(r=>setTimeout(r,220));}
+      current.innerHTML=next.innerHTML; current.className='page-transition page-enter';
+      document.title=doc.title; const desc=doc.querySelector('meta[name="description"]'); const ours=qs('meta[name="description"]'); if(desc&&ours)ours.setAttribute('content',desc.content);
+      if(push)history.pushState({url:target.href},'',target.href);
+      setActive(target.href); window.scrollTo({top:0,behavior:reduced?'auto':'smooth'}); await initModules();
+      requestAnimationFrame(()=>current.classList.add('page-enter-active'));
+      setTimeout(()=>{current.classList.remove('page-enter','page-enter-active');document.body.classList.remove('is-navigating');},520);
+    }catch(err){document.body.classList.remove('is-navigating');window.location.href=target.href;}
+  }
+
+  function initRouter(){
+    document.addEventListener('click',e=>{const a=e.target.closest('a.page-route');if(!a)return;const href=a.getAttribute('href');if(!href||href.startsWith('#')||a.target==='_blank'||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;e.preventDefault();navigate(href,true);});
+    window.addEventListener('popstate',()=>navigate(location.href,false));
+  }
+  function initShortLoader(){
+    const loader=qs('#mb-page-loader'); if(!loader)return;
+    // The loader is only a brief first-visit visual cue. It never blocks content
+    // and is not replayed for browser Back/Forward or subsequent visits in this tab.
+    let nav=null; try{nav=performance.getEntriesByType?.('navigation')?.[0];}catch{}
+    let seen=false; try{seen=sessionStorage.getItem('mbac_loader_seen')==='1';}catch{}
+    if(seen || nav?.type==='back_forward'){loader.remove();return;}
+    try{sessionStorage.setItem('mbac_loader_seen','1');}catch{}
+    window.setTimeout(()=>{loader.classList.add('is-hidden');window.setTimeout(()=>loader.remove(),360);},2000);
+  }
+  document.addEventListener('DOMContentLoaded',()=>{initShortLoader();initHeader();initRouter();setActive(location.href);initModules();const year=qs('#year');if(year)year.textContent=new Date().getFullYear();});
+
+})();
