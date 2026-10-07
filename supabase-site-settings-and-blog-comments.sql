@@ -11,8 +11,10 @@ create table if not exists public.site_settings (
   youtube text not null default '',
   tiktok text not null default '',
   x text not null default '',
+  working_hours jsonb not null default '{"mon":{"open":true,"start":"08:00","end":"19:00"},"tue":{"open":true,"start":"08:00","end":"19:00"},"wed":{"open":true,"start":"08:00","end":"19:00"},"thu":{"open":true,"start":"08:00","end":"19:00"},"fri":{"open":true,"start":"08:00","end":"19:00"},"sat":{"open":true,"start":"08:00","end":"15:00"},"sun":{"open":false,"start":"08:00","end":"15:00"}}'::jsonb,
   updated_at timestamptz not null default now()
 );
+alter table public.site_settings add column if not exists working_hours jsonb not null default '{"mon":{"open":true,"start":"08:00","end":"19:00"},"tue":{"open":true,"start":"08:00","end":"19:00"},"wed":{"open":true,"start":"08:00","end":"19:00"},"thu":{"open":true,"start":"08:00","end":"19:00"},"fri":{"open":true,"start":"08:00","end":"19:00"},"sat":{"open":true,"start":"08:00","end":"15:00"},"sun":{"open":false,"start":"08:00","end":"15:00"}}'::jsonb;
 alter table public.site_settings enable row level security;
 drop policy if exists "public read site settings" on public.site_settings;
 create policy "public read site settings" on public.site_settings
@@ -124,6 +126,7 @@ $$;
 
 grant execute on function public.admin_site_settings_get(text,text) to anon,authenticated;
 grant execute on function public.admin_site_settings_update(text,text,text,text,text,text,text,text,text,text) to anon,authenticated;
+\ncreate or replace function public.admin_site_settings_update(\n  p_username text,p_password text,p_phone text,p_whatsapp text,p_email text,\n  p_instagram text,p_facebook text,p_youtube text,p_tiktok text,p_x text,p_working_hours jsonb\n)\nreturns public.site_settings\nlanguage plpgsql security definer set search_path=public\nas $$\ndeclare result public.site_settings;\nbegin\n  if not exists(select 1 from public.admin_users where username=trim(p_username) and password=p_password) then\n    raise exception 'Invalid admin credentials';\n  end if;\n  insert into public.site_settings(id,phone,whatsapp,email,instagram,facebook,youtube,tiktok,x,working_hours,updated_at)\n  values(1,trim(coalesce(p_phone,'')),trim(coalesce(p_whatsapp,'')),trim(coalesce(p_email,'')),\n         trim(coalesce(p_instagram,'')),trim(coalesce(p_facebook,'')),trim(coalesce(p_youtube,'')),\n         trim(coalesce(p_tiktok,'')),trim(coalesce(p_x,'')),coalesce(p_working_hours,'{}'::jsonb),now())\n  on conflict(id) do update set\n    phone=excluded.phone,whatsapp=excluded.whatsapp,email=excluded.email,\n    instagram=excluded.instagram,facebook=excluded.facebook,youtube=excluded.youtube,\n    tiktok=excluded.tiktok,x=excluded.x,working_hours=excluded.working_hours,updated_at=now()\n  returning * into result;\n  return result;\nend;\n$$;\n\ngrant execute on function public.admin_site_settings_update(text,text,text,text,text,text,text,text,text,text,jsonb) to anon,authenticated;\n
 grant execute on function public.admin_blog_comments_list(text,text) to anon,authenticated;
 grant execute on function public.admin_blog_comment_reply(text,text,uuid,text) to anon,authenticated;
 grant execute on function public.admin_blog_comment_delete(text,text,uuid) to anon,authenticated;

@@ -3,10 +3,19 @@ const BASE='';
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 const norm=s=>String(s??'').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
-let settings={phone:'',whatsapp:'',email:'',instagram:'',facebook:'',youtube:'',tiktok:'',x:''};
-const IMAGE_EXTENSIONS=['jpg','jpeg','png','webp'];
-function numberedImageCandidates(folder,slot){return IMAGE_EXTENSIONS.map(ext=>`${folder}/img${slot}.${ext}`);}
-function imageFallbackScript(folder,slot){const candidates=numberedImageCandidates(folder,slot);return `this.dataset.tryIndex=String(Number(this.dataset.tryIndex||0)+1);const i=Number(this.dataset.tryIndex);if(i<${candidates.length}){this.src='${candidates[0]}'.replace('jpg', ['jpg','jpeg','png','webp'][i]);}else{this.closest('article,figure')?.remove();}`;}
+const DEFAULT_WORKING_HOURS={
+  mon:{open:true,start:'08:00',end:'19:00'}, tue:{open:true,start:'08:00',end:'19:00'}, wed:{open:true,start:'08:00',end:'19:00'},
+  thu:{open:true,start:'08:00',end:'19:00'}, fri:{open:true,start:'08:00',end:'19:00'}, sat:{open:true,start:'08:00',end:'15:00'}, sun:{open:false,start:'08:00',end:'15:00'}
+};
+let settings={phone:'',whatsapp:'',email:'',instagram:'',facebook:'',youtube:'',tiktok:'',x:'',working_hours:DEFAULT_WORKING_HOURS};
+function normaliseWorkingHours(value){
+  let parsed=value;
+  if(typeof parsed==='string'){try{parsed=JSON.parse(parsed);}catch{parsed=null;}}
+  const source=parsed&&typeof parsed==='object'?parsed:{};
+  return Object.fromEntries(Object.entries(DEFAULT_WORKING_HOURS).map(([day,def])=>[day,{open:source[day]?.open===undefined?def.open:source[day].open===true,start:String(source[day]?.start||def.start),end:String(source[day]?.end||def.end)}]));
+}
+function formatHour(value){const [h,m]=String(value||'').split(':').map(Number);if(!Number.isFinite(h)||!Number.isFinite(m))return value||'';const suffix=h>=12?'PM':'AM';const hour=(h%12)||12;return `${hour}:${String(m).padStart(2,'0')} ${suffix}`;}
+function workingHoursLines(hours=settings.working_hours){const labels={mon:'Monday',tue:'Tuesday',wed:'Wednesday',thu:'Thursday',fri:'Friday',sat:'Saturday',sun:'Sunday'};return Object.entries(labels).map(([day,label])=>{const x=normaliseWorkingHours(hours)[day];return `<p><strong>${label}</strong> ${x.open?`${formatHour(x.start)}–${formatHour(x.end)}`:'Closed'}</p>`;}).join('');}
 function whatsappNumber(){return String(settings.whatsapp||'').match(/wa\.me\/(\d+)/i)?.[1]||String(settings.whatsapp||'').replace(/\D/g,'');}
 function whatsappLink(value){const raw=String(value||'').trim();if(!raw)return '';if(/^https?:\/\/\S+/i.test(raw))return raw;const n=raw.replace(/\D/g,'');return n?`https://wa.me/${n}`:'';}
 const POSTS=[
@@ -36,7 +45,7 @@ function cars(){return window.MBStore?.getCars?.()||window.MBCars||[]}
 async function loadSettings(){
   const r=await api('site_settings?select=*&id=eq.1');
   if(r.ok&&r.data?.[0]){
-    settings={...settings,...r.data[0]};
+    settings={...settings,...r.data[0],working_hours:normaliseWorkingHours(r.data[0].working_hours)};
     applyContacts();
   }
   return settings;
@@ -49,7 +58,7 @@ function applyContacts(){
   const emailLinks=[...document.querySelectorAll('[data-contact="email"],[data-email]')];
   emailLinks.forEach(a=>{a.href='#';a.onclick=e=>{e.preventDefault();if(!settings.email)return;const to=encodeURIComponent(settings.email),web='https://mail.google.com/mail/?view=cm&fs=1&to='+to;if(/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)){location.href='googlegmail:///co?to='+to;setTimeout(()=>location.href=web,900)}else window.open(web,'_blank','noopener')}});
 }
-function footer(){const f=$('#footer');f.innerHTML='<div class="wrap footer-grid"><div><h3>Moses Benz Auto Care</h3><p>Mercedes-Benz repairs, maintenance, diagnosis and vehicle sales in Idimu, Lagos.</p><div class="social"><a data-contact="facebook" aria-label="Facebook"><i class="fa-solid fa-square-facebook"></i></a><a data-contact="tiktok" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a><a data-contact="instagram" aria-label="Instagram"><i class="fa-solid fa-square-instagram"></i></a><a data-contact="whatsapp" aria-label="WhatsApp"><i class="fa-solid fa-square-whatsapp"></i></a></div></div><div><h4>Explore</h4><a href="#home">Home</a><a href="#inventory">Inventory</a><a href="#blog">Blog</a><a href="#appointments">Book an Appointment</a><a href="#guide">Mercedes-Benz Guide</a></div><div><h4>Contact</h4><a data-contact="phone">Call the Workshop</a><a data-contact="email">Email Us</a><p>11 Lasu Rd, beside Federal Peace Estate, Idimu, Lagos.</p></div><div><h4>Hours</h4><p>Mon–Fri 8:00 AM–7:00 PM</p><p>Saturday 8:00 AM–3:00 PM</p><p>Sunday Closed</p></div></div><div class="footer-bottom">© 2026 Moses Benz Auto Care</div>';applyContacts()}
+function footer(){const f=$('#footer');f.innerHTML='<div class="wrap footer-grid"><div><h3>Moses Benz Auto Care</h3><p>Mercedes-Benz repairs, maintenance, diagnosis and vehicle sales in Idimu, Lagos.</p><div class="social"><a data-contact="facebook" aria-label="Facebook"><i class="fa-solid fa-square-facebook"></i></a><a data-contact="tiktok" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a><a data-contact="instagram" aria-label="Instagram"><i class="fa-solid fa-square-instagram"></i></a><a data-contact="whatsapp" aria-label="WhatsApp"><i class="fa-solid fa-square-whatsapp"></i></a></div></div><div><h4>Explore</h4><a href="#home">Home</a><a href="#inventory">Inventory</a><a href="#blog">Blog</a><a href="#appointments">Book an Appointment</a><a href="#guide">Mercedes-Benz Guide</a></div><div><h4>Contact</h4><a data-contact="phone">Call the Workshop</a><a data-contact="email">Email Us</a><p>11 Lasu Rd, beside Federal Peace Estate, Idimu, Lagos.</p></div><div><h4>Hours</h4>${workingHoursLines()}</div></div><div class="footer-bottom">© 2026 Moses Benz Auto Care</div>';applyContacts()}
 function fab(){if($('.fab'))return;const d=document.createElement('div');d.className='fab';d.innerHTML='<a data-contact="phone" aria-label="Call the workshop" title="Call the workshop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 2.5 9.1 2a1.7 1.7 0 0 1 1.9 1.1l1.2 3.1a1.7 1.7 0 0 1-.4 1.8L10.4 9.4a13.2 13.2 0 0 0 4.2 4.2l1.4-1.4a1.7 1.7 0 0 1 1.8-.4l3.1 1.2A1.7 1.7 0 0 1 22 15l-.5 2.5a2 2 0 0 1-2.1 1.6C10.6 18.5 5.5 13.4 4.9 4.6A2 2 0 0 1 6.6 2.5Z"/></svg></a><a data-contact="whatsapp" aria-label="WhatsApp" title="WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5a9.3 9.3 0 0 0-8 14.1L3 21l4.6-1a9.5 9.5 0 1 0 4.4-17.5Zm0 16.8a7.4 7.4 0 0 1-3.8-1l-.3-.2-2.7.6.7-2.6-.2-.3A7.4 7.4 0 1 1 12 19.3Zm4.1-5.4c-.2-.1-1.2-.6-1.4-.7-.2-.1-.3-.1-.5.1l-.6.8c-.2.2-.3.2-.5.1a6 6 0 0 1-1.8-1.1 7 7 0 0 1-1.3-1.6c-.1-.2 0-.3.1-.4l.4-.5.2-.4c.1-.1 0-.3 0-.4l-.7-1.6c-.2-.4-.3-.4-.5-.4h-.4c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.3c.1.2 1.6 2.5 3.9 3.5 1.4.6 2 .7 2.4.6.4-.1 1.2-.5 1.4-1 .2-.5.2-.9.1-1-.1-.1-.2-.1-.4-.2Z"/></svg></a>';document.body.appendChild(d);applyContacts()}
 
 let routeTimer=null;
@@ -158,9 +167,10 @@ function carCard(c,opts={}){
   const meta=[c.specTag,c.mileageKm?Number(c.mileageKm).toLocaleString()+' km':''].filter(Boolean).join(' · ');
   const condition=c.condition?`<span class="stock-meta">${esc(c.condition)}</span>`:'';
   const image=String(c.image||'').trim();
+  const fallback="this.onerror=null;this.src='/images/moses-benz-logo.png';";
   return `<article class="car-card inventory-card${popular?' is-popular':''}" data-slug="${esc(c.slug)}">
     <div class="car-card-media">
-      <img src="${esc(image)}" alt="${esc(c.name)}" loading="lazy" onerror="this.closest('.car-card')?.remove()">
+      <img src="${esc(image)}" alt="${esc(c.name)}" loading="lazy" onerror="${fallback}">
       ${popular?'<span class="car-badge popular-badge">Popular</span>':''}
     </div>
     <div class="car-card-body">
@@ -222,7 +232,7 @@ function modelFamily(name){
 }
 async function car(slug){const c=cars().find(x=>x.slug===slug);if(!c)return '<section class="section white"><div class="wrap empty"><h1>Vehicle not found</h1><a class="btn red" href="#inventory">Back to Inventory</a></div></section>';
   const family=modelFamily(c.name),about=MODEL_FAMILY_INFO[family];
-  return `<section class="section white"><div class="wrap"><a class="back" href="#inventory">← Back to Inventory</a><div class="detail-grid"><div><img class="detail-image" src="${esc(c.image||'') }" alt="${esc(c.name)}" onerror="this.closest('.detail-grid > div')?.querySelector('.detail-image')?.remove()"></div><div><span class="eyebrow">Mercedes-Benz · For Sale</span><h1>${esc(c.name)}</h1><p>${esc(c.description)}</p><button id="car-wa" class="btn red">Send a DM to ask if it is available</button></div></div><div class="spec-panel"><h2>Full details</h2><div class="spec-grid">${[['Year',c.year],['Mileage',(c.mileageKm||0)+' km'],['Specification',c.specTag],['Condition',c.condition],['Transmission',c.transmission],['Fuel',c.fuel],['Body',c.body],['Drivetrain',c.drivetrain],['Engine',c.engineSize],['Cylinders',c.cylinders],['Horsepower',c.horsepower?c.horsepower+' hp':''],['Colour',c.color],['Interior',c.interiorColor],['Seats',c.seats],['Registration',c.registered]].filter(x=>x[1]).map(x=>'<div><span>'+esc(x[0])+'</span><b>'+esc(x[1])+'</b></div>').join('')}</div>${about?`<div class="model-about"><h3>About the ${esc(family)}</h3><p>${esc(about)}</p></div>`:''}</div></div></section>`}
+  return `<section class="section white"><div class="wrap"><a class="back" href="#inventory">← Back to Inventory</a><div class="detail-grid"><div><img class="detail-image" src="${BASE}${esc(c.image)}" alt="${esc(c.name)}" onerror="this.onerror=null;this.src='/images/moses-benz-logo.png';"></div><div><span class="eyebrow">Mercedes-Benz · For Sale</span><h1>${esc(c.name)}</h1><p>${esc(c.description)}</p><button id="car-wa" class="btn red">Send a DM to ask if it is available</button></div></div><div class="spec-panel"><h2>Full details</h2><div class="spec-grid">${[['Year',c.year],['Mileage',(c.mileageKm||0)+' km'],['Specification',c.specTag],['Condition',c.condition],['Transmission',c.transmission],['Fuel',c.fuel],['Body',c.body],['Drivetrain',c.drivetrain],['Engine',c.engineSize],['Cylinders',c.cylinders],['Horsepower',c.horsepower?c.horsepower+' hp':''],['Colour',c.color],['Interior',c.interiorColor],['Seats',c.seats],['Registration',c.registered]].filter(x=>x[1]).map(x=>'<div><span>'+esc(x[0])+'</span><b>'+esc(x[1])+'</b></div>').join('')}</div>${about?`<div class="model-about"><h3>About the ${esc(family)}</h3><p>${esc(about)}</p></div>`:''}</div></div></section>`}
 function bindCar(slug){const c=cars().find(x=>x.slug===slug),b=$('#car-wa');if(b&&c)b.onclick=()=>sendCarDM(c)}
 const POPULAR_MODEL_PATTERNS=[
   /\bc\s*-?\s*(180|200|300|350)\b/i,
@@ -401,33 +411,39 @@ function bindBlogArticle(slug){
   };
   load();
 }
-function appointments(){return `<section class="page-head"><div class="wrap"><span class="eyebrow">Appointment</span><h1>Book an appointment.</h1><p>Your request is saved for the workshop and WhatsApp opens with the same details.</p></div></section><section class="section white"><div class="wrap narrow"><form id="appointment-form" class="form-card"><label>Full Name *<input name="name" required></label><label>Email *<input name="email" type="email" required></label><label>WhatsApp *<input name="phone" required></label><div class="two"><label>Vehicle Model *<input name="model" placeholder="C 300" required></label><label>Year *<input name="year" type="number" required></label></div><label>Location *<input name="location" required></label><label>What is the car doing? *<textarea name="message" rows="7" required></textarea></label><button class="btn red">Send Appointment Request</button><p id="appointment-status" class="status"></p></form></div></section>`}
+function appointments(){
+  return `<section class="page-head"><div class="wrap"><span class="eyebrow">Appointment</span><h1>Book an appointment.</h1><p>Your request is saved for the workshop before WhatsApp opens with the same details.</p></div></section><section class="section white"><div class="wrap narrow"><div class="appointment-hours"><span class="eyebrow">Workshop hours</span><div class="appointment-hours-grid">${workingHoursLines()}</div></div><form id="appointment-form" class="form-card"><label>Full Name *<input name="name" required></label><label>Email *<input name="email" type="email" required></label><label>WhatsApp *<input name="phone" required></label><div class="two"><label>Vehicle Model *<input name="model" placeholder="C 300" required></label><label>Year *<input name="year" type="number" required></label></div><label>Location *<input name="location" required></label><label>What is the car doing? *<textarea name="message" rows="7" required></textarea></label><button class="btn red" type="submit">Send Appointment Request</button><p id="appointment-status" class="status"></p></form></div></section>`;
+}
 function bindAppointment(){
   const f=$('#appointment-form');
-  if(!f)return;
+  if(!f||f.dataset.bound)return;
+  f.dataset.bound='1';
   f.onsubmit=async e=>{
     e.preventDefault();
-    const fd=new FormData(f);
-    const p={
-      id:'apt-'+Date.now().toString(36),
-      name:fd.get('name'),
-      email:fd.get('email'),
-      phone:fd.get('phone'),
-      model:fd.get('model'),
-      year:Number(fd.get('year')),
-      location:fd.get('location'),
-      service:'Appointment Request',
-      message:String(fd.get('message')),
-      status:'requested'
-    };
-    const status=$('#appointment-status');
-    status.textContent='Saving request…';
-    await api('appointments',{method:'POST',body:JSON.stringify(p)});
+    const fd=new FormData(f),btn=f.querySelector('button[type="submit"]'),status=$('#appointment-status');
+    const p={id:'apt-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8),name:String(fd.get('name')||'').trim(),email:String(fd.get('email')||'').trim(),phone:String(fd.get('phone')||'').trim(),model:String(fd.get('model')||'').trim(),year:Number(fd.get('year')),location:String(fd.get('location')||'').trim(),service:'Appointment Request',registration:null,message:String(fd.get('message')||'').trim(),status:'requested'};
+    btn.disabled=true; status.textContent='Saving request to the workshop…';
+    let saved=false;
+    try{
+      const rpcResult=await rpc('create_appointment',{p_id:p.id,p_name:p.name,p_email:p.email,p_phone:p.phone,p_model:p.model,p_year:p.year,p_service:p.service,p_registration:null,p_location:p.location,p_message:p.message});
+      if(rpcResult.ok)saved=true;
+      else {
+        const direct=await api('appointments',{method:'POST',body:JSON.stringify(p)});
+        saved=direct.ok;
+      }
+    }catch{}
+    if(!saved){
+      status.textContent='We could not save the appointment. Please try again — WhatsApp was not opened.';
+      btn.disabled=false;
+      return;
+    }
+    try{window.MBData?.addAppointment?.(p);}catch{}
     const n=whatsappNumber();
-    status.textContent='Request received. Opening WhatsApp…';
+    status.textContent=n?'Appointment saved. Opening WhatsApp…':'Appointment saved. We will contact you using the details provided.';
+    btn.disabled=false;
     if(n){
       const text=`Hello Moses Benz Auto Care. I would like to book an appointment.\nFull Name: ${p.name}\nEmail: ${p.email}\nWhatsApp: ${p.phone}\nVehicle: ${p.model} (${p.year})\nLocation: ${p.location}\nWhat is the car doing: ${p.message}`;
-      location.href='https://wa.me/'+n+'?text='+encodeURIComponent(text);
+      window.setTimeout(()=>{window.location.href='https://wa.me/'+n+'?text='+encodeURIComponent(text);},250);
     }
   };
 }

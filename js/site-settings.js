@@ -1,9 +1,9 @@
 /* Moses Benz Auto Care — public contact/social settings from Supabase. */
 (() => {
-  const blank = { phone:'', whatsapp:'', email:'', instagram:'', facebook:'', youtube:'', tiktok:'', x:'' };
+  const blank = { phone:'', whatsapp:'', email:'', instagram:'', facebook:'', youtube:'', tiktok:'', x:'', working_hours:{mon:{open:true,start:'08:00',end:'19:00'},tue:{open:true,start:'08:00',end:'19:00'},wed:{open:true,start:'08:00',end:'19:00'},thu:{open:true,start:'08:00',end:'19:00'},fri:{open:true,start:'08:00',end:'19:00'},sat:{open:true,start:'08:00',end:'15:00'},sun:{open:false,start:'08:00',end:'15:00'}} };
   const clean=v=>String(v||'').replace(/[^\d+]/g,'').replace(/^\+/,'');
   const whatsappUrl=v=>{const raw=String(v||'').trim();if(!raw)return '';if(/^https?:\/\/\S+/i.test(raw))return raw;const n=clean(raw);return n?`https://wa.me/${n}`:''};
-  const normalise=r=>({...blank,...(r||{})});
+  const normalise=r=>{let x={...blank,...(r||{})};let h=x.working_hours;if(typeof h==='string'){try{h=JSON.parse(h);}catch{h=blank.working_hours;}}x.working_hours={...blank.working_hours,...(h||{})};return x;};
   function gmailCompose(email){
     const to=encodeURIComponent(String(email||''));
     const web=`https://mail.google.com/mail/?view=cm&fs=1&to=${to}`;

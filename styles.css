@@ -227,3 +227,17 @@
 .admin-blog-body{padding:20px}.admin-blog-body h3{margin:7px 0 8px;font-size:22px}.admin-blog-body p{color:var(--muted);margin:0 0 10px}.admin-blog-body small{display:block;color:var(--muted);overflow-wrap:anywhere}.admin-blog-actions{display:flex;justify-content:flex-end;margin-top:16px}
 .admin-field-help{display:block;color:var(--muted);font-size:12px;margin-top:-10px;margin-bottom:15px}
 @media(max-width:760px){.admin-blog-grid{grid-template-columns:1fr}}
+
+/* Admin working-hours controls and appointment load state */
+.working-hours-editor{margin-top:22px;padding-top:22px;border-top:1px solid var(--line-light);}
+.working-hours-grid{display:flex;flex-direction:column;gap:10px;margin-top:14px;}
+.working-hours-row{display:grid;grid-template-columns:minmax(150px,1fr) minmax(130px,.7fr) minmax(130px,.7fr);gap:12px;align-items:end;padding:12px;border:1px solid var(--line-light);background:rgba(255,255,255,.55);}
+.working-hours-row .working-day{display:flex;align-items:center;gap:9px;min-height:44px;font-weight:700;}
+.working-hours-row input[type="checkbox"]{width:18px;height:18px;accent-color:var(--ignition);}
+.working-hours-row input[type="time"]{width:100%;box-sizing:border-box;}
+.appointment-hours{margin-bottom:24px;padding:22px;border:1px solid var(--line-light);background:var(--paper);}
+.appointment-hours-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 24px;margin-top:12px;}
+.appointment-hours-grid p{margin:0;color:var(--ink-soft);font-size:13px;}
+.appointment-hours-grid strong{display:inline-block;min-width:82px;color:var(--ink);}
+.admin-load-error{padding:18px;border:1px solid rgba(180,40,40,.3);background:rgba(180,40,40,.05);}
+@media(max-width:700px){.working-hours-row{grid-template-columns:1fr 1fr;}.working-hours-row .working-day{grid-column:1/-1;}.appointment-hours-grid{grid-template-columns:1fr;}}
