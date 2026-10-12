@@ -1,46 +1,34 @@
-/* Moses Benz Auto Care — workshop gallery.
-   Keep each photo's original filename and extension; no img1/img2 renaming. */
+/* Moses Benz Auto Care — homepage workshop gallery. Add photographs to /images/workshop-gallery and list filenames below. */
 (() => {
-  const photos = [
-    {file:"IMG_3708.jpeg", alt:"Moses Benz workshop"},
-    {file:"IMG_3786.jpeg", alt:"Moses Benz workshop"},
-    {file:"IMG_3790.jpeg", alt:"Moses Benz workshop"},
-    {file:"IMG_3791.jpeg", alt:"Moses Benz workshop"},
-    {file:"IMG_3793.jpeg", alt:"Moses Benz workshop"},
-    {file:"IMG_3798.jpeg", alt:"Moses Benz workshop"},
-    {file:"IMG_3806.jpeg", alt:"Moses Benz workshop"},
-    {file:"landmark-fuel-station.jpg", alt:"Workshop exterior"},
-    {file:"street-cars.jpg", alt:"Cars at the workshop"},
-    {file:"workshop-technicians.jpg", alt:"Workshop technicians"}
-  ];
-  const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
-  function init() {
-    const root = document.getElementById("workshop-gallery-carousel");
-    if (!root) return;
-    const slides = photos.map(p => `<figure class="workshop-gallery-slide"><img src="/images/workshop-gallery/${esc(p.file)}" alt="${esc(p.alt)}" loading="lazy" decoding="async" onerror="this.closest('figure')?.remove()"><figcaption>${esc(p.alt)}</figcaption></figure>`).join("");
-    root.innerHTML = `<div class="workshop-gallery-viewport"><div class="workshop-gallery-track">${slides}</div></div>`;
-    const track = root.querySelector(".workshop-gallery-track");
-    const original = [...track.children];
-    if (original.length < 2) return;
-    track.innerHTML = original.map(x => x.outerHTML).concat(original.map(x => x.outerHTML)).join("");
-    const count = original.length;
-    let index = 0, timer;
-    const step = () => Math.max(root.querySelector(".workshop-gallery-slide")?.getBoundingClientRect().width || 0, 260);
-    const move = () => { index++; track.style.transform = `translateX(-${index * step()}px)`; };
-    track.addEventListener("transitionend", () => {
-      if (index >= count) {
-        track.style.transition = "none"; index = 0; track.style.transform = "translateX(0)";
-        requestAnimationFrame(() => requestAnimationFrame(() => track.style.transition = "transform .65s cubic-bezier(.2,.75,.2,1)"));
+  const photos=Array.from({length:12},(_,i)=>[`img${i+1}`,`Moses Benz workshop image ${i+1}`]);
+  const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+  function init(){
+    const root=document.getElementById('workshop-gallery-carousel');if(!root)return;
+    const usable=photos.filter(p=>p[0]);
+    const slideMarkup=usable.map(p=>`<figure class="workshop-gallery-slide"><img src="/images/workshop-gallery/${esc(p[0])}.jpg" alt="${esc(p[1])}" loading="lazy" decoding="async" onerror="this.dataset.ext=(Number(this.dataset.ext||0)+1);const e=['jpg','jpeg','png','webp'][Number(this.dataset.ext)];if(e)this.src='/images/workshop-gallery/${esc(p[0])}.'+e;else this.closest('figure')?.remove()"><figcaption>${esc(p[1])}</figcaption></figure>`).join('');
+    root.innerHTML=`<div class="workshop-gallery-viewport"><div class="workshop-gallery-track">${slideMarkup}</div></div>`;
+    const track=root.querySelector('.workshop-gallery-track');
+    const originalSlides=[...track.children];
+    if(originalSlides.length<2)return;
+    const originalCount=originalSlides.length;
+    track.innerHTML=originalSlides.map(el=>el.outerHTML).concat(originalSlides.map(el=>el.outerHTML)).join('');
+    const slides=[...track.children];
+    let index=0,timer;
+    const offset=i=>slides[i].offsetLeft-slides[0].offsetLeft;
+    const move=()=>{index++;track.style.transform=`translateX(-${offset(index)}px)`;};
+    track.style.transition='transform .65s cubic-bezier(.2,.75,.2,1)';
+    track.addEventListener('transitionend',()=>{
+      if(index>=originalCount){
+        track.style.transition='none';index=0;track.style.transform='translateX(0)';
+        requestAnimationFrame(()=>requestAnimationFrame(()=>{track.style.transition='transform .65s cubic-bezier(.2,.75,.2,1)';}));
       }
     });
-    track.style.transition = "transform .65s cubic-bezier(.2,.75,.2,1)";
-    timer = setInterval(move, 3000);
-    window.addEventListener("pagehide", () => clearInterval(timer), {once:true});
-    window.addEventListener("resize", () => {
-      track.style.transition = "none"; track.style.transform = `translateX(-${index * step()}px)`;
-      requestAnimationFrame(() => track.style.transition = "transform .65s cubic-bezier(.2,.75,.2,1)");
-    }, {passive:true});
+    timer=window.setInterval(()=>{if(!document.hidden)move();},3000);
+    window.addEventListener('pagehide',()=>window.clearInterval(timer),{once:true});
+    window.addEventListener('resize',()=>{
+      track.style.transition='none';track.style.transform=`translateX(-${offset(index)}px)`;
+      requestAnimationFrame(()=>{track.style.transition='transform .65s cubic-bezier(.2,.75,.2,1)';});
+    },{passive:true});
   }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init, {once:true});
-  else init();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
