@@ -1,76 +1,230 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Moses Benz Auto Care — Mercedes-Benz Specialists in Lagos</title>
-<meta name="description" content="Moses Benz Auto Care is a Mercedes-Benz specialist workshop in Idimu, Lagos — dealer-grade diagnostics, servicing, repair and a curated line-up of prepared vehicles.">
-<link rel="icon" type="image/jpeg" href="/images/moses-benz-logo-icon.jpeg">
-<meta name="application-name" content="Moses Benz">
-<meta property="og:site_name" content="Moses Benz">
-<meta property="og:title" content="Moses Benz — Mercedes-Benz Specialist in Lagos">
-<meta property="og:description" content="Mercedes-Benz diagnosis, servicing, repairs and vehicle sales in Idimu, Lagos.">
-<link rel="canonical" href="https://moses-benz.com/">
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "Moses Benz",
-  "alternateName": "Moses Benz Auto Care",
-  "url": "https://moses-benz.com/"
-}
-</script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "name": "Moses Benz",
-  "alternateName": "Moses Benz Auto Care",
-  "url": "https://moses-benz.com/",
-  "logo": "https://moses-benz.com/images/moses-benz-logo.png"
-}
-</script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ladydee Minimart Store — Everyday groceries delivered in Nigeria</title>
+<meta name="description" content="Ladydee Minimart Store — rice, beans, garri, cooking oil, noodles, beverages, household and baby essentials. Sealed, fairly priced and delivered across Nigeria.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="styles.css">
-<link rel="stylesheet" href="styles-modern.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><text y='19' font-size='19'>🛒</text></svg>">
+<link rel="stylesheet" href="styles.css?v=5">
 </head>
-<body>
-<div class="top-progress" id="top-progress"></div>
-<header class="header">
-  <div class="wrap nav-wrap">
-    <a class="brand" href="#home">
-      <img src="images/moses-benz-logo.png" alt="Moses Benz Auto Care">
-      <span>Moses Benz<small>Auto Care · Idimu, Lagos</small></span>
-    </a>
-    <nav>
-      <a href="#home">Home</a>
-      <a href="#inventory">Inventory</a>
-      <a href="#blog">Insights</a>
-      <a href="#contact">Contact</a>
-    </nav>
-    <a class="btn red desktop-cta" href="#appointments">Book a Service</a>
-    <button class="menu-btn" aria-label="Menu" type="button">☰</button>
+<body data-page="home">
+
+<div id="site-header"></div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-copy">
+      <span class="eyebrow">Groceries, sealed &amp; delivered</span>
+      <h1>Your market run, <em>done in minutes</em>.</h1>
+      <p class="hero-lead">Rice by the bag, cooking oil, noodles, detergent and baby essentials — all sealed, fairly priced and brought to your door across Nigeria.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary btn-lg" href="/products">Start shopping</a>
+        <a class="btn btn-outline btn-lg" href="/workflows">How delivery works</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><b>30+</b><span>Everyday essentials</span></div>
+        <div class="hero-stat"><b>7</b><span>Delivery zones</span></div>
+        <div class="hero-stat"><b>Same day</b><span>Across Lagos</span></div>
+      </div>
+    </div>
+    <div class="hero-art">
+      <div class="hero-art-img">
+        <img src="images/scene-hero.png" alt="A well-stocked grocery aisle with sealed packaged foodstuffs">
+      </div>
+      <div class="hero-float hero-float--a">
+        <span class="hero-float-ico" style="background:var(--green-soft);color:var(--green)" data-i="truck"></span>
+        <span><b>Free delivery</b><small>Orders over ₦50,000</small></span>
+      </div>
+      <div class="hero-float hero-float--b">
+        <span class="hero-float-ico" style="background:var(--amber-soft);color:var(--amber-dark)" data-i="shield"></span>
+        <span><b>Sealed &amp; fresh</b><small>Checked before dispatch</small></span>
+      </div>
+    </div>
   </div>
-  <div class="mobile-menu">
-    <a href="#home">Home</a>
-    <a href="#inventory">Inventory</a>
-    <a href="#blog">Insights</a>
-    <a href="#contact">Contact</a>
-    <a class="btn red" href="#appointments">Book a Service</a>
-  </div>
-</header>
-<div class="route-transition" id="route-transition" aria-hidden="true">
-  <div class="route-transition-line"></div>
+</section>
+
+<!-- TRUST MARQUEE -->
+<div class="trust">
+  <div class="trust-track" id="trustTrack"></div>
 </div>
-<main id="app"></main>
-<footer id="footer"></footer>
-<script src="js/cars.js"></script>
-<script src="js/supabase-config.js"></script>
-<script src="js/backend.js"></script>
-<script src="js/store.js"></script>
-<script src="app.js"></script>
+
+<!-- CATEGORIES -->
+<section class="section">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Shop by category</span>
+        <h2>Everything for the house</h2>
+        <p>Seven aisles, stocked with the sizes Nigerian homes actually buy.</p>
+      </div>
+      <a class="link-arrow" href="/products">Browse all products <span data-i="arrowRight"></span></a>
+    </div>
+    <div class="cat-grid" id="catGrid"></div>
+  </div>
+</section>
+
+<!-- DELIVERY DISCOUNT BANNER -->
+<section class="section--tight">
+  <div class="wrap">
+    <div class="deliv-banner reveal">
+      <span class="deliv-banner-ico" data-i="truck"></span>
+      <div>
+        <h3>Delivery discounts, running now</h3>
+        <p>We are cutting delivery fees across the board. Stack a promo code on top and pay even less to get your order.</p>
+        <div class="deliv-banner-tags" id="delivTags"></div>
+      </div>
+      <a class="btn btn-primary" href="/cart">See fees at checkout</a>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED -->
+<section class="section section--cream">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Featured</span>
+        <h2>Popular this week</h2>
+        <p>The staples our customers reorder most — rice, oil, noodles and milk.</p>
+      </div>
+      <a class="link-arrow" href="/products">See all <span data-i="arrowRight"></span></a>
+    </div>
+    <div class="pgrid" id="featuredGrid"></div>
+  </div>
+</section>
+
+<!-- DEALS -->
+<section class="section">
+  <div class="wrap">
+    <div class="deals">
+      <div class="deals-head">
+        <div>
+          <span class="eyebrow" style="color:var(--amber)">Deals of the week</span>
+          <h2>Price drops on the essentials</h2>
+          <p>Discounted while stock lasts — no code needed.</p>
+        </div>
+        <div class="countdown" id="countdown"></div>
+      </div>
+      <div class="pgrid" id="dealsGrid"></div>
+    </div>
+  </div>
+</section>
+
+<!-- VALUE PROPS -->
+<section class="section--tight">
+  <div class="wrap">
+    <div class="vprops" id="vprops"></div>
+  </div>
+</section>
+
+<!-- NEWSLETTER -->
+<section class="section">
+  <div class="wrap">
+    <div class="newsletter reveal">
+      <div>
+        <h2>Get the weekly price list</h2>
+        <p>One short email each Monday with the week's deals and any delivery discounts. No spam, unsubscribe anytime.</p>
+      </div>
+      <form class="newsletter-form" id="newsForm">
+        <input type="email" id="newsEmail" placeholder="you@example.com" aria-label="Email address" required>
+        <button class="btn btn-accent btn-lg" type="submit">Subscribe</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+
+<script src="app.js?v=5"></script>
+<script src="brevi.js"></script>
+<script>
+(function () {
+  var S = window.Ladydee;
+  S.mount('home');
+
+  document.querySelectorAll('[data-i]').forEach(function (e) { e.innerHTML = S.icon(e.getAttribute('data-i')); });
+
+  var TRUST = [
+    ['truck', 'Same-day delivery across Lagos'],
+    ['shield', 'Sealed and quality-checked'],
+    ['wallet', 'Pay on delivery available'],
+    ['refresh', 'Easy returns within 48 hours'],
+    ['headset', 'Support on WhatsApp and phone'],
+    ['award', 'Fair, transparent pricing']
+  ];
+  var items = TRUST.map(function (t) {
+    return '<span class="trust-item">' + S.icon(t[0]) + t[1] + '</span>';
+  }).join('');
+  document.getElementById('trustTrack').innerHTML = items + items;
+
+  document.getElementById('catGrid').innerHTML = S.CATEGORIES.map(function (c) {
+    var n = S.PRODUCTS.filter(function (p) { return p.category === c.id; }).length;
+    return '<a class="cat-card reveal" href="/products?cat=' + c.id + '">' +
+      '<span class="cat-card-ico">' + S.icon(c.icon) + '</span>' +
+      '<b>' + S.esc(c.name) + '</b>' +
+      '<small>' + S.esc(c.blurb) + '</small>' +
+      '<span class="cc-count">' + n + ' product' + (n === 1 ? '' : 's') + ' →</span>' +
+    '</a>';
+  }).join('');
+
+  var rules = S.getDeliveryRules();
+  var tags = [];
+  tags.push('<span class="dpill">' + S.icon('truck') + 'Free delivery over ' + S.money(rules.freeOver) + '</span>');
+  if (rules.memberFree) tags.push('<span class="dpill">' + S.icon('user') + 'Free delivery for members</span>');
+  Object.keys(rules.codes).forEach(function (code) {
+    tags.push('<span class="dpill">' + S.icon('tag') + code + ' — ' + S.esc(rules.codes[code].label) + '</span>');
+  });
+  document.getElementById('delivTags').innerHTML = tags.join('');
+
+  var featured = S.PRODUCTS.filter(function (p) { return p.badge === 'bestseller' || p.rating >= 4.7; }).slice(0, 8);
+  document.getElementById('featuredGrid').innerHTML = featured.map(function (p) { return S.productCard(p); }).join('');
+
+  var deals = S.PRODUCTS.filter(function (p) { return p.oldPrice; })
+    .sort(function (a, b) { return S.discountOf(b) - S.discountOf(a); }).slice(0, 4);
+  document.getElementById('dealsGrid').innerHTML = deals.map(function (p) { return S.productCard(p); }).join('');
+
+  function tick() {
+    var now = new Date();
+    var end = new Date(now);
+    end.setDate(now.getDate() + (7 - now.getDay()) % 7);
+    end.setHours(23, 59, 59, 0);
+    if (end <= now) end.setDate(end.getDate() + 7);
+    var ms = end - now;
+    var d = Math.floor(ms / 86400000), h = Math.floor(ms / 3600000) % 24,
+        m = Math.floor(ms / 60000) % 60, s = Math.floor(ms / 1000) % 60;
+    var units = [[d, 'Days'], [h, 'Hours'], [m, 'Mins'], [s, 'Secs']];
+    document.getElementById('countdown').innerHTML = units.map(function (u) {
+      return '<span class="cd-unit"><b>' + String(u[0]).padStart(2, '0') + '</b><span>' + u[1] + '</span></span>';
+    }).join('');
+  }
+  tick(); setInterval(tick, 1000);
+
+  var VP = [
+    ['truck', 'Fast, tracked delivery', 'Same-day in Lagos, 2–5 days nationwide. Track every step from your account.'],
+    ['shield', 'Sealed and checked', 'Every pack is inspected before it leaves the warehouse. Nothing opened, nothing leaking.'],
+    ['wallet', 'Pay how you like', 'Card, bank transfer, USSD or cash on delivery — whichever suits you.'],
+    ['refresh', 'Easy returns', 'Wrong or damaged item? Tell us within 48 hours and we will sort it out.']
+  ];
+  document.getElementById('vprops').innerHTML = VP.map(function (v) {
+    return '<div class="vprop reveal"><span class="vprop-ico">' + S.icon(v[0]) + '</span>' +
+      '<div><b>' + v[1] + '</b><small>' + v[2] + '</small></div></div>';
+  }).join('');
+
+  document.getElementById('newsForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var v = document.getElementById('newsEmail').value.trim();
+    if (!v) return;
+    S.toast('Subscribed — check your inbox on Monday', 'mail');
+    document.getElementById('newsEmail').value = '';
+  });
+
+  S.observeReveals();
+})();
+</script>
 </body>
 </html>

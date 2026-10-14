@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in — Ladydee Minimart Store</title>
+<meta name="description" content="Sign in to your Ladydee Minimart Store account to track orders and check out faster.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><text y='19' font-size='19'>🛒</text></svg>">
+<link rel="stylesheet" href="styles.css?v=5">
+</head>
+<body data-page="login">
+
+<div id="site-header"></div>
+
+<div class="auth-wrap">
+  <aside class="auth-aside">
+    <h2>Welcome back</h2>
+    <p>Sign in to see your orders, reorder your usual basket and keep your free delivery.</p>
+    <div class="auth-points">
+      <div class="auth-point"><span data-i="clipboard"></span><span><b>Your order history</b><small>Every order, with live status</small></span></div>
+      <div class="auth-point"><span data-i="refresh"></span><span><b>One-tap reorder</b><small>Buy your usual basket again</small></span></div>
+      <div class="auth-point"><span data-i="truck"></span><span><b>Free delivery</b><small>Active on every signed-in order</small></span></div>
+    </div>
+  </aside>
+
+  <main class="auth-main">
+    <div class="auth-card">
+      <h1>Sign in</h1>
+      <p>Enter your details to continue.</p>
+      <div class="demo-note"><span><b>Demo account:</b> alex@example.com / demo1234</span></div>
+      <form class="auth-form" id="loginForm" novalidate>
+        <div class="field"><label for="lEmail">Email address</label><input id="lEmail" type="email" placeholder="you@example.com" autocomplete="email"></div>
+        <div class="field"><label for="lPw">Password</label>
+          <div class="pw-wrap"><input id="lPw" type="password" placeholder="Your password" autocomplete="current-password">
+          <button class="pw-toggle" type="button" id="pwToggle" aria-label="Show password"></button></div></div>
+        <div class="auth-row">
+          <label class="check"><input type="checkbox" id="lRemember" checked><span>Keep me signed in</span></label>
+          <a href="/forgot" style="color:var(--green);font-weight:700">Forgot password?</a>
+        </div>
+        <button class="btn btn-primary btn-lg btn-block" type="submit">Sign in</button>
+      </form>
+      <p class="auth-alt">New to Ladydee? <a href="/signup">Create an account</a></p>
+    </div>
+  </main>
+</div>
+
+<div id="site-footer"></div>
+
+<script src="app.js?v=5"></script>
+<script src="brevi.js"></script>
+<script>
+(function () {
+  var S = window.Ladydee;
+  S.mount('products');
+  document.querySelectorAll('[data-i]').forEach(function (e) { e.innerHTML = S.icon(e.getAttribute('data-i')); });
+
+  /* the demo note is static markup — inject its icon */
+  var note = document.querySelector('.demo-note');
+  if (note) note.innerHTML = S.icon('info') + '<span><b>Demo account:</b> alex@example.com / demo1234</span>';
+
+  var pw = document.getElementById('lPw');
+  var toggle = document.getElementById('pwToggle');
+  toggle.innerHTML = S.icon('eye');
+  toggle.addEventListener('click', function () {
+    var t = pw.type === 'password';
+    pw.type = t ? 'text' : 'password';
+    toggle.innerHTML = S.icon(t ? 'eyeOff' : 'eye');
+  });
+
+  document.getElementById('loginForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var email = document.getElementById('lEmail').value.trim();
+    var pass = pw.value;
+    if (!email || !pass) { S.toast('Enter your email and password', 'alert'); return; }
+    var res = S.login(email, pass);
+    if (!res.ok) { S.toast(res.reason, 'alert'); return; }
+    S.toast('Welcome back, ' + (res.user.name || '').split(' ')[0], 'checkCircle');
+    setTimeout(function () { S.go('/account'); }, 500);
+  });
+})();
+</script>
+</body>
+</html>

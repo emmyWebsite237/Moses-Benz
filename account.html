@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My account — Ladydee Minimart Store</title>
+<meta name="description" content="Your Ladydee Minimart Store account: order history, saved addresses, wishlist and profile.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><text y='19' font-size='19'>🛒</text></svg>">
+<link rel="stylesheet" href="styles.css?v=5">
+</head>
+<body data-page="account">
+
+<div id="site-header"></div>
+
+<main class="section">
+  <div class="wrap" id="acctWrap"></div>
+</main>
+
+<div id="site-footer"></div>
+
+<script src="app.js?v=5"></script>
+<script src="brevi.js"></script>
+<script>
+(function () {
+  var S = window.Ladydee;
+  S.mount('products');
+
+  var user = S.currentUser();
+  if (!user) {
+    document.getElementById('acctWrap').innerHTML =
+      '<div class="empty"><div style="width:84px;height:84px;border-radius:50%;background:var(--green-soft);color:var(--green);display:grid;place-items:center;margin:0 auto 20px">' +
+      '<span style="width:38px;height:38px;display:block">' + S.icon('lock') + '</span></div>' +
+      '<b>Please sign in</b><p>You need an account to see your orders and addresses.</p>' +
+      '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">' +
+      '<a class="btn btn-primary btn-lg" href="/login">Sign in</a>' +
+      '<a class="btn btn-outline btn-lg" href="/signup">Create an account</a></div></div>';
+    return;
+  }
+
+  var tab = 'overview';
+  var editingAddr = null;
+
+  function myOrders() {
+    return S.getOrders().filter(function (o) {
+      return o.customer && o.customer.email && o.customer.email.toLowerCase() === user.email.toLowerCase();
+    });
+  }
+
+  function statusPill(s) {
+    return '<span class="status-pill st-' + s + '">' + S.statusLabel(s) + '</span>';
+  }
+
+  function orderCard(o) {
+    var steps = S.orderStatuses();
+    var idx = steps.indexOf(o.status);
+    var track = steps.map(function (s, i) {
+      var cls = i < idx ? 'done' : i === idx ? 'current' : '';
+      return '<div class="tstep ' + cls + '"><div class="tstep-rail"><span class="tstep-dot">' + (i < idx ? S.icon('check') : '') + '</span><span class="tstep-line"></span></div>' +
+        '<div class="tstep-body"><b>' + S.statusLabel(s) + '</b><small>' + (i < idx ? 'Completed' : i === idx ? 'In progress' : 'Pending') + '</small></div></div>';
+    }).join('');
+
+    return '<article class="order-card">' +
+      '<div class="order-head">' +
+        '<div><b>' + S.esc(o.code) + '</b><small>Placed ' + S.fmtDate(new Date(o.date)) + ' · ' + (o.items || []).length + ' item' + ((o.items || []).length === 1 ? '' : 's') + '</small></div>' +
+        '<div class="oh-right">' + statusPill(o.status) + '<b>' + S.money(o.total) + '</b></div>' +
+      '</div>' +
+      '<div class="order-body">' +
+        '<div class="order-items">' + (o.items || []).map(function (it) {
+          return '<span class="oi"><img src="' + it.image + '" alt=""><span><b>' + S.esc(it.name) + '</b><small>' + S.esc(it.size) + ' × ' + it.qty + '</small></span></span>';
+        }).join('') + '</div>' +
+        '<div class="track-steps">' + track + '</div>' +
+        '<div class="order-foot">' +
+          '<span class="of-total"><small>Total paid</small><b>' + S.money(o.total) + '</b></span>' +
+          '<span class="muted" style="font-size:.84rem">' + S.esc(o.payment) + ' · ' + S.esc(o.eta || '') + '</span>' +
+          '<button class="btn btn-outline btn-sm" type="button" data-reorder="' + S.esc(o.code) + '">' + S.icon('refresh') + ' Buy again</button>' +
+        '</div>' +
+      '</div>' +
+    '</article>';
+  }
+
+  function renderOverview() {
+    var orders = myOrders();
+    var spent = orders.reduce(function (n, o) { return n + o.total; }, 0);
+    var active = orders.filter(function (o) { return o.status !== 'delivered' && o.status !== 'cancelled' && o.status !== 'rejected'; }).length;
+    var wish = S.wishCount();
+
+    return '<div class="kpis">' +
+      '<div class="kpi"><span class="kpi-ico" style="background:var(--green-soft);color:var(--green)">' + S.icon('clipboard') + '</span><b>' + orders.length + '</b><small>Total orders</small></div>' +
+      '<div class="kpi"><span class="kpi-ico" style="background:var(--amber-soft);color:var(--amber-dark)">' + S.icon('truck') + '</span><b>' + active + '</b><small>In progress</small></div>' +
+      '<div class="kpi"><span class="kpi-ico" style="background:var(--blue-soft);color:var(--blue)">' + S.icon('wallet') + '</span><b>' + S.money(spent) + '</b><small>Total spent</small></div>' +
+      '<div class="kpi"><span class="kpi-ico" style="background:var(--coral-soft);color:var(--coral)">' + S.icon('heart') + '</span><b>' + wish + '</b><small>Wishlist items</small></div>' +
+    '</div>' +
+    '<div class="panel"><div class="panel-head"><b>Recent orders</b><button class="btn btn-ghost btn-sm" type="button" data-tab="orders">View all ' + S.icon('arrowRight') + '</button></div>' +
+      '<div class="panel-body">' + (orders.length ? orders.slice(0, 2).map(orderCard).join('') : '<p class="muted">No orders yet. <a href="/products" style="color:var(--green);font-weight:700">Start shopping</a></p>') + '</div></div>';
+  }
+
+  function renderOrders() {
+    var orders = myOrders();
+    if (!orders.length) {
+      return '<div class="empty"><b>No orders yet</b><p>When you place an order it will appear here with live tracking.</p><a class="btn btn-primary" href="/products">Start shopping</a></div>';
+    }
+    return orders.map(orderCard).join('');
+  }
+
+  function renderWishlist() {
+    var items = S.getWish().map(function (id) { return S.product(id); }).filter(Boolean);
+    if (!items.length) {
+      return '<div class="empty"><b>Your wishlist is empty</b><p>Tap the heart on any product to save it here.</p><a class="btn btn-primary" href="/products">Browse products</a></div>';
+    }
+    return '<div class="pgrid pgrid--3">' + items.map(function (p) { return S.productCard(p); }).join('') + '</div>';
+  }
+
+  function renderAddresses() {
+    var addrs = user.addresses || [];
+    var cards = addrs.map(function (a) {
+      return '<div class="addr-card' + (a.isDefault ? ' default' : '') + '">' +
+        (a.isDefault ? '<span class="ad-def">Default</span>' : '') +
+        '<span class="ad-tag">' + S.esc(a.label || 'Address') + '</span>' +
+        '<b>' + S.esc(a.name) + '</b>' +
+        '<p>' + S.esc(a.address) + '<br>' + S.esc(a.city) + '<br>' + S.esc(a.phone) + '</p>' +
+        '<div class="ad-actions">' +
+          (a.isDefault ? '' : '<button class="btn btn-outline btn-sm" type="button" data-defaddr="' + a.id + '">Make default</button>') +
+          '<button class="btn btn-outline btn-sm" type="button" data-editaddr="' + a.id + '">' + S.icon('edit') + ' Edit</button>' +
+          '<button class="btn btn-danger btn-sm" type="button" data-deladdr="' + a.id + '">' + S.icon('trash') + '</button>' +
+        '</div></div>';
+    }).join('');
+
+    var form = editingAddr ? addrForm(editingAddr) : '';
+
+    return '<div class="addr-grid">' + cards +
+      '<button class="addr-add" type="button" id="addAddrBtn">' + S.icon('plus') + 'Add a new address</button>' +
+    '</div>' + form;
+  }
+
+  function addrForm(a) {
+    return '<div class="panel" style="margin-top:20px"><div class="panel-head"><b>' + (a.id ? 'Edit address' : 'New address') + '</b>' +
+      '<button class="btn btn-ghost btn-sm" type="button" id="cancelAddr">Cancel</button></div>' +
+      '<div class="panel-body"><div class="form-grid">' +
+        '<div class="field"><label for="aLabel">Label</label><input id="aLabel" value="' + S.esc(a.label || '') + '" placeholder="Home, Office…"></div>' +
+        '<div class="field"><label for="aName">Recipient name</label><input id="aName" value="' + S.esc(a.name || '') + '" placeholder="Full name"></div>' +
+        '<div class="field"><label for="aPhone">Phone</label><input id="aPhone" value="' + S.esc(a.phone || '') + '" placeholder="0801 234 5678"></div>' +
+        '<div class="field"><label for="aCity">City</label><input id="aCity" value="' + S.esc(a.city || 'Lagos') + '" placeholder="Lagos"></div>' +
+        '<div class="field full"><label for="aAddress">Street address</label><input id="aAddress" value="' + S.esc(a.address || '') + '" placeholder="Street, area"></div>' +
+        '<div class="field full"><label for="aZone">Delivery zone</label><select id="aZone">' +
+          S.ZONES.map(function (z) { return '<option value="' + z.id + '"' + (a.zone === z.id ? ' selected' : '') + '>' + S.esc(z.name) + ' — ' + (z.fee ? S.money(z.fee) : 'Free') + '</option>'; }).join('') +
+        '</select></div>' +
+      '</div><div style="margin-top:18px;display:flex;gap:10px"><button class="btn btn-primary" type="button" id="saveAddr">Save address</button></div></div></div>';
+  }
+
+  function renderProfile() {
+    return '<div class="panel"><div class="panel-head"><b>Profile details</b></div><div class="panel-body">' +
+      '<div class="form-grid">' +
+        '<div class="field"><label for="pName">Full name</label><input id="pName" value="' + S.esc(user.name) + '"></div>' +
+        '<div class="field"><label for="pPhone">Phone number</label><input id="pPhone" value="' + S.esc(user.phone || '') + '"></div>' +
+        '<div class="field full"><label for="pEmail">Email address</label><input id="pEmail" type="email" value="' + S.esc(user.email) + '"></div>' +
+      '</div>' +
+      '<div style="margin-top:18px"><button class="btn btn-primary" type="button" id="saveProfile">Save changes</button></div>' +
+    '</div></div>' +
+    '<div class="panel" style="margin-top:20px"><div class="panel-head"><b>Password &amp; security</b></div><div class="panel-body">' +
+      '<div class="form-grid">' +
+        '<div class="field"><label for="cPw">Current password</label><input id="cPw" type="password" placeholder="Your current password"></div>' +
+        '<div class="field"><label for="nPw">New password</label><input id="nPw" type="password" placeholder="At least 8 characters"></div>' +
+      '</div>' +
+      '<div style="margin-top:18px"><button class="btn btn-outline" type="button" id="savePw">Update password</button></div>' +
+    '</div></div>' +
+    '<div class="panel" style="margin-top:20px"><div class="panel-head"><b>Session</b></div><div class="panel-body">' +
+      '<p class="muted" style="font-size:.9rem;margin-bottom:16px">Signed in as <b>' + S.esc(user.email) + '</b>. Your data lives only in this browser.</p>' +
+      '<button class="btn btn-danger" type="button" id="logoutBtn">' + S.icon('logOut') + ' Sign out</button>' +
+    '</div></div>';
+  }
+
+  function renderPanel() {
+    if (tab === 'overview') return renderOverview();
+    if (tab === 'orders') return renderOrders();
+    if (tab === 'wishlist') return renderWishlist();
+    if (tab === 'addresses') return renderAddresses();
+    return renderProfile();
+  }
+
+  function render() {
+    var orders = myOrders();
+    var nav = [
+      ['overview', 'grid', 'Overview', ''],
+      ['orders', 'clipboard', 'Order history', orders.length],
+      ['wishlist', 'heart', 'Wishlist', S.wishCount()],
+      ['addresses', 'mapPin', 'Saved addresses', (user.addresses || []).length],
+      ['profile', 'user', 'Profile &amp; security', '']
+    ];
+
+    document.getElementById('acctWrap').innerHTML =
+      '<div class="acct-layout">' +
+        '<aside class="acct-side">' +
+          '<div class="acct-user"><span class="acct-av">' + S.esc((user.name || 'A').charAt(0).toUpperCase()) + '</span>' +
+            '<span><b>' + S.esc(user.name) + '</b><small>' + S.esc(user.email) + '</small></span></div>' +
+          '<nav class="acct-nav">' + nav.map(function (n) {
+            return '<button type="button" data-tab="' + n[0] + '"' + (tab === n[0] ? ' class="on"' : '') + '>' + S.icon(n[1]) + '<span>' + n[2] + '</span>' +
+              (n[3] !== '' ? '<span class="an-count">' + n[3] + '</span>' : '') + '</button>';
+          }).join('') + '</nav>' +
+        '</aside>' +
+        '<div class="acct-panel on" id="acctPanel">' + renderPanel() + '</div>' +
+      '</div>';
+
+    S.observeReveals();
+  }
+
+  /* ---- events ---- */
+  document.getElementById('acctWrap').addEventListener('click', function (e) {
+    var t = e.target.closest('button'); if (!t) return;
+
+    if (t.hasAttribute('data-tab')) { tab = t.getAttribute('data-tab'); editingAddr = null; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+
+    if (t.hasAttribute('data-reorder')) {
+      var code = t.getAttribute('data-reorder');
+      var o = S.getOrders().filter(function (x) { return x.code === code; })[0];
+      if (o) { o.items.forEach(function (it) { S.addToCart(it.id, it.qty); }); S.toast('Items added to your cart', 'cart'); S.refreshBadges(); }
+      return;
+    }
+
+    if (t.id === 'addAddrBtn') { editingAddr = { id: '', label: '', name: user.name, phone: user.phone || '', address: '', city: 'Lagos', zone: 'island' }; render(); return; }
+    if (t.id === 'cancelAddr') { editingAddr = null; render(); return; }
+    if (t.hasAttribute('data-editaddr')) {
+      var id = t.getAttribute('data-editaddr');
+      editingAddr = (user.addresses || []).filter(function (a) { return a.id === id; })[0];
+      render(); return;
+    }
+    if (t.hasAttribute('data-deladdr')) {
+      var did = t.getAttribute('data-deladdr');
+      var list = (user.addresses || []).filter(function (a) { return a.id !== did; });
+      user = S.updateUser({ addresses: list });
+      S.toast('Address removed', 'trash'); render(); return;
+    }
+    if (t.hasAttribute('data-defaddr')) {
+      var fid = t.getAttribute('data-defaddr');
+      var l2 = (user.addresses || []).map(function (a) { return Object.assign({}, a, { isDefault: a.id === fid }); });
+      user = S.updateUser({ addresses: l2 });
+      S.toast('Default address updated', 'checkCircle'); render(); return;
+    }
+    if (t.id === 'saveAddr') {
+      var a = {
+        id: editingAddr.id || 'a' + Date.now(),
+        label: document.getElementById('aLabel').value.trim() || 'Address',
+        name: document.getElementById('aName').value.trim(),
+        phone: document.getElementById('aPhone').value.trim(),
+        address: document.getElementById('aAddress').value.trim(),
+        city: document.getElementById('aCity').value.trim(),
+        zone: document.getElementById('aZone').value,
+        isDefault: editingAddr.isDefault || !(user.addresses || []).length
+      };
+      if (!a.name || !a.address) { S.toast('Name and address are required', 'alert'); return; }
+      var list3 = (user.addresses || []).slice();
+      var idx = -1;
+      list3.forEach(function (x, i) { if (x.id === a.id) idx = i; });
+      if (idx > -1) list3[idx] = a; else list3.push(a);
+      user = S.updateUser({ addresses: list3 });
+      editingAddr = null;
+      S.toast('Address saved', 'checkCircle'); render(); return;
+    }
+    if (t.id === 'saveProfile') {
+      var name = document.getElementById('pName').value.trim();
+      var phone = document.getElementById('pPhone').value.trim();
+      var email = document.getElementById('pEmail').value.trim().toLowerCase();
+      if (!name || !email) { S.toast('Name and email are required', 'alert'); return; }
+      user = S.updateUser({ name: name, phone: phone, email: email });
+      S.toast('Profile updated', 'checkCircle'); render(); return;
+    }
+    if (t.id === 'savePw') {
+      var cur = document.getElementById('cPw').value;
+      var nw = document.getElementById('nPw').value;
+      if (cur !== user.password) { S.toast('Current password is not correct', 'alert'); return; }
+      if (nw.length < 8) { S.toast('New password must be at least 8 characters', 'alert'); return; }
+      user = S.updateUser({ password: nw });
+      S.toast('Password updated', 'checkCircle'); render(); return;
+    }
+    if (t.id === 'logoutBtn') {
+      S.logout();
+      S.toast('Signed out', 'logOut');
+      setTimeout(function () { S.go('/'); }, 500);
+      return;
+    }
+  });
+
+  document.addEventListener('ladydee:wish', function () { if (tab === 'wishlist' || tab === 'overview') render(); });
+
+  render();
+})();
+</script>
+</body>
+</html>

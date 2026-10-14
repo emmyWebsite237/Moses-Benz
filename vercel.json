@@ -1,1 +1,17 @@
-{"rewrites":[{"source":"/inventory","destination":"/#inventory"},{"source":"/blog","destination":"/#blog"},{"source":"/appointments","destination":"/#appointments"},{"source":"/contact","destination":"/#contact"},{"source":"/careers","destination":"/#careers"},{"source":"/mercedes","destination":"/#guide"},{"source":"/mbac-control-7x4k9","destination":"/mbac-control-7x4k9-login.html"},{"source":"/mbac-control-7x4k9/","destination":"/mbac-control-7x4k9-login.html"},{"source":"/mbac-control-7x4k9/portal","destination":"/mbac-control-7x4k9-portal.html"},{"source":"/mbac-control-7x4k9/portal/","destination":"/mbac-control-7x4k9-portal.html"}]}
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/products", "destination": "/products.html" },
+    { "source": "/product", "destination": "/product.html" },
+    { "source": "/cart", "destination": "/cart.html" },
+    { "source": "/search", "destination": "/search.html" },
+    { "source": "/wishlist", "destination": "/wishlist.html" },
+    { "source": "/account", "destination": "/account.html" },
+    { "source": "/login", "destination": "/login.html" },
+    { "source": "/signup", "destination": "/signup.html" },
+    { "source": "/forgot", "destination": "/forgot.html" },
+    { "source": "/workflows", "destination": "/workflows.html" },
+    { "source": "/adeolaadaccess112", "destination": "/adeolaadaccess112.html" }
+  ]
+}

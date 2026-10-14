@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product — Ladydee Minimart Store</title>
+<meta name="description" content="Product details, sizes, prices and reviews at Ladydee Minimart Store.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><text y='19' font-size='19'>🛒</text></svg>">
+<link rel="stylesheet" href="styles.css?v=5">
+</head>
+<body data-page="product">
+
+<div id="site-header"></div>
+
+<main id="pdpMain"></main>
+
+<div id="site-footer"></div>
+
+<script src="app.js?v=5"></script>
+<script src="brevi.js"></script>
+<script>
+(function () {
+  var S = window.Ladydee;
+  S.mount('products');
+
+  var id = S.param('id');
+  var p = id ? S.product(id) : null;
+  if (!p) p = S.PRODUCTS[0];
+
+  document.title = p.name + ' ' + p.size + ' — Ladydee Minimart Store';
+
+  var d = S.discountOf(p);
+  var out = p.stock <= 0;
+  var low = p.stock > 0 && p.stock <= 30;
+  var wished = S.inWish(p.id);
+
+  /* gallery: product shot + scene shot */
+  var shots = [p.image, p.scene].filter(Boolean);
+
+  /* reviews */
+  var NAMES = ['Chidinma O.', 'Tunde A.', 'Aisha B.', 'Emeka N.', 'Funke A.', 'Ibrahim S.', 'Ngozi E.', 'Segun O.'];
+  var TEXTS = [
+    'Exactly as described and properly sealed. Delivery was faster than I expected.',
+    'Good value for the size. I have reordered this twice already.',
+    'Quality is solid and the price is fair compared to my local market.',
+    'Arrived well packaged, nothing spilled. Will buy again.',
+    'Does the job. Nothing fancy but reliable and the size is accurate.',
+    'Happy with this purchase — the family finished it quickly.',
+    'Sealed properly and the expiry date is far off. No complaints.',
+    'Solid buy. Delivery rider called ahead which I appreciated.'
+  ];
+  var reviews = [];
+  for (var i = 0; i < 4; i++) {
+    var r = Math.max(3, Math.min(5, Math.round(p.rating) - (i === 3 ? 1 : 0)));
+    reviews.push({
+      name: NAMES[(i * 3 + p.id.length) % NAMES.length],
+      rating: r,
+      text: TEXTS[(i * 2 + p.id.length) % TEXTS.length],
+      days: 3 + i * 9
+    });
+  }
+  var dist = [5, 4, 3, 2, 1].map(function (s) {
+    var pct = s === 5 ? 68 : s === 4 ? 22 : s === 3 ? 7 : s === 2 ? 2 : 1;
+    return { star: s, pct: pct };
+  });
+
+  var related = S.PRODUCTS.filter(function (x) { return x.category === p.category && x.id !== p.id; }).slice(0, 4);
+  if (related.length < 4) {
+    S.PRODUCTS.forEach(function (x) {
+      if (related.length < 4 && x.id !== p.id && related.indexOf(x) < 0) related.push(x);
+    });
+  }
+
+  var specRows = Object.keys(p.specs).map(function (k) {
+    return '<tr><td>' + S.esc(k) + '</td><td>' + S.esc(p.specs[k]) + '</td></tr>';
+  }).join('');
+
+  var html =
+  '<section class="page-head"><div class="wrap">' +
+    '<nav class="breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a>' + S.icon('chevronRight') +
+      '<a href="/products">Shop</a>' + S.icon('chevronRight') +
+      '<a href="/products?cat=' + p.category + '">' + S.esc(S.catName(p.category)) + '</a>' + S.icon('chevronRight') +
+      '<span>' + S.esc(p.name) + '</span></nav>' +
+  '</div></section>' +
+
+  '<section class="section"><div class="wrap"><div class="pdp">' +
+    '<div class="pdp-gallery">' +
+      '<div class="gallery-main"><img id="galleryMain" src="' + shots[0] + '" alt="' + S.esc(p.name) + ' ' + S.esc(p.size) + '"></div>' +
+      '<div class="gallery-thumbs">' + shots.map(function (s, i) {
+        return '<button class="gthumb' + (i === 0 ? ' on' : '') + '" type="button" data-shot="' + s + '" aria-label="View image ' + (i + 1) + '"><img src="' + s + '" alt=""></button>';
+      }).join('') + '</div>' +
+    '</div>' +
+
+    '<div class="pdp-info">' +
+      '<span class="pcard-cat">' + S.esc(S.catName(p.category)) + '</span>' +
+      '<h1>' + S.esc(p.name) + '</h1>' +
+      '<div class="pdp-meta">' + S.stars(p.rating) + '<span>' + p.rating + ' · ' + p.reviewCount + ' reviews</span>' +
+        '<span>·</span><span>' + S.esc(p.size) + '</span></div>' +
+      '<div class="pdp-price"><b>' + S.money(p.price) + '</b>' +
+        (p.oldPrice ? '<s>' + S.money(p.oldPrice) + '</s><span class="pdp-save">Save ' + d + '%</span>' : '') + '</div>' +
+      '<div class="pdp-stock ' + (out ? 'out' : low ? 'low' : 'in') + '">' + S.icon(out ? 'alert' : 'checkCircle') +
+        (out ? 'Out of stock' : low ? 'Only ' + p.stock + ' left in stock' : 'In stock — ready to dispatch') + '</div>' +
+      '<p class="pdp-short">' + S.esc(p.short) + '</p>' +
+
+      '<div class="pdp-buy">' +
+        '<div class="qty"><button type="button" id="qMinus" aria-label="Decrease quantity">' + S.icon('minus') + '</button>' +
+          '<input type="number" id="qty" value="1" min="1" max="99" aria-label="Quantity">' +
+          '<button type="button" id="qPlus" aria-label="Increase quantity">' + S.icon('plus') + '</button></div>' +
+        '<button class="btn btn-primary btn-lg" id="addBtn" type="button"' + (out ? ' disabled' : '') + '>' + S.icon('cart') + ' Add to cart</button>' +
+        '<button class="btn btn-outline btn-lg" id="buyBtn" type="button"' + (out ? ' disabled' : '') + '>Buy now</button>' +
+        '<button class="icon-btn wish-btn-lg' + (wished ? ' on' : '') + '" id="wishBtn" type="button" aria-label="' + (wished ? 'Remove from wishlist' : 'Add to wishlist') + '" aria-pressed="' + wished + '" style="width:52px;height:52px;border:1.5px solid var(--line);border-radius:50%;position:static;box-shadow:none;background:var(--surface)">' + S.icon('heart') + '</button>' +
+      '</div>' +
+
+      '<div class="pdp-perks">' +
+        '<div class="pdp-perk">' + S.icon('truck') + '<span><b>Free delivery</b> on orders over ' + S.money(S.getDeliveryRules().freeOver) + '</span></div>' +
+        '<div class="pdp-perk">' + S.icon('shield') + '<span><b>Sealed and checked</b> before dispatch</span></div>' +
+        '<div class="pdp-perk">' + S.icon('refresh') + '<span><b>48-hour returns</b> on damaged or wrong items</span></div>' +
+        '<div class="pdp-perk">' + S.icon('wallet') + '<span><b>Pay on delivery</b> available in Lagos</span></div>' +
+      '</div>' +
+    '</div>' +
+  '</div></div></section>' +
+
+  '<section class="section section--cream"><div class="wrap">' +
+    '<div class="tabs" role="tablist">' +
+      '<button class="tab on" data-tab="desc" role="tab" type="button">Description</button>' +
+      '<button class="tab" data-tab="specs" role="tab" type="button">Specifications</button>' +
+      '<button class="tab" data-tab="revs" role="tab" type="button">Reviews (' + p.reviewCount + ')</button>' +
+    '</div>' +
+
+    '<div class="tabpanel on" id="tab-desc"><div class="prose">' +
+      '<p>' + S.esc(p.description) + '</p>' +
+      '<ul class="feat-list">' + p.features.map(function (f) {
+        return '<li>' + S.icon('check') + '<span>' + S.esc(f) + '</span></li>';
+      }).join('') + '</ul>' +
+    '</div></div>' +
+
+    '<div class="tabpanel" id="tab-specs"><table class="spec-table">' + specRows + '</table></div>' +
+
+    '<div class="tabpanel" id="tab-revs">' +
+      '<div class="rev-summary">' +
+        '<div class="rev-score"><b>' + p.rating + '</b>' + S.stars(p.rating) + '<small>' + p.reviewCount + ' verified reviews</small></div>' +
+        '<div class="rev-bars">' + dist.map(function (x) {
+          return '<div class="rev-bar"><span>' + x.star + '★</span><span class="rev-bar-track"><span class="rev-bar-fill" style="width:' + x.pct + '%"></span></span><span>' + x.pct + '%</span></div>';
+        }).join('') + '</div>' +
+      '</div>' +
+      '<div class="rev-list">' + reviews.map(function (r) {
+        return '<article class="review"><div class="review-head">' +
+          '<span class="review-av">' + S.esc(r.name.charAt(0)) + '</span>' +
+          '<div><b>' + S.esc(r.name) + '</b><small>' + r.days + ' days ago</small></div>' +
+          '<span class="review-verified">' + S.icon('checkCircle') + 'Verified purchase</span></div>' +
+          S.stars(r.rating) + '<p style="margin-top:8px">' + S.esc(r.text) + '</p></article>';
+      }).join('') + '</div>' +
+    '</div>' +
+  '</div></section>' +
+
+  '<section class="section"><div class="wrap">' +
+    '<div class="section-head"><div><span class="eyebrow">You may also like</span><h2>More from ' + S.esc(S.catName(p.category)) + '</h2></div>' +
+      '<a class="link-arrow" href="/products?cat=' + p.category + '">See category ' + S.icon('arrowRight') + '</a></div>' +
+    '<div class="pgrid">' + related.map(function (x) { return S.productCard(x); }).join('') + '</div>' +
+  '</div></section>';
+
+  document.getElementById('pdpMain').innerHTML = html;
+  S.observeReveals();
+
+  /* gallery */
+  document.querySelector('.gallery-thumbs').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-shot]'); if (!b) return;
+    document.getElementById('galleryMain').src = b.getAttribute('data-shot');
+    document.querySelectorAll('.gthumb').forEach(function (t) { t.classList.toggle('on', t === b); });
+  });
+
+  /* qty */
+  var qty = document.getElementById('qty');
+  document.getElementById('qMinus').addEventListener('click', function () { qty.value = Math.max(1, Number(qty.value) - 1); });
+  document.getElementById('qPlus').addEventListener('click', function () { qty.value = Math.min(99, Number(qty.value) + 1); });
+
+  /* add / buy */
+  document.getElementById('addBtn').addEventListener('click', function () {
+    S.addToCart(p.id, Number(qty.value) || 1);
+    S.toast(p.name + ' added to cart', 'cart');
+    S.refreshBadges();
+  });
+  document.getElementById('buyBtn').addEventListener('click', function () {
+    S.addToCart(p.id, Number(qty.value) || 1);
+    S.go('/cart');
+  });
+
+  /* wishlist */
+  var wb = document.getElementById('wishBtn');
+  wb.addEventListener('click', function () {
+    var on = S.toggleWish(p.id);
+    wb.classList.toggle('on', on);
+    wb.setAttribute('aria-pressed', String(on));
+    wb.style.color = on ? 'var(--coral)' : '';
+    S.toast(on ? 'Saved to wishlist' : 'Removed from wishlist', 'heart');
+    S.refreshBadges();
+  });
+  if (wished) wb.style.color = 'var(--coral)';
+
+  /* tabs */
+  document.querySelector('.tabs').addEventListener('click', function (e) {
+    var t = e.target.closest('.tab'); if (!t) return;
+    document.querySelectorAll('.tab').forEach(function (x) { x.classList.toggle('on', x === t); });
+    document.querySelectorAll('.tabpanel').forEach(function (x) { x.classList.remove('on'); });
+    document.getElementById('tab-' + t.getAttribute('data-tab')).classList.add('on');
+  });
+})();
+</script>
+</body>
+</html>
