@@ -1,1217 +1,553 @@
-/* ============================================================
-   Ladydee Minimart Store — shared app engine
-   Catalogue (Naira) · cart · wishlist · auth · orders
-   delivery zones & discounts · coupons · clean URLs
-   ============================================================ */
-(function () {
-  'use strict';
+const SB=window.MBAC_SUPABASE||{url:'',anonKey:''};
+const BASE='';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+const norm=s=>String(s??'').toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');
+const DEFAULT_WORKING_HOURS={
+  mon:{open:true,start:'08:00',end:'19:00'}, tue:{open:true,start:'08:00',end:'19:00'}, wed:{open:true,start:'08:00',end:'19:00'},
+  thu:{open:true,start:'08:00',end:'19:00'}, fri:{open:true,start:'08:00',end:'19:00'}, sat:{open:true,start:'08:00',end:'15:00'}, sun:{open:false,start:'08:00',end:'15:00'}
+};
+let settings={phone:'',whatsapp:'',email:'',instagram:'',facebook:'',youtube:'',tiktok:'',x:'',working_hours:DEFAULT_WORKING_HOURS};
+function normaliseWorkingHours(value){
+  let parsed=value;
+  if(typeof parsed==='string'){try{parsed=JSON.parse(parsed);}catch{parsed=null;}}
+  const source=parsed&&typeof parsed==='object'?parsed:{};
+  return Object.fromEntries(Object.entries(DEFAULT_WORKING_HOURS).map(([day,def])=>[day,{open:source[day]?.open===undefined?def.open:source[day].open===true,start:String(source[day]?.start||def.start),end:String(source[day]?.end||def.end)}]));
+}
+function formatHour(value){const [h,m]=String(value||'').split(':').map(Number);if(!Number.isFinite(h)||!Number.isFinite(m))return value||'';const suffix=h>=12?'PM':'AM';const hour=(h%12)||12;return `${hour}:${String(m).padStart(2,'0')} ${suffix}`;}
+function workingHoursLines(hours=settings.working_hours){const labels={mon:'Monday',tue:'Tuesday',wed:'Wednesday',thu:'Thursday',fri:'Friday',sat:'Saturday',sun:'Sunday'};return Object.entries(labels).map(([day,label])=>{const x=normaliseWorkingHours(hours)[day];return `<p><strong>${label}</strong> ${x.open?`${formatHour(x.start)}–${formatHour(x.end)}`:'Closed'}</p>`;}).join('');}
+function whatsappNumber(){return String(settings.whatsapp||'').match(/wa\.me\/(\d+)/i)?.[1]||String(settings.whatsapp||'').replace(/\D/g,'');}
+function whatsappLink(value){const raw=String(value||'').trim();if(!raw)return '';if(/^https?:\/\/\S+/i.test(raw))return raw;const n=raw.replace(/\D/g,'');return n?`https://wa.me/${n}`:'';}
+const POSTS=[
+{slug:"how-to-keep-your-mercedes-benz-healthy-in-lagos",category:"Mercedes-Benz Maintenance",title:"How to Keep Your Mercedes-Benz Healthy in Lagos",excerpt:"Practical habits for keeping a Mercedes-Benz dependable through Lagos traffic, heat, dust and stop-start driving.",content:"Owning a Mercedes-Benz in Lagos rewards consistency more than any single expensive repair ever will. The most useful maintenance habit is not waiting for a major fault before visiting a specialist. Keep the service history, follow the correct service intervals for your specific model and pay close attention to changes in sound, smell, vibration or performance, because those small signals almost always arrive well before an actual breakdown does.\n\nTraffic changes how a car is used in ways that owners rarely plan around. Long periods of idling, repeated acceleration and braking, short trips and hot weather can place far more demand on cooling, braking, transmission and electrical systems than the same car would experience on an open highway. A car that feels completely normal today can still benefit from a scheduled inspection, simply because Lagos driving conditions quietly work components harder than distance alone would suggest.\n\nCheck the basics between services rather than waiting for the next appointment to reveal them. Look at tyre pressures and tread depth, make sure every exterior light actually works, watch the coolant and washer-fluid levels, and look underneath a parked vehicle for fresh fluid marks on the ground. Do not ignore a warning simply because the car still drives normally; a vehicle can continue running for a long time while a real problem quietly develops underneath.\n\nWhen a warning light appears, diagnosis should always come before parts are ordered. Clearing a fault code may remove the dashboard message temporarily without ever fixing the underlying cause, which usually means the same warning returns within days or weeks. A proper inspection combines fault codes, live sensor data, physical checks and the driver's own description of when and how the problem happens.\n\nKeep records of oil and filter changes, brake work, tyres, battery replacement and any major repairs carried out on the vehicle. A clear, organised history makes future diagnosis considerably easier for whoever works on the car next, and it also helps preserve the resale value of the vehicle by showing a prospective buyer exactly how it has been looked after.\n\nFinally, choose a workshop that genuinely understands Mercedes-Benz systems rather than treating every vehicle as a generic car with generic problems. Specialist knowledge saves real time and money because the technician starts with the right questions, recognises model-specific patterns immediately, and follows the correct diagnostic approach instead of guessing their way toward an answer."},
+{slug:"what-dashboard-warning-lights-are-trying-to-tell-you",category:"Mercedes-Benz Knowledge",title:"What Dashboard Warning Lights Are Trying to Tell You",excerpt:"Understand what your Mercedes-Benz is trying to communicate before you reset a warning and carry on driving.",content:"Dashboard warnings are the car's way of communicating that a system needs attention right now rather than at some vague point in the future. They should not automatically be treated as proof that one particular part has failed, because a single warning light can sit at the end of a chain of possible causes that only a proper inspection can actually narrow down.\n\nThe first question is always whether the warning is red, amber or accompanied by a serious change in how the vehicle actually drives. A red warning, or a major braking, steering, overheating or engine problem, deserves immediate attention rather than a wait-and-see approach. If the car feels unsafe to continue driving in any way, stop as soon as it is safe to do so and arrange professional assistance straight away.\n\nAmber warnings still deserve proper investigation even though they feel less urgent. A sensor, battery condition, wiring problem, fluid issue or another system fault can all trigger the same message on the dashboard. Resetting the warning without finding its actual cause can allow the underlying problem to keep developing quietly until it eventually becomes a far more expensive repair than it needed to be.\n\nMercedes-Benz vehicles use multiple control units that constantly communicate with one another behind the scenes. This means one relatively small fault can create several different symptoms across seemingly unrelated systems. A technician should read the stored fault information, examine live values where appropriate, and physically inspect the vehicle before recommending any parts be replaced.\n\nWrite down exactly what happened when the warning first appeared, because those details are more useful than they might seem. Note whether the engine was cold or hot, whether the vehicle was accelerating or idling, and whether you noticed any loss of power, vibration or unusual noise alongside the message. Those small observations can genuinely save diagnostic time once the car is on the ramp.\n\nIf a warning disappears after restarting the vehicle, do not assume the underlying problem has gone away with it. Intermittent faults can be particularly important precisely because they tend to return under the same conditions that triggered them the first time. Keep the message in mind, note when it happened, and arrange a proper check rather than simply hoping it stays away."},
+{slug:"why-short-trips-can-be-hard-on-your-car",category:"Mercedes-Benz Maintenance",title:"Why Short Trips Can Be Hard on Your Mercedes-Benz",excerpt:"Frequent short journeys create a different maintenance pattern from long highway driving.",content:"A five-minute drive may feel completely easy on a car because the engine has barely had time to work hard. Mechanically, however, repeated short journeys can create their own particular set of challenges that a longer drive would never expose in the same way, and those challenges tend to build up quietly over months rather than announcing themselves immediately.\n\nAn engine needs real time to reach its normal operating temperature before it is working under ideal conditions. When a vehicle is repeatedly started, driven briefly and then switched off again, some systems spend much of their time warming up rather than actually operating under the steady conditions they were designed around, which changes how components wear over the long run.\n\nShort journeys can also mean more cold starts, more idling and more stop-start operation packed into a single day. In busy Lagos traffic, that pattern is frequently combined with heat and long periods of low-speed driving, stacking several demanding conditions on top of one another rather than spreading them out the way a longer, steadier drive naturally would.\n\nThis does not mean every short trip is harmful, or that you should start taking unnecessary long drives just to compensate for it. It means your maintenance routine should genuinely reflect how the vehicle is actually used day to day. Service intervals, fluid checks, battery condition and tyre inspection all remain important regardless of how far the car typically travels between drives.\n\nIf a Mercedes-Benz is used mainly for short journeys around town, tell the technician exactly that during any visit. Usage history is genuinely useful diagnostic information, not just background detail. A good service plan is built around the real operating conditions the car experiences rather than an idealised driving pattern that rarely matches how the vehicle is actually driven.\n\nPay attention to repeated symptoms such as slow starting, rough running, unusual smells or warning messages that keep reappearing. Early investigation is almost always easier, faster and cheaper than waiting for a small issue to quietly develop into a full breakdown somewhere inconvenient."},
+{slug:"what-to-check-before-buying-a-used-mercedes-benz",category:"Buying Guide",title:"What to Check Before Buying a Used Mercedes-Benz",excerpt:"A careful inspection can reveal much more than a clean exterior and a convincing sales description.",content:"A used Mercedes-Benz should be evaluated as a complete vehicle, not just by its badge, year and appearance in a set of photos. Before any money changes hands, take the time to establish exactly what you are actually buying, because the badge on the boot tells you almost nothing about the condition of what is underneath it.\n\nStart with the documentation available for the vehicle. Check the model, year, identification details and any available service history you can get hold of. Ask direct questions about previous repairs, accident damage and major component replacement. Incomplete history does not automatically make a car bad, but it should make you noticeably more careful before committing.\n\nInspect the body carefully in good daylight rather than under showroom lighting. Look for inconsistent paint texture, uneven panel gaps, overspray, repaired areas and any signs that panels have been replaced rather than original. Then move on to inspect the tyres, wheels, lights, glass and visible suspension components for anything that looks unusually worn or mismatched.\n\nDuring a proper road test, pay close attention to starting, idle quality, transmission behaviour, steering, braking, suspension noise and acceleration under load. A vehicle can look genuinely excellent from the outside while quietly hiding expensive mechanical problems that only reveal themselves once you are actually driving it.\n\nA diagnostic scan is valuable, but it is not a substitute for a thorough physical inspection carried out by someone who knows what to look for. Stored faults, current faults, live data and the actual condition of the components all matter together. Ask the inspecting technician to explain their findings clearly instead of simply handing you a list of unexplained codes.\n\nBudget for immediate maintenance as well as the purchase price itself. Even a genuinely healthy used car may need fluids, filters, tyres or other routine work shortly after purchase. Knowing the likely cost of that work before buying gives you a much clearer and more honest picture of the real total value of the deal."},
+{slug:"when-should-you-check-your-brake-system",category:"Safety & Maintenance",title:"When Should You Check Your Mercedes-Benz Brake System?",excerpt:"Noise, vibration, pulling and changes in pedal feel should never be treated as normal wear.",content:"Brakes are one of the systems where small changes deserve attention. You do not need to wait until a warning appears before checking them.\n\nA squeal can have several causes, including pad material, surface condition or wear. Grinding is more concerning because it can indicate that friction material has become severely worn. Neither sound should be diagnosed from the noise alone.\n\nNotice how the vehicle behaves under braking. Pulling to one side, vibration through the steering wheel, a pedal that feels different or a longer stopping response should prompt an inspection.\n\nA proper brake check considers pads, discs, calipers, hoses and related components. Tyres and suspension can also affect how braking feels, so the complete system matters.\n\nBrake wear is not identical on every Mercedes-Benz model. Driving style, traffic conditions, vehicle weight and component quality all affect service life. Regular inspection gives you a chance to replace worn components before they become a bigger problem.\n\nIf you are unsure whether a brake noise is serious, arrange a specialist inspection rather than guessing. A few minutes of checking can provide much more confidence than continuing to drive and hoping the sound disappears."},
+{slug:"how-to-look-after-your-car-battery",category:"Electrical & Maintenance",title:"How to Look After Your Mercedes-Benz Battery",excerpt:"Battery condition affects starting, electronics and the stability of modern vehicle systems.",content:"Modern Mercedes-Benz vehicles depend heavily on electrical systems. That makes battery health more important than many drivers realise.\n\nA weak battery may first appear as slow starting or an occasional electrical message. Other symptoms can include unusual behaviour from convenience features or repeated low-voltage faults. These signs deserve investigation.\n\nHeat and repeated short trips can be demanding for batteries. If a car sits unused for long periods, the battery can also lose charge. The correct charging and replacement approach depends on the vehicle and its electrical system.\n\nDo not judge battery health by voltage alone. A proper test can examine starting performance and available capacity. The vehicle may also need the battery replacement to be registered or configured correctly depending on its system.\n\nKeep battery terminals and surrounding areas clean and secure, but avoid improvising repairs around sensitive electrical components. If a battery repeatedly goes flat, find out why instead of replacing it again and again.\n\nIf your Mercedes-Benz has become slow to start or is displaying several unrelated electrical warnings, mention all of them during diagnosis. Low system voltage can sometimes create a collection of symptoms that look like separate faults."},
+{slug:"understanding-airmatic-suspension-symptoms",category:"Suspension",title:"Understanding AIRMATIC Suspension Symptoms",excerpt:"Learn the signs that can point to an air-suspension problem and why early diagnosis matters.",content:"AIRMATIC suspension can provide a comfortable and controlled ride, but it is also a system that should be diagnosed carefully when its behaviour changes.\n\nOne common sign is a vehicle sitting lower than expected, especially after being parked. Uneven ride height can suggest a leak or another suspension-system issue, but the exact cause needs to be established.\n\nYou may also notice a compressor running for longer than usual, unusual noises, a warning message or changes in ride quality. These symptoms can have different causes, so replacing an air spring or compressor without testing can waste money.\n\nA technician should inspect the suspension components and air system, check for leaks and use the vehicle's diagnostic information where appropriate. The condition of valves, lines, sensors and the compressor can all be relevant.\n\nIf one corner repeatedly drops overnight, record when it happens and whether the vehicle corrects its height after starting. That information can help the technician reproduce the fault.\n\nSuspension faults are easier to manage when addressed early. Continuing to operate a vehicle with a struggling compressor or persistent leak can place additional strain on other components."},
+{slug:"why-correct-engine-oil-matters",category:"Engine Care",title:"Why the Correct Engine Oil Matters in a Mercedes-Benz",excerpt:"Oil is more than a lubricant; the correct specification supports the engine's design and service requirements.",content:"Engine oil has several jobs. It lubricates moving parts, helps manage heat, carries contaminants toward the filter and supports the operation of systems that depend on oil pressure and flow.\n\nFor a Mercedes-Benz, the important question is not simply whether an oil is described as synthetic or premium. The oil must meet the specification appropriate to the particular engine and service requirement.\n\nUsing the wrong product or extending an interval beyond what the vehicle needs can create unnecessary risk. Modern engines may have turbochargers, variable valve systems and other components that place specific demands on lubrication.\n\nCheck the vehicle's required specification and use a reputable product. During servicing, the filter should also be replaced correctly and the technician should check for leaks.\n\nOil level matters too. Both low and excessive oil levels can cause problems. If you repeatedly need to top up between services, investigate the reason rather than treating the top-up as a permanent solution.\n\nKeep the service record. Recording the oil specification, date and mileage creates a useful maintenance history and makes future servicing more straightforward."},
+{slug:"simple-tyre-checks-every-driver-can-do",category:"Tyres & Safety",title:"Simple Tyre Checks Every Mercedes-Benz Driver Can Do",excerpt:"A few quick checks can help you catch tyre problems before they affect handling.",content:"Tyres are the only part of the vehicle continuously touching the road, so their condition deserves regular attention.\n\nCheck pressures when the tyres are cold and use the vehicle's recommended pressure rather than guessing. The correct value can vary with load and model, so use the information supplied for your vehicle.\n\nLook across the tread instead of checking only the centre. Uneven wear can provide clues about alignment, suspension, pressure or tyre condition. Look for cuts, bulges, cracks and objects lodged in the tread.\n\nDo not judge a tyre only by how much tread appears to remain. Age, damage and condition also matter. A tyre with adequate-looking tread can still require replacement if it has deteriorated.\n\nIf your Mercedes-Benz pulls to one side, vibrates at certain speeds or develops unusual tyre wear, have the complete wheel and suspension setup checked. Balancing and alignment are different jobs and both may be relevant.\n\nA short tyre inspection before longer journeys is a simple habit. If you see anything you cannot confidently assess, ask a specialist to inspect it rather than taking a chance."},
+{slug:"why-diagnosis-should-come-before-parts",category:"Mercedes-Benz Diagnostics",title:"Why Diagnosis Should Come Before Parts",excerpt:"Good Mercedes-Benz repair starts with evidence, not a guess about which component to replace.",content:"Replacing parts until a warning disappears is an expensive way to diagnose a vehicle. A better approach is to identify the cause first.\n\nModern Mercedes-Benz vehicles contain many interconnected control units and sensors. A single symptom may have several possible causes, while one underlying electrical or mechanical problem can produce several warnings.\n\nFault codes are useful clues, but a code does not always mean that the named component itself is defective. The technician needs to interpret the code alongside live data, wiring information, physical inspection and the circumstances in which the fault occurs.\n\nA good diagnosis also starts with the customer. When did the problem begin? Was anything repaired recently? Does it happen when the engine is cold, when the car is hot, during acceleration, after rain or only occasionally? These details can narrow the investigation.\n\nOnce the cause is established, the repair can be explained clearly. You know what has failed, what needs to be done and why the recommended parts or labour are necessary.\n\nThat process is especially valuable on premium vehicles where unnecessary parts replacement can become expensive very quickly. Diagnosis is not an extra step before repair; it is part of good repair."},
+{slug:"foreign-used-vs-nigeria-used-mercedes-benz",category:"Buying Guide",title:"Foreign Used vs Nigeria Used Mercedes-Benz: What Really Changes",excerpt:"The labels tell you where a car spent its life, not automatically which one is the safer buy.",content:"Buyers in Lagos often treat \"Foreign Used\" and \"Nigeria Used\" as a simple ranking, as though one label always means a better car than the other. In reality the label describes where the vehicle has spent most of its life, not the condition of any individual example, and both categories contain excellent cars and neglected ones.\n\nA Foreign Used Mercedes-Benz typically arrives after being driven in a market with different roads, fuel quality, climate and servicing culture. That can mean gentler wear in some areas, but it also means the car's early service history, accident record and true mileage are harder to verify once it lands in Nigeria and changes hands a few times.\n\nA Nigeria Used Mercedes-Benz has usually been serviced locally from new or from an early age, which can leave a clearer paper trail if the first owner kept records. The trade-off is that it has been living with Lagos traffic, heat, fuel variability and road conditions for its entire life, which places its own demands on suspension, cooling and electrical systems.\n\nNeither label tells you about accident repair, flood exposure, how consistently it was serviced, or whether a component has already been quietly replaced with a lower-quality part. Two cars with the same badge, year and condition label can have completely different mechanical histories underneath a similar-looking exterior.\n\nWhat actually matters is what a proper inspection reveals: panel and paint consistency, chassis condition, suspension and steering behaviour, fluid condition, wiring integrity and how the vehicle's systems respond during a real diagnostic check. That inspection tells you far more than the condition label on its own ever will.\n\nWhen you are comparing vehicles in our inventory, use the condition label as a starting point for questions, not as the final verdict. Ask about documented service history, request an inspection before committing, and treat the label as one data point among many rather than the whole story."},
+{slug:"preparing-your-mercedes-benz-for-lagos-rainy-season",category:"Seasonal Care",title:"Preparing Your Mercedes-Benz for the Lagos Rainy Season",excerpt:"Flooded roads, standing water and constant humidity create a very different set of demands on your car.",content:"Lagos rain does not arrive gently. Roads flood quickly, drainage struggles to keep up, and a car that felt perfectly fine in the dry season can suddenly reveal weaknesses the moment it has to deal with standing water, spray and constant dampness for weeks at a time.\n\nTyres and brakes deserve attention before the rain sets in properly. Reduced tread depth that was tolerable on dry tarmac becomes far more dangerous on a wet, pothole-scarred road, and brake pads that were due for replacement soon will wear faster still under the additional strain of constant wet-weather braking and standing water.\n\nWater ingress is one of the most expensive mistakes an owner can make. Driving through deep standing water, even slowly, can pull water into the engine through the intake or affect sensitive electrical connectors underneath the vehicle, and a Mercedes-Benz has considerably more of those connectors than an older, simpler car.\n\nElectrical systems and door, boot and sunroof seals are worth checking early rather than after you notice a damp carpet or a warning light that only appears in wet weather. A perished seal that was a minor inconvenience in dry weather can let in enough water during heavy rain to affect carpeting, wiring looms and control modules underneath the cabin floor.\n\nVisibility matters as much as mechanical condition. Worn wiper blades, a washer system that is not topped up, and headlights that have dulled with age all become significantly more dangerous once heavy rain, spray from other vehicles and Lagos evening traffic combine on the same stretch of road.\n\nA short pre-rainy-season inspection covering tyres, brakes, wiper blades, door and window seals, the underbody and drainage channels around the sunroof and boot area can catch most of these issues while they are still simple and affordable to correct, well before the first serious downpour finds them for you."},
+{slug:"warning-signs-of-automatic-transmission-trouble",category:"Mercedes-Benz Maintenance",title:"Warning Signs of Automatic Transmission Trouble",excerpt:"A smooth-shifting Mercedes-Benz gearbox can start signalling trouble in ways that are easy to dismiss.",content:"The automatic transmission in a modern Mercedes-Benz is designed to shift so smoothly that most owners never think about it at all, right up until the moment something changes. Because the change is often gradual, it is easy to adjust to it without realising that the car is already telling you something is wrong.\n\nA delayed or harsh engagement when you first move from park into drive or reverse is one of the earliest signs worth paying attention to. A transmission in good health engages promptly and smoothly, and any hesitation, clunk or delay before the car actually moves deserves investigation rather than simply becoming a habit you plan your driving around.\n\nShifting behaviour under normal acceleration is another useful indicator. Shifts that suddenly feel harder than usual, a noticeable slip where the engine revs rise without a matching increase in speed, or hunting between gears on a gentle incline can all point toward fluid condition, internal wear or an electronic control issue that is worth diagnosing early.\n\nTemperature plays a bigger role than most drivers expect. Heavy Lagos traffic keeps a transmission working hard for long periods without the benefit of sustained higher speeds to help cool it, and a transmission that runs consistently hot will age considerably faster than one that gets occasional stretches of steady-speed driving to recover.\n\nWarning messages related to the transmission should never be reset and ignored. Unlike a simple sensor fault, transmission-related faults can escalate quickly from an inconvenience into a very expensive repair if the underlying cause, whether it is fluid condition, a sensor, a solenoid or something more serious, is left unresolved for too long.\n\nIf you notice any combination of delayed engagement, rough shifting, unusual noise during gear changes or a dashboard message, book a proper diagnostic check rather than waiting to see whether the symptom goes away on its own. Transmission problems rarely improve with time, and early diagnosis is consistently the more affordable path."},
+{slug:"keeping-your-mercedes-benz-air-conditioning-healthy-in-lagos-heat",category:"Comfort & Climate",title:"Keeping Your Mercedes-Benz Air Conditioning Healthy in Lagos Heat",excerpt:"A struggling air conditioning system is rarely just about refrigerant, especially in constant Lagos heat and traffic.",content:"Lagos heat and traffic mean the air conditioning system in your Mercedes-Benz is almost never given a rest, and that constant demand makes it one of the systems most likely to show its age well before other, less frequently used components ever do.\n\nWeak cooling is often blamed entirely on low refrigerant, but a Mercedes-Benz climate system depends on several components working together, including the compressor, condenser, cabin filter, blend-door actuators and a network of sensors that decide how hot or cold air should be at any given moment inside the cabin.\n\nA cabin air filter clogged with Lagos dust and traffic pollution can noticeably reduce airflow long before anything else in the system has actually failed, leaving the car blowing weaker air even though the compressor and refrigerant charge are both still in perfectly good condition.\n\nUnusual smells, inconsistent temperature between the left and right sides of the cabin, or air conditioning that seems to work fine at idle but weakens noticeably once you are moving in traffic are all useful diagnostic clues rather than random inconveniences to simply live with.\n\nRefrigerant leaks are a common cause of gradually weakening performance, but the correct response is to find and repair the leak rather than repeatedly topping up refrigerant every few months. Repeated top-ups without a leak repair cost more over time and can allow moisture to enter a system that should otherwise stay completely sealed.\n\nHaving the air conditioning system checked before the hottest months arrive, rather than after it has already stopped cooling properly, is the more comfortable and usually the more affordable way to keep a Mercedes-Benz liveable through a Lagos afternoon in traffic."},
+{slug:"why-specialist-labour-costs-differ-from-a-generic-mechanic",category:"Mercedes-Benz Knowledge",title:"Why Specialist Labour Costs Differ From a Generic Mechanic",excerpt:"A lower quote is not automatically a better deal once you account for diagnostic accuracy and repeat repairs.",content:"It is natural to compare a specialist workshop's quote against a cheaper estimate from a generic mechanic and wonder why the same-sounding job costs differently. The honest answer is that the two quotes are rarely describing the same process, even when they use similar words to describe the work.\n\nA Mercedes-Benz specialist workshop invests in the correct diagnostic tools, model-specific technical information and ongoing training on systems that change from one generation of vehicle to the next. That investment is reflected in labour rates, but it is also what allows a fault to be identified accurately on the first visit rather than through a slower process of trial and error.\n\nGeneric workshops can perform simple mechanical work perfectly well, and there is nothing wrong with using one for straightforward jobs. The risk appears on more complex, electronically integrated systems, where an incorrect diagnosis can lead to a part being replaced unnecessarily while the actual fault remains completely untouched and continues to cause the same symptom.\n\nRepeated visits to fix the same underlying problem are where a cheaper quote can quietly become the more expensive option overall. Paying less per visit does not help if the car returns with the same fault three times before someone finally identifies the real cause hiding behind it.\n\nSpecialist labour also typically includes the time to explain findings clearly, show supporting diagnostic data where relevant, and discuss realistic options rather than presenting a single unexplained bill at the end. That transparency has a value of its own, particularly on a vehicle where trust in the diagnosis genuinely matters.\n\nWhen comparing quotes, ask what the price actually includes: diagnostic time, the specific parts being used, warranty on the work, and how the technician arrived at their conclusion. A fair comparison is rarely just two numbers sitting side by side without any context behind them."},
+{slug:"lagos-roads-suspension-wear-and-wheel-alignment",category:"Suspension",title:"Lagos Roads, Suspension Wear and Wheel Alignment",excerpt:"Potholes and uneven surfaces place a very specific kind of strain on a Mercedes-Benz suspension system.",content:"Every Lagos driver knows the particular jolt of an unseen pothole appearing at the last second, and while a single hard impact rarely destroys a modern Mercedes-Benz suspension outright, the accumulated effect of Lagos roads over months and years is a genuinely different story.\n\nBushings, control arms, ball joints and shock absorbers are all designed around a certain range of expected impact and movement. Repeated hard hits, even relatively minor ones, gradually wear these components faster than the smoother, more predictable roads that many of these parts were originally engineered and tested around.\n\nWheel alignment drifts more easily under these conditions than most owners expect. A single firm pothole impact can be enough to shift alignment out of specification, and a car that is even slightly out of alignment will wear its tyres unevenly, pull gently to one side and place additional, unnecessary strain on suspension components that are already working harder than they should need to.\n\nUnusual noise over bumps, a vehicle that feels less settled and composed than it used to, or tyres wearing unevenly across their width are all signs worth investigating rather than dismissing as simply how Lagos roads feel on any car. A well-maintained Mercedes-Benz should still ride with noticeably more composure than these symptoms suggest.\n\nRegular inspection of suspension bushings, links and shock absorbers, combined with an alignment check whenever new tyres are fitted or after a particularly hard impact, helps catch wear before it starts affecting handling, tyre life and ride comfort all at the same time.\n\nIf your Mercedes-Benz has started to feel noticeably less composed over bumps, or you notice a pull to one side under gentle braking or on a straight, flat road, have the suspension and alignment checked together rather than separately. On Lagos roads, the two problems very often travel together."}
+];
 
-  /* ---------- Icons ---------- */
-  var P = {
-    cart: '<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 2h3l2.7 12.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/>',
-    search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
-    heart: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21.2l7.7-7.7 1.1-1.1a5.5 5.5 0 0 0 0-7.8Z"/>',
-    star: '<path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.9L12 17.8 5.8 21l1.2-6.9-5-4.9 6.9-1Z"/>',
-    check: '<path d="M20 6 9 17l-5-5"/>',
-    checkCircle: '<circle cx="12" cy="12" r="10"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/>',
-    chevronRight: '<path d="m9 18 6-6-6-6"/>',
-    chevronDown: '<path d="m6 9 6 6 6-6"/>',
-    chevronLeft: '<path d="m15 18-6-6 6-6"/>',
-    plus: '<path d="M12 5v14M5 12h14"/>',
-    minus: '<path d="M5 12h14"/>',
-    trash: '<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/>',
-    truck: '<path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>',
-    shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/>',
-    refresh: '<path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/>',
-    headset: '<path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>',
-    phone: '<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z"/>',
-    mail: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>',
-    mapPin: '<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/>',
-    clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
-    menu: '<path d="M3 6h18M3 12h18M3 18h18"/>',
-    close: '<path d="M18 6 6 18M6 6l12 12"/>',
-    arrowRight: '<path d="M5 12h14M13 5l7 7-7 7"/>',
-    zap: '<path d="M13 2 3 14h8l-1 8 10-12h-8l1-8Z"/>',
-    box: '<path d="m21 8-9-5-9 5 9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/>',
-    creditCard: '<rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/>',
-    chart: '<path d="M3 3v18h18"/><path d="m7 14 3-3 4 4 5-6"/>',
-    bell: '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/>',
-    plug: '<path d="M9 2v6M15 2v6"/><path d="M6 8h12v4a6 6 0 0 1-12 0z"/><path d="M12 18v4"/>',
-    layers: '<path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/>',
-    cpu: '<rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3"/>',
-    user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
-    userPlus: '<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M19 8v6M22 11h-6"/>',
-    logOut: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>',
-    key: '<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M17 6l2 2M14 9l2 2"/>',
-    clipboard: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v3H9z"/><path d="M9 11h6M9 15h4"/>',
-    calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
-    alert: '<path d="M10.3 3.7 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.7a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/>',
-    sliders: '<path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3"/><path d="M1 14h6M9 8h6M17 16h6"/>',
-    package: '<path d="m21 8-9-5-9 5 9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v9"/>',
-    lock: '<rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
-    filter: '<path d="M3 5h18M6 12h12M10 19h4"/>',
-    award: '<circle cx="12" cy="9" r="6"/><path d="m8.5 14.5-2 8 5.5-3 5.5 3-2-8"/>',
-    gift: '<rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M3 12h18"/><path d="M12 8S10.2 2.4 7.6 3.6 10 8 12 8Zm0 0s1.8-5.6 4.4-4.4S14 8 12 8Z"/>',
-    percent: '<path d="M19 5 5 19"/><circle cx="7.5" cy="7.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/>',
-    send: '<path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7Z"/>',
-    grid: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
-    eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
-    eyeOff: '<path d="M10.7 5.1A10.9 10.9 0 0 1 12 5c6.5 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.2M6.6 6.6A17.6 17.6 0 0 0 2 12s3.5 7 10 7a10.9 10.9 0 0 0 4.4-.9"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m2 2 20 20"/>',
-    facebook: '<path d="M14 9h3V6h-3a4 4 0 0 0-4 4v2H8v3h2v7h3v-7h3l1-3h-4v-2a1 1 0 0 1 1-1Z"/>',
-    instagram: '<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.7" r="1.1"/>',
-    twitter: '<path d="M18.2 3H21l-6.3 7.2L22 21h-5.7l-4.5-5.9L6.6 21H3.8l6.7-7.7L2.6 3h5.8l4.1 5.4Zm-1 16.2h1.6L7.9 4.7H6.2Z"/>',
-    whatsapp: '<path d="M21 11.8a9 9 0 0 1-13.3 7.9L3 21l1.4-4.5A9 9 0 1 1 21 11.8Z"/><path d="M8.4 9.2c.3 2.6 2 4.3 4.6 4.6l1-1.3 1.7.8v1.4c-2.9.3-6.9-3.6-6.6-6.5h1.4l.8 1.7Z"/>',
-    wheat: '<path d="M12 22V8"/><path d="M12 8c0-3 2-5 4-5 0 3-2 5-4 5Zm0 0c0-3-2-5-4-5 0 3 2 5 4 5Z"/><path d="M12 14c0-3 2-5 4-5 0 3-2 5-4 5Zm0 0c0-3-2-5-4-5 0 3 2 5 4 5Z"/>',
-    pot: '<path d="M4 9h16v7a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/><path d="M2 9h20M8 5c0-1 1-2 2-2M14 5c0-1 1-2 2-2"/>',
-    cup: '<path d="M4 8h13v7a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M17 10h2a2.5 2.5 0 0 1 0 5h-2"/><path d="M7 3v2M11 3v2"/>',
-    cookie: '<path d="M12 3a9 9 0 1 0 9 9 4 4 0 0 1-5-5 4 4 0 0 1-4-4Z"/><circle cx="9" cy="10" r="1"/><circle cx="14" cy="14" r="1"/><circle cx="9.5" cy="15" r="1"/>',
-    spray: '<path d="M9 8h6v13H9z"/><path d="M10 8V5h4v3"/><path d="M17 5h3M17 8h3M17 11h3"/>',
-    droplet: '<path d="M12 2.7 6.8 8a7.3 7.3 0 1 0 10.4 0Z"/>',
-    baby: '<circle cx="12" cy="8" r="5"/><path d="M9.5 7h.01M14.5 7h.01"/><path d="M10 10.5a3 3 0 0 0 4 0"/><path d="M6 21v-3a6 6 0 0 1 12 0v3"/>',
-    basket: '<path d="M3 9h18l-1.6 9.2a2 2 0 0 1-2 1.8H6.6a2 2 0 0 1-2-1.8Z"/><path d="m8 9 4-6 4 6"/><path d="M9 13v3M15 13v3"/>',
-    store: '<path d="M3 9.5 5 4h14l2 5.5"/><path d="M4 9.5V20h16V9.5"/><path d="M9 20v-6h6v6"/>',
-    tag: '<path d="M20.6 13.4 12 22l-9-9V4a1 1 0 0 1 1-1h9l7.6 7.6a2 2 0 0 1 0 2.8Z"/><circle cx="7.5" cy="7.5" r="1.3"/>',
-    sparkles: '<path d="m12 3 1.9 4.6L18.5 9.5l-4.6 1.9L12 16l-1.9-4.6L5.5 9.5l4.6-1.9Z"/><path d="m18 15 .9 2.1L21 18l-2.1.9L18 21l-.9-2.1L15 18l2.1-.9Z"/>',
-    wallet: '<rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/><circle cx="17" cy="15" r="1.3"/>',
-    route: '<circle cx="6" cy="19" r="3"/><circle cx="18" cy="5" r="3"/><path d="M9 19h6a4 4 0 0 0 0-8H9a4 4 0 0 1 0-8h3"/>',
-    settings: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2 2 2 0 1 1-4 0 1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 15a2 2 0 1 1 0-4 1.7 1.7 0 0 0 1.5-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 4.6a2 2 0 1 1 4 0 1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21 11a2 2 0 1 1 0 4Z"/>',
-    users: '<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M17 4.5a4 4 0 0 1 0 7M22 21a6 6 0 0 0-4-5.7"/>',
-    edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
-    image: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>',
-    download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/>',
-    info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>'
-  };
+function loadRemoteConfig(){return Promise.resolve(window.MBAC_SUPABASE||null)}
+async function api(path,opts={}){try{const r=await fetch(SB.url+'/rest/v1/'+path,{...opts,headers:{apikey:SB.anonKey,Authorization:'Bearer '+SB.anonKey,'Content-Type':'application/json',Prefer:'return=representation',...(opts.headers||{})}});let data=null;try{data=await r.json()}catch{}return {ok:r.ok,data,status:r.status}}catch{return {ok:false,data:null,status:0}}}
+const rpc=(fn,body)=>api('rpc/'+encodeURIComponent(fn),{method:'POST',body:JSON.stringify(body)});
+function fmt(n){return new Intl.NumberFormat('en-NG',{style:'currency',currency:'NGN',maximumFractionDigits:0}).format(n||0)}
+function cars(){return window.MBStore?.getCars?.()||window.MBCars||[]}
+async function loadSettings(){
+  const r=await api('site_settings?select=*&id=eq.1');
+  if(r.ok&&r.data?.[0]){
+    settings={...settings,...r.data[0],working_hours:normaliseWorkingHours(r.data[0].working_hours)};
+    applyContacts();
+  }
+  return settings;
+}
+function applyContacts(){
+  const digits=v=>String(v||'').replace(/\D/g,'');
+  document.querySelectorAll('[data-contact="phone"]').forEach(a=>{a.href=settings.phone?'tel:+'+digits(settings.phone):'#';a.removeAttribute('aria-disabled');if(!settings.phone)a.setAttribute('aria-disabled','true');});
+  document.querySelectorAll('[data-contact="whatsapp"]').forEach(a=>{a.href=whatsappLink(settings.whatsapp)||'#';a.removeAttribute('aria-disabled');if(!settings.whatsapp)a.setAttribute('aria-disabled','true');});
+  ['facebook','instagram','youtube','tiktok','x'].forEach(k=>document.querySelectorAll('[data-contact="'+k+'"]').forEach(a=>{a.hidden=!settings[k];if(settings[k])a.href=settings[k]}));
+  const emailLinks=[...document.querySelectorAll('[data-contact="email"],[data-email]')];
+  emailLinks.forEach(a=>{a.href='#';a.onclick=e=>{e.preventDefault();if(!settings.email)return;const to=encodeURIComponent(settings.email),web='https://mail.google.com/mail/?view=cm&fs=1&to='+to;if(/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent)){location.href='googlegmail:///co?to='+to;setTimeout(()=>location.href=web,900)}else window.open(web,'_blank','noopener')}});
+}
+function footer(){const f=$('#footer');f.innerHTML='<div class="wrap footer-grid"><div><h3>Moses Benz Auto Care</h3><p>Mercedes-Benz repairs, maintenance, diagnosis and vehicle sales in Idimu, Lagos.</p><div class="social"><a data-contact="facebook" aria-label="Facebook"><i class="fa-solid fa-square-facebook"></i></a><a data-contact="tiktok" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a><a data-contact="instagram" aria-label="Instagram"><i class="fa-solid fa-square-instagram"></i></a><a data-contact="whatsapp" aria-label="WhatsApp"><i class="fa-solid fa-square-whatsapp"></i></a></div></div><div><h4>Explore</h4><a href="#home">Home</a><a href="#inventory">Inventory</a><a href="#blog">Blog</a><a href="#appointments">Book a Service</a><a href="#guide">Mercedes-Benz Guide</a></div><div><h4>Contact</h4><a data-contact="phone">Call the Workshop</a><a data-contact="email">Email Us</a><p>11 Lasu Rd, beside Federal Peace Estate, Idimu, Lagos.</p></div><div><h4>Hours</h4>${workingHoursLines()}</div></div><div class="footer-bottom">© 2026 Moses Benz Auto Care</div>';applyContacts()}
+function fab(){if($('.fab'))return;const d=document.createElement('div');d.className='fab';d.innerHTML='<a data-contact="phone" aria-label="Call the workshop" title="Call the workshop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 2.5 9.1 2a1.7 1.7 0 0 1 1.9 1.1l1.2 3.1a1.7 1.7 0 0 1-.4 1.8L10.4 9.4a13.2 13.2 0 0 0 4.2 4.2l1.4-1.4a1.7 1.7 0 0 1 1.8-.4l3.1 1.2A1.7 1.7 0 0 1 22 15l-.5 2.5a2 2 0 0 1-2.1 1.6C10.6 18.5 5.5 13.4 4.9 4.6A2 2 0 0 1 6.6 2.5Z"/></svg></a><a data-contact="whatsapp" aria-label="WhatsApp" title="WhatsApp"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5a9.3 9.3 0 0 0-8 14.1L3 21l4.6-1a9.5 9.5 0 1 0 4.4-17.5Zm0 16.8a7.4 7.4 0 0 1-3.8-1l-.3-.2-2.7.6.7-2.6-.2-.3A7.4 7.4 0 1 1 12 19.3Zm4.1-5.4c-.2-.1-1.2-.6-1.4-.7-.2-.1-.3-.1-.5.1l-.6.8c-.2.2-.3.2-.5.1a6 6 0 0 1-1.8-1.1 7 7 0 0 1-1.3-1.6c-.1-.2 0-.3.1-.4l.4-.5.2-.4c.1-.1 0-.3 0-.4l-.7-1.6c-.2-.4-.3-.4-.5-.4h-.4c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2.9 2.3c.1.2 1.6 2.5 3.9 3.5 1.4.6 2 .7 2.4.6.4-.1 1.2-.5 1.4-1 .2-.5.2-.9.1-1-.1-.1-.2-.1-.4-.2Z"/></svg></a>';document.body.appendChild(d);applyContacts()}
 
-  function icon(name, cls) {
-    var fill = (name === 'star' || name === 'facebook' || name === 'twitter');
-    return '<svg viewBox="0 0 24 24" ' +
-      (fill ? 'fill="currentColor" stroke="none"' :
-              'fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"') +
-      (cls ? ' class="' + cls + '"' : '') + ' aria-hidden="true">' + (P[name] || '') + '</svg>';
+let routeTimer=null;
+function normalizeRouteHash(value){
+  const raw=String(value||'').trim();
+  if(!raw||raw==='#')return 'home';
+  const hash=raw.startsWith('#')?raw.slice(1):raw;
+  return hash.replace(/^\/+|\/+$/g,'')||'home';
+}
+function goRoute(hash){
+  if(!hash)return;
+  const next=String(hash).startsWith('#')?String(hash):'#'+String(hash);
+  const current=normalizeRouteHash(location.hash);
+  const target=normalizeRouteHash(next);
+  const overlay=$('#route-transition');
+  document.querySelector('.mobile-menu')?.classList.remove('open');
+
+  // Re-selecting the page that is already open must be a plain browser reload.
+  // Do not start the route transition: that overlay is only for real page changes.
+  if(target===current){
+    if(routeTimer){window.clearTimeout(routeTimer);routeTimer=null;}
+    if(overlay)overlay.classList.remove('is-active');
+    window.location.reload();
+    return;
   }
 
-  /* ---------- Categories ---------- */
-  var CATEGORIES = [
-    { id: 'rice-grains',   name: 'Rice & Grains',      blurb: 'Rice, beans, garri & semovita',      icon: 'wheat' },
-    { id: 'cooking',       name: 'Cooking Essentials', blurb: 'Oil, tomato, seasoning & pasta',      icon: 'pot' },
-    { id: 'beverages',     name: 'Beverages',          blurb: 'Tea, coffee, water & soft drinks',    icon: 'cup' },
-    { id: 'snacks',        name: 'Snacks & Pantry',    blurb: 'Cereals, biscuits & treats',          icon: 'cookie' },
-    { id: 'household',     name: 'Household',          blurb: 'Detergents, soap & tissue',           icon: 'spray' },
-    { id: 'personal-care', name: 'Personal Care',      blurb: 'Oral & everyday care',                icon: 'droplet' },
-    { id: 'baby-kids',     name: 'Baby & Kids',        blurb: 'Diapers, cereal & wipes',             icon: 'baby' }
-  ];
-
-  /* ---------- Products (sample catalogue, Naira) ---------- */
-  var PRODUCTS = [
-    {
-      id: 'rice-50kg', name: 'Premium Parboiled Rice', category: 'rice-grains', size: '50kg bag',
-      price: 78000, oldPrice: 85000, rating: 4.8, reviewCount: 312, badge: 'bestseller', stock: 24,
-      image: 'images/rice-50kg.png', scene: 'images/scene-warehouse.png',
-      short: 'A full 50kg sack of clean, stone-free long-grain parboiled rice.',
-      description: 'Our most popular bulk buy. This 50kg sack of long-grain parboiled rice is double-sorted and de-stoned, so it cooks up separate and fluffy every time. Ideal for large households, events and resellers. The sack is machine-stitched and sealed for safe storage.',
-      features: ['50kg machine-stitched sack', 'Long-grain, parboiled', 'Double-sorted and de-stoned', 'Stores well for months'],
-      specs: { Weight: '50 kg', Type: 'Long-grain parboiled', Packaging: 'Woven sack, stitched', Origin: 'Nigeria', 'Shelf life': '12 months' }
-    },
-    {
-      id: 'rice-10kg', name: 'Premium Parboiled Rice', category: 'rice-grains', size: '10kg bag',
-      price: 17500, oldPrice: 19000, rating: 4.7, reviewCount: 208, badge: 'sale', stock: 60,
-      image: 'images/rice-10kg.png', scene: 'images/scene-warehouse.png',
-      short: 'The same clean long-grain rice in a handy 10kg sealed bag.',
-      description: 'A 10kg sealed bag of our long-grain parboiled rice — the right size for a small family or a monthly top-up. Sealed to keep moisture and weevils out, and it stacks neatly in the pantry.',
-      features: ['10kg sealed bag', 'Long-grain, parboiled', 'Moisture-resistant packaging', 'Easy to store and stack'],
-      specs: { Weight: '10 kg', Type: 'Long-grain parboiled', Packaging: 'Sealed plastic bag', Origin: 'Nigeria', 'Shelf life': '12 months' }
-    },
-    {
-      id: 'rice-5kg', name: 'Premium Parboiled Rice', category: 'rice-grains', size: '5kg bag',
-      price: 9200, oldPrice: null, rating: 4.6, reviewCount: 141, badge: null, stock: 88,
-      image: 'images/rice-5kg.png', scene: 'images/scene-warehouse.png',
-      short: 'A mini 5kg bag — perfect for trying us out or a small household.',
-      description: 'Our smallest rice pack. A 5kg sealed bag of long-grain parboiled rice, ideal for singles, students and anyone who wants to try the quality before buying in bulk.',
-      features: ['5kg sealed bag', 'Long-grain, parboiled', 'Great for small households', 'Resealable after opening'],
-      specs: { Weight: '5 kg', Type: 'Long-grain parboiled', Packaging: 'Sealed plastic bag', Origin: 'Nigeria', 'Shelf life': '12 months' }
-    },
-    {
-      id: 'beans-10kg', name: 'Honey Beans (Oloyin)', category: 'rice-grains', size: '10kg bag',
-      price: 21000, oldPrice: 23000, rating: 4.7, reviewCount: 176, badge: 'sale', stock: 35,
-      image: 'images/beans-10kg.png', scene: 'images/scene-warehouse.png',
-      short: 'Sweet brown honey beans, hand-picked and cleaned.',
-      description: 'Oloyin honey beans are prized for their natural sweetness and soft texture. This 10kg bag is hand-picked and cleaned, so you spend less time sorting at home. They cook down beautifully for beans porridge or moi moi.',
-      features: ['10kg sealed bag', 'Hand-picked and cleaned', 'Naturally sweet oloyin variety', 'Cooks soft and fast'],
-      specs: { Weight: '10 kg', Variety: 'Brown honey beans (oloyin)', Packaging: 'Sealed plastic bag', Origin: 'Nigeria', 'Shelf life': '9 months' }
-    },
-    {
-      id: 'garri-10kg', name: 'Ijebu Garri', category: 'rice-grains', size: '10kg bag',
-      price: 12500, oldPrice: null, rating: 4.5, reviewCount: 98, badge: null, stock: 52,
-      image: 'images/garri-10kg.png', scene: 'images/scene-warehouse.png',
-      short: 'Sour, fine Ijebu garri — crisp and properly dried.',
-      description: 'Authentic Ijebu garri with that characteristic tang. Fine-grained, well-dried and sealed in a 10kg bag so it stays crisp. Great for soaking with groundnut and sugar, or for eba.',
-      features: ['10kg sealed bag', 'Fine-grained Ijebu style', 'Properly dried, stays crisp', 'Great for eba or soaking'],
-      specs: { Weight: '10 kg', Type: 'Ijebu (sour) garri', Packaging: 'Sealed plastic bag', Origin: 'Nigeria', 'Shelf life': '6 months' }
-    },
-    {
-      id: 'semovita-10kg', name: 'Semovita', category: 'rice-grains', size: '10kg bag',
-      price: 15500, oldPrice: 17000, rating: 4.6, reviewCount: 122, badge: 'sale', stock: 40,
-      image: 'images/semovita-10kg.png', scene: 'images/scene-warehouse.png',
-      short: 'Smooth semolina flour for a soft, lump-free swallow.',
-      description: 'A 10kg bag of fine semolina flour that mixes smooth and holds together well. Makes a soft, stretchy swallow that pairs with any soup. Sealed for freshness.',
-      features: ['10kg sealed bag', 'Fine, smooth semolina', 'Mixes without lumps', 'Sealed for freshness'],
-      specs: { Weight: '10 kg', Type: 'Semolina flour', Packaging: 'Sealed bag', Origin: 'Nigeria', 'Shelf life': '9 months' }
-    },
-    {
-      id: 'oil-5l', name: 'Vegetable Cooking Oil', category: 'cooking', size: '5 litre jerrycan',
-      price: 14500, oldPrice: 16000, rating: 4.7, reviewCount: 264, badge: 'bestseller', stock: 45,
-      image: 'images/oil-5l.png', scene: 'images/scene-warehouse.png',
-      short: 'Cholesterol-free vegetable oil in a sealed 5L jerrycan.',
-      description: 'A 5-litre jerrycan of refined vegetable cooking oil. Light, neutral-tasting and cholesterol-free, it works for frying, stews and baking. The jerrycan has a tamper-evident sealed cap.',
-      features: ['5 litre sealed jerrycan', 'Cholesterol-free', 'Neutral taste, high smoke point', 'Tamper-evident cap'],
-      specs: { Volume: '5 litres', Type: 'Refined vegetable oil', Packaging: 'Sealed jerrycan', 'Shelf life': '18 months', Storage: 'Cool, dry place' }
-    },
-    {
-      id: 'oil-1l', name: 'Vegetable Cooking Oil', category: 'cooking', size: '1 litre bottle',
-      price: 3200, oldPrice: null, rating: 4.5, reviewCount: 187, badge: null, stock: 120,
-      image: 'images/oil-1l.png', scene: 'images/scene-warehouse.png',
-      short: 'A 1 litre bottle of the same oil — handy for small kitchens.',
-      description: 'The 1-litre bottle of our refined vegetable oil. Easy to handle and pour, and the right size if you cook in smaller quantities or want to keep a spare.',
-      features: ['1 litre sealed bottle', 'Cholesterol-free', 'Easy-pour design', 'Great for small kitchens'],
-      specs: { Volume: '1 litre', Type: 'Refined vegetable oil', Packaging: 'Sealed bottle', 'Shelf life': '18 months', Storage: 'Cool, dry place' }
-    },
-    {
-      id: 'tomato-paste', name: 'Tomato Paste', category: 'cooking', size: '400g tin',
-      price: 950, oldPrice: 1100, rating: 4.4, reviewCount: 341, badge: 'sale', stock: 200,
-      image: 'images/tomato-paste.png', scene: 'images/scene-warehouse.png',
-      short: 'Thick, concentrated tomato paste in a sealed tin.',
-      description: 'A 400g tin of thick tomato paste made from ripe tomatoes. Concentrated, so a little goes a long way in stews, jollof and sauces. Sealed tin with a long shelf life.',
-      features: ['400g sealed tin', 'Thick and concentrated', 'No artificial colouring', 'Long shelf life'],
-      specs: { Weight: '400 g', Type: 'Concentrated tomato paste', Packaging: 'Sealed tin', 'Shelf life': '24 months', Storage: 'Cool, dry place' }
-    },
-    {
-      id: 'seasoning-cubes', name: 'Seasoning Cubes', category: 'cooking', size: 'Roll of 10',
-      price: 700, oldPrice: null, rating: 4.6, reviewCount: 412, badge: null, stock: 300,
-      image: 'images/seasoning-cubes.png', scene: 'images/scene-warehouse.png',
-      short: 'A roll of ten classic all-purpose seasoning cubes.',
-      description: 'The everyday seasoning cube every Nigerian kitchen runs on. A roll of ten cubes, each individually wrapped, that lifts the flavour of rice, stews, soups and noodles.',
-      features: ['Roll of 10 cubes', 'Individually wrapped', 'All-purpose seasoning', 'Long shelf life'],
-      specs: { Quantity: '10 cubes', Type: 'All-purpose seasoning', Packaging: 'Foil roll', 'Shelf life': '18 months', Storage: 'Cool, dry place' }
-    },
-    {
-      id: 'spaghetti', name: 'Spaghetti Pasta', category: 'cooking', size: '500g pack',
-      price: 1200, oldPrice: 1400, rating: 4.5, reviewCount: 233, badge: 'sale', stock: 150,
-      image: 'images/spaghetti.png', scene: 'images/scene-warehouse.png',
-      short: 'Durum wheat spaghetti that holds its bite.',
-      description: 'A 500g pack of durum wheat spaghetti. Cooks to a firm al dente and holds sauce well — good for a quick jollof spaghetti or a simple tomato pasta.',
-      features: ['500g sealed pack', 'Durum wheat semolina', 'Cooks al dente', 'Holds sauce well'],
-      specs: { Weight: '500 g', Type: 'Durum wheat spaghetti', Packaging: 'Sealed pack', 'Shelf life': '24 months', Cooking: '8–10 minutes' }
-    },
-    {
-      id: 'noodles', name: 'Instant Noodles', category: 'cooking', size: 'Carton of 40',
-      price: 11500, oldPrice: 13000, rating: 4.7, reviewCount: 289, badge: 'bestseller', stock: 30,
-      image: 'images/noodles.png', scene: 'images/scene-warehouse.png',
-      short: 'A full carton of 40 instant noodle packs with seasoning.',
-      description: 'A carton of 40 instant noodle packs, each with its own seasoning sachet. The quickest hot meal in the house — boil, add the seasoning, done. Buying the carton works out much cheaper per pack.',
-      features: ['Carton of 40 packs', 'Seasoning sachet in each', 'Ready in 3 minutes', 'Best value per pack'],
-      specs: { Quantity: '40 packs', 'Per pack': '70 g', Packaging: 'Sealed carton', 'Shelf life': '12 months', Cooking: '3 minutes' }
-    },
-    {
-      id: 'sugar', name: 'Granulated Sugar', category: 'cooking', size: '2kg bag',
-      price: 4200, oldPrice: null, rating: 4.5, reviewCount: 156, badge: null, stock: 90,
-      image: 'images/sugar.png', scene: 'images/scene-warehouse.png',
-      short: 'Fine white granulated sugar in a sealed 2kg bag.',
-      description: 'A 2kg sealed bag of fine white granulated sugar. Dissolves quickly, so it is good for tea, baking and drinks. Sealed to keep it free-flowing and dry.',
-      features: ['2kg sealed bag', 'Fine, quick-dissolving grains', 'Good for baking and drinks', 'Stays free-flowing'],
-      specs: { Weight: '2 kg', Type: 'White granulated sugar', Packaging: 'Sealed bag', 'Shelf life': '24 months', Storage: 'Cool, dry place' }
-    },
-    {
-      id: 'salt', name: 'Iodised Table Salt', category: 'cooking', size: '1kg bag',
-      price: 700, oldPrice: null, rating: 4.4, reviewCount: 198, badge: null, stock: 180,
-      image: 'images/salt.png', scene: 'images/scene-warehouse.png',
-      short: 'Fine iodised table salt in a sealed 1kg bag.',
-      description: 'A 1kg sealed bag of fine iodised table salt. Free-flowing and easy to measure, with iodine added as recommended for everyday cooking.',
-      features: ['1kg sealed bag', 'Iodised', 'Fine, free-flowing', 'Everyday cooking salt'],
-      specs: { Weight: '1 kg', Type: 'Iodised table salt', Packaging: 'Sealed bag', 'Shelf life': '24 months', Storage: 'Cool, dry place' }
-    },
-    {
-      id: 'flour', name: 'Wheat Flour', category: 'cooking', size: '2kg bag',
-      price: 3800, oldPrice: 4200, rating: 4.5, reviewCount: 134, badge: 'sale', stock: 70,
-      image: 'images/flour.png', scene: 'images/scene-warehouse.png',
-      short: 'All-purpose wheat flour for baking and frying.',
-      description: 'A 2kg bag of all-purpose wheat flour, milled fine and sifted. Works for bread, cakes, pancakes and for dusting before frying. Sealed to keep it dry.',
-      features: ['2kg sealed bag', 'All-purpose, finely milled', 'Good for bread and cakes', 'Sealed for freshness'],
-      specs: { Weight: '2 kg', Type: 'All-purpose wheat flour', Packaging: 'Sealed paper bag', 'Shelf life': '9 months', Storage: 'Cool, dry place' }
-    },
-    {
-      id: 'milk-powder', name: 'Full Cream Milk Powder', category: 'beverages', size: '400g tin',
-      price: 6500, oldPrice: 7200, rating: 4.7, reviewCount: 276, badge: 'sale', stock: 55,
-      image: 'images/milk-powder.png', scene: 'images/scene-warehouse.png',
-      short: 'Rich full-cream milk powder in a sealed 400g tin.',
-      description: 'A 400g tin of full-cream milk powder. Dissolves smoothly in hot or cold water and gives tea, pap and cereal a proper creamy body. The tin reseals to keep the powder dry.',
-      features: ['400g sealed tin', 'Full cream, rich taste', 'Dissolves smoothly', 'Resealable tin'],
-      specs: { Weight: '400 g', Type: 'Full cream milk powder', Packaging: 'Sealed tin', 'Shelf life': '18 months', Storage: 'Cool, dry place' }
-    },
-    {
-      id: 'tea', name: 'Black Tea Bags', category: 'beverages', size: '50 bags',
-      price: 3500, oldPrice: null, rating: 4.5, reviewCount: 167, badge: null, stock: 80,
-      image: 'images/tea.png', scene: 'images/scene-warehouse.png',
-      short: 'A box of 50 black tea bags, individually sealed.',
-      description: 'A box of 50 black tea bags. Each bag is individually wrapped so it stays fresh, and the blend brews strong and clear in about three minutes. Good with milk or lemon.',
-      features: ['50 individually wrapped bags', 'Strong, clear brew', 'Ready in 3 minutes', 'Sealed for freshness'],
-      specs: { Quantity: '50 tea bags', Type: 'Black tea', Packaging: 'Sealed box', 'Shelf life': '24 months', Brewing: '3 minutes' }
-    },
-    {
-      id: 'coffee', name: 'Instant Coffee', category: 'beverages', size: '200g jar',
-      price: 7800, oldPrice: 8500, rating: 4.6, reviewCount: 143, badge: 'sale', stock: 42,
-      image: 'images/coffee.png', scene: 'images/scene-warehouse.png',
-      short: 'Smooth instant coffee granules in a resealable 200g jar.',
-      description: 'A 200g jar of instant coffee granules with a rounded, low-acid taste. Dissolves instantly in hot water or milk, and the jar reseals to protect the aroma.',
-      features: ['200g resealable jar', 'Smooth, low-acid taste', 'Dissolves instantly', 'Makes about 100 cups'],
-      specs: { Weight: '200 g', Type: 'Instant coffee granules', Packaging: 'Glass jar', 'Shelf life': '24 months', Servings: '~100 cups' }
-    },
-    {
-      id: 'water-pack', name: 'Table Water', category: 'beverages', size: 'Pack of 12',
-      price: 1800, oldPrice: null, rating: 4.4, reviewCount: 221, badge: null, stock: 200,
-      image: 'images/water-pack.png', scene: 'images/scene-warehouse.png',
-      short: 'A shrink-wrapped pack of twelve 75cl bottles of table water.',
-      description: 'A pack of twelve 75cl bottles of treated table water, shrink-wrapped for easy carrying. Sealed caps, clean taste, and handy for the office, the car or the fridge.',
-      features: ['Pack of 12 bottles', '75cl each', 'Shrink-wrapped pack', 'Sealed tamper-proof caps'],
-      specs: { Quantity: '12 bottles', 'Per bottle': '75 cl', Type: 'Treated table water', Packaging: 'Shrink-wrapped pack', 'Shelf life': '12 months' }
-    },
-    {
-      id: 'soft-drink', name: 'Orange Soft Drink', category: 'beverages', size: 'Pack of 6',
-      price: 3600, oldPrice: 4000, rating: 4.3, reviewCount: 189, badge: 'sale', stock: 110,
-      image: 'images/soft-drink.png', scene: 'images/scene-warehouse.png',
-      short: 'Six 50cl bottles of fizzy orange soft drink.',
-      description: 'A pack of six 50cl bottles of orange soft drink. Properly fizzy and best served cold. The pack is shrink-wrapped and the bottles have sealed caps.',
-      features: ['Pack of 6 bottles', '50cl each', 'Chilled best', 'Sealed caps'],
-      specs: { Quantity: '6 bottles', 'Per bottle': '50 cl', Flavour: 'Orange', Packaging: 'Shrink-wrapped pack', 'Shelf life': '6 months' }
-    },
-    {
-      id: 'custard', name: 'Custard Powder', category: 'snacks', size: '500g tin',
-      price: 4300, oldPrice: null, rating: 4.5, reviewCount: 112, badge: null, stock: 65,
-      image: 'images/custard.png', scene: 'images/scene-warehouse.png',
-      short: 'Smooth vanilla custard powder in a sealed 500g tin.',
-      description: 'A 500g tin of vanilla custard powder. Mixes smooth without lumps and sets to a silky custard — good with bread, cake or on its own as a warm dessert.',
-      features: ['500g sealed tin', 'Smooth, lump-free mix', 'Vanilla flavour', 'Ready in minutes'],
-      specs: { Weight: '500 g', Flavour: 'Vanilla', Packaging: 'Sealed tin', 'Shelf life': '18 months', Storage: 'Cool, dry place' }
-    },
-    {
-      id: 'cornflakes', name: 'Cornflakes Cereal', category: 'snacks', size: '500g pack',
-      price: 4800, oldPrice: 5200, rating: 4.4, reviewCount: 128, badge: 'sale', stock: 58,
-      image: 'images/cornflakes.png', scene: 'images/scene-warehouse.png',
-      short: 'Crisp golden cornflakes in a sealed 500g pack.',
-      description: 'A 500g pack of golden cornflakes that stay crisp in milk. Fortified with vitamins and iron, and quick enough for a school morning. The inner bag reseals.',
-      features: ['500g sealed pack', 'Fortified with vitamins', 'Stays crisp in milk', 'Resealable inner bag'],
-      specs: { Weight: '500 g', Type: 'Cornflakes cereal', Packaging: 'Sealed carton', 'Shelf life': '12 months', Storage: 'Cool, dry place' }
-    },
-    {
-      id: 'honey', name: 'Pure Honey', category: 'snacks', size: '500ml jar',
-      price: 5500, oldPrice: null, rating: 4.7, reviewCount: 96, badge: null, stock: 44,
-      image: 'images/honey.png', scene: 'images/scene-warehouse.png',
-      short: 'Raw, unfiltered honey in a sealed 500ml glass jar.',
-      description: 'A 500ml glass jar of raw, unfiltered honey. Thick and aromatic, with no added sugar or syrup. Good in tea, on bread, or straight off the spoon.',
-      features: ['500ml glass jar', 'Raw and unfiltered', 'No added sugar', 'Sealed lid'],
-      specs: { Volume: '500 ml', Type: 'Raw honey', Packaging: 'Glass jar', 'Shelf life': '24 months', Storage: 'Cool, dry place' }
-    },
-    {
-      id: 'biscuits', name: 'Cream Sandwich Biscuits', category: 'snacks', size: '300g pack',
-      price: 1600, oldPrice: 1800, rating: 4.3, reviewCount: 204, badge: 'sale', stock: 170,
-      image: 'images/biscuits.png', scene: 'images/scene-warehouse.png',
-      short: 'Vanilla cream sandwich biscuits in a sealed 300g pack.',
-      description: 'A 300g pack of vanilla cream sandwich biscuits. Crunchy outside, creamy in the middle — a reliable tea-time and lunchbox biscuit.',
-      features: ['300g sealed pack', 'Vanilla cream filling', 'Crunchy and fresh', 'Great for lunchboxes'],
-      specs: { Weight: '300 g', Flavour: 'Vanilla cream', Packaging: 'Sealed pack', 'Shelf life': '12 months', Storage: 'Cool, dry place' }
-    },
-    {
-      id: 'chin-chin', name: 'Chin Chin Snack', category: 'snacks', size: '200g pack',
-      price: 1200, oldPrice: null, rating: 4.5, reviewCount: 158, badge: null, stock: 190,
-      image: 'images/chin-chin.png', scene: 'images/scene-warehouse.png',
-      short: 'Crunchy, lightly sweetened chin chin in a sealed pack.',
-      description: 'A 200g pack of chin chin — fried dough cubes that are crisp all the way through and only lightly sweet. Sealed to keep them crunchy.',
-      features: ['200g sealed pack', 'Crisp and crunchy', 'Lightly sweetened', 'Sealed for crunch'],
-      specs: { Weight: '200 g', Type: 'Chin chin snack', Packaging: 'Sealed pack', 'Shelf life': '6 months', Storage: 'Cool, dry place' }
-    },
-    {
-      id: 'detergent', name: 'Washing Detergent Powder', category: 'household', size: '2kg bag',
-      price: 4500, oldPrice: 5000, rating: 4.6, reviewCount: 187, badge: 'sale', stock: 95,
-      image: 'images/detergent.png', scene: 'images/scene-warehouse.png',
-      short: 'High-foam washing powder in a sealed 2kg bag.',
-      description: 'A 2kg sealed bag of high-foam washing detergent powder. Cuts through grease and stains in hand-wash or machine, and rinses out clean without leaving residue.',
-      features: ['2kg sealed bag', 'High-foam formula', 'Hand-wash and machine', 'Rinses clean'],
-      specs: { Weight: '2 kg', Type: 'Washing detergent powder', Packaging: 'Sealed bag', 'Shelf life': '24 months', Use: 'Hand & machine wash' }
-    },
-    {
-      id: 'laundry-soap', name: 'Laundry Soap Bar', category: 'household', size: '800g bar',
-      price: 1500, oldPrice: null, rating: 4.5, reviewCount: 143, badge: null, stock: 160,
-      image: 'images/laundry-soap.png', scene: 'images/scene-warehouse.png',
-      short: 'A long-lasting 800g multi-purpose laundry soap bar.',
-      description: 'An 800g bar of multi-purpose laundry soap. Tough on collars, cuffs and stains, and it lasts a long time. Wrapped and sealed to keep it dry.',
-      features: ['800g wrapped bar', 'Multi-purpose', 'Tough on stains', 'Long lasting'],
-      specs: { Weight: '800 g', Type: 'Laundry soap bar', Packaging: 'Wrapped bar', 'Shelf life': '24 months', Use: 'Hand wash' }
-    },
-    {
-      id: 'tissue', name: 'Toilet Tissue', category: 'household', size: 'Pack of 4',
-      price: 2200, oldPrice: 2500, rating: 4.4, reviewCount: 176, badge: 'sale', stock: 130,
-      image: 'images/tissue.png', scene: 'images/scene-warehouse.png',
-      short: 'Four soft 2-ply toilet tissue rolls, shrink-wrapped.',
-      description: 'A shrink-wrapped pack of four 2-ply toilet tissue rolls. Soft but strong, and the pack keeps the rolls clean and dry in storage.',
-      features: ['Pack of 4 rolls', '2-ply, soft and strong', 'Shrink-wrapped pack', 'Clean, dry storage'],
-      specs: { Quantity: '4 rolls', Ply: '2-ply', Packaging: 'Shrink-wrapped pack', 'Shelf life': 'No expiry', Storage: 'Dry place' }
-    },
-    {
-      id: 'toothpaste', name: 'Fluoride Toothpaste', category: 'personal-care', size: '140g tube',
-      price: 1900, oldPrice: null, rating: 4.6, reviewCount: 152, badge: null, stock: 140,
-      image: 'images/toothpaste.png', scene: 'images/scene-warehouse.png',
-      short: 'Fresh mint fluoride toothpaste in a sealed 140g tube.',
-      description: 'A 140g tube of fluoride toothpaste with a clean mint taste. Fights plaque and cavities and leaves your mouth properly fresh. Sealed in a box.',
-      features: ['140g sealed tube', 'Fluoride protection', 'Fresh mint flavour', 'Fights plaque'],
-      specs: { Weight: '140 g', Type: 'Fluoride toothpaste', Flavour: 'Mint', Packaging: 'Sealed box', 'Shelf life': '24 months' }
-    },
-    {
-      id: 'diapers', name: 'Baby Diapers', category: 'baby-kids', size: 'Jumbo pack',
-      price: 12500, oldPrice: 14000, rating: 4.7, reviewCount: 231, badge: 'bestseller', stock: 38,
-      image: 'images/diapers.png', scene: 'images/scene-warehouse.png',
-      short: 'A jumbo pack of ultra-absorbent baby diapers.',
-      description: 'A jumbo pack of ultra-absorbent baby diapers with a soft, breathable back sheet and stretchy side panels. The wetness indicator and leak guards make night-time easier.',
-      features: ['Jumbo pack', 'Ultra-absorbent core', 'Breathable back sheet', 'Wetness indicator'],
-      specs: { Pack: 'Jumbo', Sizes: 'Medium / Large', Type: 'Disposable diapers', Packaging: 'Sealed pack', 'Shelf life': 'No expiry' }
-    },
-    {
-      id: 'baby-cereal', name: 'Baby Cereal', category: 'baby-kids', size: '400g tin',
-      price: 5200, oldPrice: null, rating: 4.6, reviewCount: 118, badge: null, stock: 48,
-      image: 'images/baby-cereal.png', scene: 'images/scene-warehouse.png',
-      short: 'Fortified infant cereal in a sealed 400g tin.',
-      description: 'A 400g tin of fortified infant cereal, milled fine for babies from six months. Mixes smooth with warm water or milk and is fortified with iron and vitamins.',
-      features: ['400g sealed tin', 'Fortified with iron', 'Fine, smooth texture', 'From 6 months'],
-      specs: { Weight: '400 g', Type: 'Fortified infant cereal', Age: '6 months +', Packaging: 'Sealed tin', 'Shelf life': '18 months' }
-    },
-    {
-      id: 'wet-wipes', name: 'Baby Wet Wipes', category: 'baby-kids', size: '80 sheets',
-      price: 1800, oldPrice: 2000, rating: 4.5, reviewCount: 197, badge: 'sale', stock: 150,
-      image: 'images/wet-wipes.png', scene: 'images/scene-warehouse.png',
-      short: 'Fragrance-free baby wipes, 80 sheets per pack.',
-      description: 'A pack of 80 fragrance-free baby wipes, soft and thick enough for nappy changes and sticky hands. The resealable lid keeps them moist to the last sheet.',
-      features: ['80 sheets per pack', 'Fragrance-free', 'Soft and thick', 'Resealable lid'],
-      specs: { Sheets: '80', Type: 'Baby wet wipes', Scent: 'Fragrance-free', Packaging: 'Resealable pack', 'Shelf life': '24 months' }
+  if(routeTimer){window.clearTimeout(routeTimer);routeTimer=null;}
+  if(overlay)overlay.classList.add('is-active');
+  routeTimer=window.setTimeout(()=>{
+    routeTimer=null;
+    location.hash=next.slice(1);
+  },1000);
+}
+function initMobileRails(){
+  document.querySelectorAll('.car-rail').forEach(rail=>{
+    if(rail.dataset.autoBound)return;
+    rail.dataset.autoBound='1';
+    if(rail.scrollWidth<=rail.clientWidth)return;
+    let timer=window.setInterval(()=>{
+      if(document.hidden)return;
+      const max=rail.scrollWidth-rail.clientWidth;
+      const next=rail.scrollLeft+Math.max(rail.clientWidth*.82,260);
+      if(next>=max-8) rail.scrollTo({left:0,behavior:'smooth'});
+      else rail.scrollTo({left:next,behavior:'smooth'});
+    },2800);
+    rail.addEventListener('mouseenter',()=>clearInterval(timer),{passive:true});
+    rail.addEventListener('mouseleave',()=>{timer=window.setInterval(()=>{
+      const max=rail.scrollWidth-rail.clientWidth;
+      const next=rail.scrollLeft+Math.max(rail.clientWidth*.82,260);
+      rail.scrollTo({left:next>=max-8?0:next,behavior:'smooth'});
+    },2800)},{passive:true});
+  });
+  const homeRail=$('#home-cars');
+  if(homeRail&&!homeRail.dataset.autoBound){
+    homeRail.dataset.autoBound='1';
+    window.setInterval(()=>{
+      if(document.hidden||homeRail.scrollWidth<=homeRail.clientWidth)return;
+      const max=homeRail.scrollWidth-homeRail.clientWidth;
+      const next=homeRail.scrollLeft+homeRail.clientWidth*.88;
+      homeRail.scrollTo({left:next>=max-8?0:next,behavior:'smooth'});
+    },2800);
+  }
+}
+function initGallery(){
+  const track=document.querySelector('.gallery-track');
+  if(!track||track.dataset.autoBound)return;
+  track.dataset.autoBound='1';
+  const originals=[...track.children];
+  if(originals.length<2)return;
+  // Duplicate the first run so the first image enters naturally after the last.
+  track.innerHTML=originals.map(el=>el.outerHTML).concat(originals.map(el=>el.outerHTML)).join('');
+  const slides=[...track.children], count=originals.length;
+  let index=0, timer;
+  const offset=i=>slides[i].offsetLeft-slides[0].offsetLeft;
+  const move=()=>{index++;track.style.transform=`translateX(-${offset(index)}px)`;};
+  track.style.transition='transform .8s ease';
+  track.addEventListener('transitionend',()=>{
+    if(index>=count){
+      // The duplicate first frame matches the real first frame; reset invisibly.
+      track.style.transition='none';index=0;track.style.transform='translateX(0)';
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{track.style.transition='transform .8s ease';}));
     }
-  ];
+  });
+  timer=window.setInterval(()=>{if(!document.hidden)move();},3000);
+  window.addEventListener('pagehide',()=>window.clearInterval(timer),{once:true});
+  window.addEventListener('resize',()=>{
+    track.style.transition='none';track.style.transform=`translateX(-${offset(index)}px)`;
+    requestAnimationFrame(()=>{track.style.transition='transform .8s ease';});
+  },{passive:true});
+}
+function initReviewsCarousel(){
+  const root=$('#reviews');
+  if(!root||root.dataset.carouselBound)return;
+  root.dataset.carouselBound='1';
+  let timer=null;
+  const move=()=>{
+    if(root.children.length<2)return;
+    const first=root.firstElementChild;
+    const width=first.getBoundingClientRect().width+18;
+    root.style.transition='transform 1.8s ease-in-out';
+    root.style.transform='translateX(-'+width+'px)';
+    window.setTimeout(()=>{
+      if(!root.isConnected)return;
+      root.style.transition='none';
+      root.appendChild(root.firstElementChild);
+      root.style.transform='translateX(0)';
+      void root.offsetWidth;
+    },1850);
+  };
+  const start=()=>{if(timer)clearInterval(timer);timer=window.setInterval(()=>{if(!document.hidden)move();},4600);};
+  root.addEventListener('mouseenter',()=>timer&&clearInterval(timer),{passive:true});
+  root.addEventListener('mouseleave',start,{passive:true});
+  start();
+}
 
-  /* ---------- Delivery zones ---------- */
-  var ZONES = [
-    { id: 'island',    name: 'Lagos Island & Victoria Island',         fee: 1500, eta: 'Same day' },
-    { id: 'mainland',  name: 'Lagos Mainland (Ikeja, Yaba, Surulere)', fee: 2000, eta: 'Same day' },
-    { id: 'outskirts', name: 'Lagos Outskirts (Ikorodu, Badagry, Epe)',fee: 3000, eta: '1–2 days' },
-    { id: 'abuja',     name: 'Abuja (FCT)',                            fee: 4500, eta: '2–3 days' },
-    { id: 'ph',        name: 'Port Harcourt & Rivers',                 fee: 5000, eta: '2–3 days' },
-    { id: 'other',     name: 'Other states (nationwide)',              fee: 6000, eta: '3–5 days' },
-    { id: 'pickup',    name: 'Pickup at our Lagos store',              fee: 0,    eta: 'Ready in 2 hours' }
-  ];
-
-  /* ---------- Delivery discount rules (admin-editable) ---------- */
-  var DEFAULT_DELIVERY_RULES = {
-    freeOver: 50000,
-    percentOff: 0,
-    memberFree: true,
-    codes: {
-      FREEDEL: { type: 'free',    label: 'Free delivery' },
-      HALFDEL: { type: 'percent', value: 50, label: '50% off delivery' }
+function carCard(c,opts={}){
+  const popular=opts.popular||false;
+  const meta=[c.specTag,c.mileageKm?Number(c.mileageKm).toLocaleString()+' km':''].filter(Boolean).join(' · ');
+  const condition=c.condition?`<span class="stock-meta">${esc(c.condition)}</span>`:'';
+  const image=String(c.image||'').trim();
+  const fallback="this.onerror=null;this.src='/images/moses-benz-logo.png';";
+  return `<article class="car-card inventory-card${popular?' is-popular':''}" data-slug="${esc(c.slug)}">
+    <div class="car-card-media">
+      <img src="${esc(image)}" alt="${esc(c.name)}" loading="lazy" onerror="${fallback}">
+      ${popular?'<span class="car-badge popular-badge">Popular</span>':''}
+    </div>
+    <div class="car-card-body">
+      <h3>${esc(c.name)}</h3>
+      ${meta?`<p class="card-meta">${esc(meta)}</p>`:''}
+      ${condition}
+      <button type="button" class="btn car-dm-btn" data-car-dm="${esc(c.slug)}">Send a DM to ask if it is available</button>
+    </div>
+  </article>`;
+}
+function sendCarDM(c){
+  const n=whatsappNumber();
+  if(!n){goRoute('#contact');return;}
+  const message=`Hello Moses Benz Auto Care. Is the ${c.name}${c.year?` (${c.year})`:''} currently available? Please send me the current details. Thank you.`;
+  window.open('https://wa.me/'+n+'?text='+encodeURIComponent(message),'_blank','noopener');
+}
+function bindCards(){
+  document.querySelectorAll('.car-card').forEach(x=>{
+    x.onclick=()=>goRoute('#car/'+encodeURIComponent(x.dataset.slug));
+    const c=cars().find(item=>item.slug===x.dataset.slug);
+    const dm=x.querySelector('[data-car-dm]');
+    if(dm&&c)dm.onclick=e=>{e.preventDefault();e.stopPropagation();sendCarDM(c);};
+  });
+}
+function home(){return `<section class="hero"><div class="hero-bg"></div><div class="wrap hero-content"><span class="eyebrow">Idimu, Lagos · Mercedes-Benz Specialists</span><h1>Keep the <i>star</i> running true.</h1><p>Mercedes-Benz diagnostics, servicing, repair and vehicle sales from a specialist workshop in Idimu, Lagos.</p><div class="actions"><a class="btn red" href="#appointments">Book a Service</a><a class="btn light" href="#inventory">Browse Inventory</a></div><div class="stats"><div><b>20+</b><span>Certified technicians</span></div><div><b>12+</b><span>Years of experience</span></div><div><b>Mercedes-Benz</b><span>Specialist workshop</span></div><div><b>Idimu</b><span>Lagos</span></div></div></div></section><div class="marquee"><div>C-CLASS · E-CLASS · S-CLASS · GLE · G-CLASS · AMG GT · CLA · EQ · MAYBACH · </div></div><section class="section white"><div class="wrap"><div class="section-head"><span class="eyebrow">Mercedes-Benz Sales</span><h2>A curated line-up, ready through Moses Benz.</h2><p>Explore a selection from the full catalogue.</p></div><div id="home-cars" class="car-grid home-car-rail">${cars().filter(c=>c.active!==false).slice(0,3).map(carCard).join('')}</div><div class="center"><a class="btn red" href="#inventory">View Full Inventory</a></div></div></section><section class="section gallery-section"><div class="wrap"><div class="section-head"><span class="eyebrow">Inside Moses Benz</span><h2>Real premises. Real workmanship.</h2></div><div class="gallery"><div class="gallery-track">${Array.from({length:12},(_,i)=>i+1).map(i=>`<figure><img src="/images/workshop-gallery/img${i}.jpg" alt="Moses Benz workshop photo ${i}" loading="lazy" data-image-slot="${i}" onerror="this.dataset.ext=(Number(this.dataset.ext||0)+1);const e=['jpg','jpeg','png','webp'][Number(this.dataset.ext)];if(e){this.src='/images/workshop-gallery/img${i}.'+e;}else{this.closest('figure')?.remove();}"></figure>`).join('')}</div></div></div></section><section class="section dark"><div class="wrap"><div class="section-head"><span class="eyebrow">How It Works</span><h2>From first booking to final collection.</h2></div><div class="steps"><article><b>01</b><h3>Book</h3><p>Tell us the Mercedes model and what is happening.</p></article><article><b>02</b><h3>Diagnose</h3><p>We investigate the cause before recommending parts.</p></article><article><b>03</b><h3>Approve & Repair</h3><p>You understand the work before it begins.</p></article><article><b>04</b><h3>Collect</h3><p>We explain what was done and what to watch next.</p></article></div></div></section><section class="section white"><div class="wrap"><div class="section-head"><span class="eyebrow">From the Workshop</span><h2>Useful things to know about your car.</h2></div><div class="blog-grid">${POSTS.slice(0,3).map(postCard).join('')}</div><div class="center"><a class="btn red" href="#blog">Read the Insights</a></div></div></section><section class="section soft"><div class="wrap"><div class="section-head"><span class="eyebrow">Reviews</span><h2>Owners who entrust us with the star.</h2></div><div class="reviews-window"><div id="reviews" class="review-grid"><article class="review"><b>Moses Benz Auto Care</b><p>Professional Mercedes-Benz diagnosis, servicing and repair.</p></article><article class="review"><b>Your experience matters</b><p>Share your experience with the workshop below.</p></article></div></div><form id="review-form" class="form-card review-form"><div class="two"><label>Your name *<input name="name" required maxlength="80"></label><label>Mercedes-Benz model<input name="model" maxlength="80" placeholder="C 300"></label></div><label>Rating *<select name="rating" required><option value="">Choose a rating</option><option value="5">5 — Excellent</option><option value="4">4 — Very good</option><option value="3">3 — Good</option><option value="2">2 — Fair</option><option value="1">1 — Poor</option></select></label><label>Your review *<textarea name="review" rows="4" required maxlength="2000"></textarea></label><button class="btn red" type="submit">Submit Review</button><p id="review-status" class="status"></p></form></div></section><section class="section white"><div class="wrap career-card"><div><span class="eyebrow">Careers</span><h2>Build a career around Mercedes-Benz.</h2><p>We value skilled, disciplined professionals who take pride in proper automotive work.</p></div><a class="btn red" href="#careers">Explore Careers</a></div></section><section class="find"><div class="map"><iframe src="https://www.google.com/maps?q=Moses+Benz+Auto+Care,+11+Lasu+Rd,+Idimu,+Lagos&output=embed" loading="lazy" title="Moses Benz Auto Care map"></iframe></div><div class="find-copy"><span class="eyebrow">Find Us</span><h2>11 Lasu Rd, Idimu, Lagos.</h2><p>Beside Federal Peace Estate, just off the Lasu-Isheri axis.</p><a class="btn red" href="https://www.google.com/maps/place/?q=place_id:ChIJ9wS7aQCROxARHinfFB1ds1w" target="_blank">Open in Google Maps</a></div></section>`}
+function postCard(p){const image=String(p.image_url||p.image||'').trim();return `<article class="blog-card"><img src="${esc(image)}" alt="${esc(p.title)}" loading="lazy" onerror="this.style.display='none'"><div><span class="eyebrow">${esc(p.category)}</span><h2>${esc(p.title)}</h2><p>${esc(p.excerpt)}</p><a href="#blog/${encodeURIComponent(p.slug)}">Read article →</a></div></article>`}
+const MODEL_FAMILY_INFO={
+"A-Class":"The A-Class is Mercedes-Benz's entry point into the range: a compact hatchback built around everyday usability, efficient turbocharged four-cylinder engines and the brand's newer cabin technology. It suits city driving, a first Mercedes-Benz, or anyone who wants the badge and build quality without stepping up to a larger sedan.",
+"CLA":"The CLA is a four-door coupe built on the same compact platform as the A-Class, but with a lower, more sloped roofline and a sportier stance. It trades a little rear headroom and boot space for styling, making it a popular choice for buyers who want compact-executive presence at a lower price point than a C-Class.",
+"C-Class":"The C-Class is Mercedes-Benz's compact executive sedan and the volume model that most people picture when they think of the brand: a comfortable, well-built saloon suited to both daily commuting and longer trips. AMG-badged C-Class variants (like the C 43 and C 63 S) add a more powerful engine, sports suspension and a firmer, more performance-focused character.",
+"E-Class":"The E-Class sits above the C-Class as Mercedes-Benz's mid-size executive sedan, with a longer wheelbase, a quieter cabin and generally more advanced standard technology. It is the traditional choice for business owners and executives who want genuine comfort over long distances without moving up to the flagship S-Class.",
+"S-Class":"The S-Class is Mercedes-Benz's flagship sedan and historically the model that introduces new technology to the rest of the range. It prioritises rear-seat comfort, cabin refinement and a smooth, quiet ride above all else, and is the natural choice for owners who are driven as often as they drive.",
+"Maybach S-Class":"Mercedes-Maybach is the ultra-luxury extension of the S-Class, with a longer body, a more elaborately finished cabin and an even greater focus on rear-seat comfort. It is aimed at owners who are chauffeured, prioritising a hushed, cosseting ride and standout presence over outright driving involvement.",
+"GLA":"The GLA is Mercedes-Benz's smallest SUV, sharing its platform and engines with the A-Class and CLA. It gives buyers a raised driving position and SUV styling in a compact, easy-to-park footprint, making it a practical choice for city driving that still wants some ground clearance.",
+"GLB":"The GLB is a boxier, more upright SUV than the GLA, with a longer wheelbase and the option of a third row of seats in some markets. It is aimed at buyers who want genuine practicality and interior space from a compact SUV rather than a sportier, more sloped roofline.",
+"GLC":"The GLC is Mercedes-Benz's compact SUV and one of its best-selling models worldwide, built on the same underpinnings as the C-Class. It balances a comfortable ride, a usable boot and everyday practicality with the higher driving position SUV buyers want, and is offered in a more coupe-styled GLC Coupe body as well.",
+"GLC Coupe":"The GLC Coupe shares its mechanical underpinnings with the standard GLC but wears a lower, more sloped roofline for a sportier profile. It sacrifices some rear headroom and cargo space in exchange for styling, appealing to buyers who want an SUV's practicality with more visual presence.",
+"GLE":"The GLE is Mercedes-Benz's mid-size SUV, sitting above the GLC with more interior space, a smoother ride and the option of a third row of seats in some configurations. It suits families and buyers who want a genuinely spacious SUV without moving up to the full-size GLS, and is also offered as the more sharply styled GLE Coupe.",
+"GLE Coupe":"The GLE Coupe carries the GLE's size and underpinnings but with a lower, coupe-inspired roofline for a sportier stance. It gives up some rear headroom compared with the standard GLE in exchange for a more dramatic silhouette, and AMG versions add significantly more power and a firmer sports chassis.",
+"GLS":"The GLS is Mercedes-Benz's full-size, flagship SUV, built to carry up to seven occupants in genuine comfort across three rows. It is the SUV equivalent of the S-Class, prioritising cabin space, ride comfort and presence for large families or buyers who want maximum room.",
+"Maybach GLS":"The Mercedes-Maybach GLS applies Maybach's ultra-luxury treatment to the full-size GLS SUV, with a more elaborate cabin, additional sound insulation and extra rear-seat comfort features. It targets buyers who want SUV practicality and ground clearance without compromising on the plush, chauffeur-friendly experience of the S-Class-based Maybach.",
+"G-Class":"The G-Class (or 'G-Wagon') is Mercedes-Benz's boxy, body-on-frame off-roader, built on an engineering platform that has changed relatively little in decades because it works. It combines genuine off-road capability with a highly distinctive, upright shape, and AMG versions turn that same rugged platform into a very fast, very loud performance SUV.",
+"V-Class":"The V-Class is Mercedes-Benz's large passenger van, built for carrying people rather than cargo, with configurable seating for large families or small groups travelling together. It offers car-like comfort and equipment in a genuinely spacious cabin, making it a practical choice for airport transfers, large families or group travel.",
+"SL":"The SL is Mercedes-Benz's long-running luxury roadster, historically pairing open-top driving with genuine grand-touring comfort rather than a stripped-out sports car feel. Modern AMG-badged SL models add significant performance while keeping the model's traditional focus on being comfortable enough to drive long distances with the roof down.",
+"AMG GT":"The AMG GT is Mercedes-AMG's dedicated sports car, built with a front-mid-mounted engine and a low, wide stance purely for performance driving. It sits apart from the rest of the range as a car chosen specifically for how it drives, rather than for passenger space or everyday practicality.",
+"EQ":"Models under the EQ name are Mercedes-Benz's electric vehicles, built around battery-electric drivetrains rather than a traditional combustion engine. They carry over the brand's usual comfort and build quality while offering silent running and instant electric response, aimed at buyers moving away from petrol or diesel power."
+};
+function modelFamily(name){
+  const n=String(name||'').replace(/^AMG\s+/i,'').trim();
+  const isMaybach=/^Maybach\s+/i.test(n);
+  const rest=n.replace(/^Maybach\s+/i,'');
+  const code=(rest.match(/^[A-Z]{1,3}/)||[''])[0];
+  const isCoupe=/coupe/i.test(rest);
+  if(isMaybach)return code==='GLS'?'Maybach GLS':'Maybach S-Class';
+  if(code==='GLC'&&isCoupe)return 'GLC Coupe';
+  if(code==='GLE'&&isCoupe)return 'GLE Coupe';
+  const map={A:'A-Class',B:'B-Class',C:'C-Class',E:'E-Class',S:'S-Class',CLA:'CLA',CLS:'CLS',CLE:'CLE',GLA:'GLA',GLB:'GLB',GLC:'GLC',GLE:'GLE',GLS:'GLS',G:'G-Class',V:'V-Class',SL:'SL',GT:'AMG GT',EQ:'EQ'};
+  return map[code]||'';
+}
+async function car(slug){const c=cars().find(x=>x.slug===slug);if(!c)return '<section class="section white"><div class="wrap empty"><h1>Vehicle not found</h1><a class="btn red" href="#inventory">Back to Inventory</a></div></section>';
+  const family=modelFamily(c.name),about=MODEL_FAMILY_INFO[family];
+  return `<section class="section white"><div class="wrap"><a class="back" href="#inventory">← Back to Inventory</a><div class="detail-grid"><div><img class="detail-image" src="${BASE}${esc(c.image)}" alt="${esc(c.name)}" onerror="this.onerror=null;this.src='/images/moses-benz-logo.png';"></div><div><span class="eyebrow">Mercedes-Benz · For Sale</span><h1>${esc(c.name)}</h1><p>${esc(c.description)}</p><button id="car-wa" class="btn red">Send a DM to ask if it is available</button></div></div><div class="spec-panel"><h2>Full details</h2><div class="spec-grid">${[['Year',c.year],['Mileage',(c.mileageKm||0)+' km'],['Specification',c.specTag],['Condition',c.condition],['Transmission',c.transmission],['Fuel',c.fuel],['Body',c.body],['Drivetrain',c.drivetrain],['Engine',c.engineSize],['Cylinders',c.cylinders],['Horsepower',c.horsepower?c.horsepower+' hp':''],['Colour',c.color],['Interior',c.interiorColor],['Seats',c.seats],['Registration',c.registered]].filter(x=>x[1]).map(x=>'<div><span>'+esc(x[0])+'</span><b>'+esc(x[1])+'</b></div>').join('')}</div>${about?`<div class="model-about"><h3>About the ${esc(family)}</h3><p>${esc(about)}</p></div>`:''}</div></div></section>`}
+function bindCar(slug){const c=cars().find(x=>x.slug===slug),b=$('#car-wa');if(b&&c)b.onclick=()=>sendCarDM(c)}
+const POPULAR_MODEL_PATTERNS=[
+  /\bc\s*-?\s*(180|200|300|350)\b/i,
+  /\bglk\s*350\b/i,
+  /\b(m|ml)\s*350\b/i,
+  /\bgle\s*(350|43)\b/i,
+  /\be\s*(300|350)\b/i,
+  /\bglc\s*300\b/i,
+  /\bgla\s*250\b/i,
+  /\bcla\s*250\b/i
+];
+function isPopularCar(c){return POPULAR_MODEL_PATTERNS.some(re=>re.test(String(c.name||'')+' '+String(c.slug||'')));}
+function bodyType(c){
+  const text=norm([c.body,c.name,c.slug,c.description].filter(Boolean).join(' '));
+  if(/gle|glc|glk|gla|glb|gls|ml|m class|g 400|g 450|g 500|g 550|g 63|maybach gls/.test(text))return 'SUV / Crossover';
+  if(/sl 43|sl 55|amg gt/.test(text))return 'Performance';
+  if(/v 220|v 250|v 300/.test(text))return 'MPV';
+  if(/cla|amg gt/.test(text))return 'Coupe / Fastback';
+  if(/a 180|a 200|a 250/.test(text))return 'Compact';
+  return 'Executive Sedan';
+}
+function conditionType(c){
+  const t=norm(c.condition||'');
+  if(t.includes('foreign'))return 'Foreign Used';
+  if(t.includes('nigeria')||t.includes('local'))return 'Nigeria Used';
+  return 'All conditions';
+}
+function inventoryCardData(list){return list.map(c=>({...c,_popular:isPopularCar(c),_body:bodyType(c),_condition:conditionType(c)}));}
+let inventoryStockTab='available';
+function inventory(){
+  const q=norm(new URLSearchParams(location.hash.split('?')[1]||'').get('q')||'');
+  return `<section class="page-head inventory-page-head"><div class="wrap"><span class="eyebrow">Mercedes-Benz Sales</span><h1>Mercedes-Benz inventory.</h1><p>Browse the current Moses Benz catalogue without prices. Send us a DM to confirm availability and get the latest details.</p></div></section>
+  <section class="section white inventory-section"><div class="wrap">
+    <div class="inventory-tabs" role="tablist" aria-label="Inventory status">
+      <button type="button" class="inventory-tab is-active" data-stock-tab="available" role="tab" aria-selected="true">Available</button>
+      <button type="button" class="inventory-tab" data-stock-tab="popular" role="tab" aria-selected="false">Most Sold &amp; Popular</button>
+      <button type="button" class="inventory-tab" data-stock-tab="all" role="tab" aria-selected="false">All Inventory</button>
+    </div>
+    <div class="inventory-toolbar" aria-label="Inventory filters">
+      <input id="inventory-search" value="${esc(q)}" type="search" placeholder="Search C300, GLE, E350…">
+      <select id="inventory-type" aria-label="Vehicle type"><option value="all">All types</option><option>SUV / Crossover</option><option>Executive Sedan</option><option>Coupe / Fastback</option><option>Performance</option><option>Compact</option><option>MPV</option></select>
+      <select id="inventory-condition" aria-label="Condition"><option value="all">All conditions</option><option>Foreign Used</option><option>Nigeria Used</option></select>
+      <select id="inventory-sort" aria-label="Sort by"><option value="popular">Most popular</option><option value="newest">Newest year</option><option value="name">Model name</option></select>
+      <button id="inventory-clear" class="filter-clear" type="button">Clear</button>
+    </div>
+    <div class="results-head"><b id="inventory-count">0 vehicles</b><span id="inventory-view-note">Showing available vehicles.</span></div>
+    <main class="inventory-results">
+      <div id="inventory-list" class="car-grid inventory-grid"></div>
+      <nav id="inventory-pagination" class="inventory-pagination" aria-label="Inventory pages"></nav>
+    </main>
+  </div></section>`;
+}
+function renderInventory(){
+  const root=$('#inventory-list'), input=$('#inventory-search');
+  if(!root||!input)return;
+  const typeEl=$('#inventory-type'),conditionEl=$('#inventory-condition'),sortEl=$('#inventory-sort'),countEl=$('#inventory-count'),pager=$('#inventory-pagination'),noteEl=$('#inventory-view-note');
+  let page=1; const pageSize=12;
+  const source=inventoryCardData(cars().filter(c=>c.active!==false));
+  const statusOf=c=>norm(c.status||'available');
+  const applyTabs=tab=>{
+    document.querySelectorAll('[data-stock-tab]').forEach(btn=>{const active=btn.dataset.stockTab===tab;btn.classList.toggle('is-active',active);btn.setAttribute('aria-selected',active?'true':'false');});
+    if(noteEl)noteEl.textContent=tab==='available'?'Showing available vehicles.':tab==='popular'?'Showing the most sold and popular models.':'Showing all visible inventory.';
+  };
+  const apply=()=>{
+    applyTabs(inventoryStockTab);
+    const q=norm(input.value);
+    let list=source.filter(c=>!q||norm([c.name,c.slug,c.description,c.specTag,c.year,...(c.searchAliases||[])].join(' ')).includes(q));
+    if(inventoryStockTab==='available')list=list.filter(c=>statusOf(c)==='available');
+    if(inventoryStockTab==='popular')list=list.filter(c=>c._popular);
+    if(typeEl.value!=='all')list=list.filter(c=>c._body===typeEl.value);
+    if(conditionEl.value!=='all')list=list.filter(c=>c._condition===conditionEl.value);
+    switch(sortEl.value){
+      case 'newest': list.sort((a,b)=>Number(b.year||0)-Number(a.year||0));break;
+      case 'name': list.sort((a,b)=>String(a.name||'').localeCompare(String(b.name||'')));break;
+      default: list.sort((a,b)=>Number(b._popular)-Number(a._popular)||Number(b.year||0)-Number(a.year||0));
     }
+    const pages=Math.max(1,Math.ceil(list.length/pageSize)); if(page>pages)page=pages;
+    const slice=list.slice((page-1)*pageSize,page*pageSize);
+    root.innerHTML=slice.map(c=>carCard(c,{popular:c._popular})).join('')||'<div class="empty inventory-empty">No Mercedes-Benz vehicle matched those filters.</div>';
+    countEl.textContent=list.length+' vehicle'+(list.length===1?'':'s'); bindCards();
+    pager.innerHTML=Array.from({length:pages},(_,i)=>`<button type="button" class="page-btn${i+1===page?' active':''}" data-page="${i+1}">${i+1}</button>`).join('');
+    pager.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{page=Number(b.dataset.page);apply();document.querySelector('.inventory-results')?.scrollIntoView({behavior:'smooth',block:'start'});});
   };
-
-  /* ---------- Seed coupons (admin-managed) ---------- */
-  var SEED_COUPONS = [
-    { code: 'WELCOME10', type: 'percent', value: 10, limit: 100, used: 23, active: true,  note: 'New customer welcome offer' },
-    { code: 'RICE5',     type: 'percent', value: 5,  limit: 50,  used: 8,  active: true,  note: 'Rice & grains promo' },
-    { code: 'LAGOS15',   type: 'percent', value: 15, limit: 20,  used: 20, active: true,  note: 'Lagos launch — fully redeemed' }
-  ];
-
-  /* ---------- Storage ---------- */
-  var K = {
-    cart: 'ladydee_cart', wish: 'ladydee_wishlist', users: 'ladydee_users',
-    session: 'ladydee_session', orders: 'ladydee_orders', coupons: 'ladydee_coupons',
-    delivery: 'ladydee_delivery_rules', admin: 'ladydee_admin_session',
-    emails: 'ladydee_email_log', brevi: 'ladydee_brevi_config', seeded: 'ladydee_seeded_v1',
-    store: 'ladydee_store_info'
+  document.querySelectorAll('[data-stock-tab]').forEach(btn=>{if(btn.dataset.bound==='1')return;btn.dataset.bound='1';btn.addEventListener('click',()=>{inventoryStockTab=btn.dataset.stockTab||'available';page=1;apply();});});
+  [input,typeEl,conditionEl,sortEl].forEach(el=>{if(el.dataset.bound==='1')return;el.dataset.bound='1';el.addEventListener(el.tagName==='INPUT'?'input':'change',()=>{page=1;apply();});});
+  const clear=$('#inventory-clear');
+  if(clear&&clear.dataset.bound!=='1'){clear.dataset.bound='1';clear.onclick=()=>{input.value='';typeEl.value='all';conditionEl.value='all';sortEl.value='popular';inventoryStockTab='available';page=1;apply();};}
+  apply();
+}
+async function blog(slug){
+  if(slug){
+    const r=await api('blog_posts?select=*&published=eq.true&slug=eq.'+encodeURIComponent(slug));
+    const p=r.ok&&r.data?.[0]?r.data[0]:POSTS.find(x=>x.slug===slug);
+    if(!p)return '<section class="section white"><div class="wrap empty"><h1>Article not found</h1><a class="btn red" href="#blog">Back to Blog</a></div></section>';
+    const paras=String(p.content||'').split(/\n\n+/).filter(Boolean).map(x=>'<p>'+esc(x)+'</p>').join('');
+    return `<section class="section white"><div class="wrap article"><a href="#blog" class="back">← Back to Blog</a><span class="eyebrow">${esc(p.category)}</span><h1>${esc(p.title)}</h1><p class="article-meta">${esc(p.author||'Moses Benz Auto Care')}</p><div class="article-body">${paras}</div><section class="comments"><div class="section-head"><span class="eyebrow">Community</span><h2>Comments</h2><p>Have a question or something useful to add? Leave a comment below.</p></div><form id="blog-comment-form" class="form-card"><input type="hidden" name="post_slug" value="${esc(p.slug)}"><label>Your name *<input name="name" required maxlength="80"></label><label>Your comment *<textarea name="comment" rows="4" required maxlength="2000"></textarea></label><button class="btn red" type="submit">Post Comment</button><p id="comment-status" class="status"></p></form><div id="blog-comments" class="comment-list"><p class="muted">Loading comments…</p></div></section></div></section>`;
+  }
+  const r=await api('blog_posts?select=*&published=eq.true&order=created_at.desc');
+  const published=r.ok&&Array.isArray(r.data)?r.data:[];
+  const posts=published.length?published:POSTS;
+  return `<section class="page-head"><div class="wrap"><span class="eyebrow">Insights</span><h1>Useful things to know about your Mercedes-Benz.</h1><p>Practical maintenance, diagnosis, buying and ownership guidance from the workshop.</p></div></section><section class="section white"><div class="wrap"><div id="blog-list" class="blog-grid">${posts.map(postCard).join('')}</div></div></section>`;
+}
+function likedComments(){try{return JSON.parse(localStorage.getItem('mbac_liked_comments')||'[]')}catch{return []}}
+function markLiked(id){try{const s=likedComments();if(!s.includes(id)){s.push(id);localStorage.setItem('mbac_liked_comments',JSON.stringify(s))}}catch{}}
+function dateLabel(v){return new Date(v).toLocaleDateString('en-NG',{year:'numeric',month:'long',day:'numeric'})}
+function replyRow(x){return `<div class="reply${x.is_admin?' is-admin':''}"><div class="reply-head"><strong>${x.is_admin?'Moses Benz Auto Care':esc(x.name)}</strong>${x.is_admin?'<span class="admin-tag">Team</span>':''}<small>${dateLabel(x.created_at)}</small></div><p>${esc(x.reply)}</p></div>`;}
+function commentRow(x,replies){
+  const liked=likedComments().includes(x.id);
+  const sorted=[...replies].sort((a,b)=>(b.is_admin-a.is_admin)||String(a.created_at).localeCompare(String(b.created_at)));
+  return `<article class="comment" data-comment-id="${esc(x.id)}">
+    <div class="comment-head"><strong>${esc(x.name)}</strong><small>${dateLabel(x.created_at)}</small></div>
+    <p>${esc(x.comment)}</p>
+    <div class="comment-actions">
+      <button type="button" class="comment-like${liked?' liked':''}" data-like="${esc(x.id)}"><i class="fa-solid fa-heart"></i><span class="like-count">${Number(x.likes)||0}</span></button>
+      <button type="button" class="comment-reply-btn" data-reply-open="${esc(x.id)}">Reply</button>
+      ${sorted.length?`<button type="button" class="comment-view-replies" data-toggle-replies="${esc(x.id)}"><span>View ${sorted.length} repl${sorted.length===1?'y':'ies'}</span><i class="fa-solid fa-chevron-down"></i></button>`:''}
+    </div>
+    <form class="reply-form" data-reply-form="${esc(x.id)}" hidden>
+      <input name="name" placeholder="Your name" required maxlength="80">
+      <input name="reply" placeholder="Write a reply…" required maxlength="2000">
+      <button class="btn red" type="submit">Send</button>
+    </form>
+    ${sorted.length?`<div class="comment-replies" data-replies="${esc(x.id)}" hidden>${sorted.map(replyRow).join('')}</div>`:''}
+  </article>`;
+}
+function bindBlogArticle(slug){
+  const list=$('#blog-comments'),form=$('#blog-comment-form'); if(!list||!form)return;
+  let comments=[],repliesByComment={};
+  const load=async()=>{
+    const r=await api('blog_comments?select=*&approved=eq.true&post_slug=eq.'+encodeURIComponent(slug)+'&order=created_at.asc');
+    if(!r.ok){list.innerHTML='<p class="muted">Comments are temporarily unavailable.</p>';return;}
+    comments=Array.isArray(r.data)?r.data:[];
+    repliesByComment={};
+    if(comments.length){
+      const ids=comments.map(c=>c.id).join(',');
+      const rr=await api('blog_comment_replies?select=*&approved=eq.true&comment_id=in.('+ids+')&order=created_at.asc');
+      if(rr.ok&&Array.isArray(rr.data))rr.data.forEach(rep=>{(repliesByComment[rep.comment_id]=repliesByComment[rep.comment_id]||[]).push(rep)});
+    }
+    list.innerHTML=comments.length?comments.map(x=>commentRow(x,repliesByComment[x.id]||[])).join(''):'<p class="muted">No comments yet. Be the first to share something useful.</p>';
+    bindCommentActions();
   };
-
-  /* ---------- Store contact details (editable in the admin console) ---------- */
-  var STORE_DEFAULTS = {
-    name: 'Ladydee Minimart Store',
-    phone: '0801 234 5678',
-    phoneHref: '+2348012345678',
-    email: 'hello@ladydee.ng',
-    address: '12 Adeniran Ogunsanya, Surulere, Lagos',
-    hours: 'Mon\u2013Sat, 8am \u2013 8pm',
-    hoursShort: 'Mon\u2013Sat, 8am\u20138pm'
-  };
-
-  function getStoreInfo() {
-    var saved = read(K.store, null) || {};
-    var out = {};
-    Object.keys(STORE_DEFAULTS).forEach(function (k) {
-      out[k] = (saved[k] != null && String(saved[k]).trim() !== '') ? String(saved[k]).trim() : STORE_DEFAULTS[k];
+  const bindCommentActions=()=>{
+    list.querySelectorAll('[data-toggle-replies]').forEach(b=>b.onclick=()=>{
+      const id=b.dataset.toggleReplies,box=list.querySelector(`[data-replies="${id}"]`); if(!box)return;
+      const open=!box.hidden; box.hidden=open; b.classList.toggle('open',!open);
+      b.querySelector('span').textContent=open?`View ${repliesByComment[id].length} repl${repliesByComment[id].length===1?'y':'ies'}`:'Hide replies';
     });
-    /* keep a dialable href in sync with whatever phone number is set */
-    out.phoneHref = '+234' + out.phone.replace(/[^0-9]/g, '').replace(/^0+/, '');
-    return out;
-  }
-  function setStoreInfo(patch) {
-    var cur = getStoreInfo();
-    Object.keys(patch || {}).forEach(function (k) {
-      if (k in STORE_DEFAULTS) cur[k] = patch[k];
+    list.querySelectorAll('[data-reply-open]').forEach(b=>b.onclick=()=>{
+      const f=list.querySelector(`[data-reply-form="${b.dataset.replyOpen}"]`); if(!f)return; f.hidden=!f.hidden; if(!f.hidden)f.querySelector('input')?.focus();
     });
-    write(K.store, cur);
-    return getStoreInfo();
-  }
-
-  function read(key, fallback) {
-    try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
-    catch (e) { return fallback; }
-  }
-  function write(key, val) {
-    try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
-  }
-
-  /* ---------- Formatting ---------- */
-  function money(n) {
-    n = Number(n) || 0;
-    var neg = n < 0; n = Math.abs(n);
-    var s = Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    return (neg ? '−' : '') + '\u20a6' + s;
-  }
-  function esc(s) {
-    return String(s == null ? '' : s)
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-  }
-  function param(name) {
-    var m = new RegExp('[?&]' + name + '=([^&#]*)').exec(location.search);
-    return m ? decodeURIComponent(m[1].replace(/\+/g, ' ')) : null;
-  }
-  function stars(rating, cls) {
-    var out = '<span class="stars ' + (cls || '') + '" aria-label="' + rating + ' out of 5">';
-    for (var i = 1; i <= 5; i++) {
-      out += '<span class="star' + (i <= Math.round(rating) ? ' on' : '') + '">' + icon('star') + '</span>';
-    }
-    return out + '</span>';
-  }
-  function fmtDate(d) {
-    var m = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    return d.getDate() + ' ' + m[d.getMonth()] + ' ' + d.getFullYear();
-  }
-  function daysFromNow(n) { var d = new Date(); d.setDate(d.getDate() + n); return d; }
-
-  /* ---------- Catalogue helpers ---------- */
-  function product(id) {
-    for (var i = 0; i < PRODUCTS.length; i++) if (PRODUCTS[i].id === id) return PRODUCTS[i];
-    return null;
-  }
-  function catName(id) {
-    for (var i = 0; i < CATEGORIES.length; i++) if (CATEGORIES[i].id === id) return CATEGORIES[i].name;
-    return id;
-  }
-  function catIcon(id) {
-    for (var i = 0; i < CATEGORIES.length; i++) if (CATEGORIES[i].id === id) return CATEGORIES[i].icon;
-    return 'basket';
-  }
-  function discountOf(p) {
-    if (!p.oldPrice || p.oldPrice <= p.price) return 0;
-    return Math.round((1 - p.price / p.oldPrice) * 100);
-  }
-  function searchProducts(q) {
-    q = (q || '').trim().toLowerCase();
-    if (!q) return PRODUCTS.slice();
-    var words = q.split(/\s+/);
-    return PRODUCTS.filter(function (p) {
-      var hay = (p.name + ' ' + p.size + ' ' + catName(p.category) + ' ' + p.short + ' ' + p.description).toLowerCase();
-      return words.every(function (w) { return hay.indexOf(w) > -1; });
+    list.querySelectorAll('[data-like]').forEach(b=>b.onclick=async()=>{
+      const id=b.dataset.like; if(likedComments().includes(id))return;
+      b.disabled=true;
+      const r=await rpc('blog_comment_like',{p_id:id});
+      if(r.ok){markLiked(id);b.classList.add('liked');b.querySelector('.like-count').textContent=r.data??((Number(b.querySelector('.like-count').textContent)||0)+1);}
+      b.disabled=false;
     });
-  }
-
-  /* ---------- Cart ---------- */
-  function getCart() { return read(K.cart, []); }
-  function setCart(c) { write(K.cart, c); document.dispatchEvent(new Event('ladydee:cart')); }
-  function addToCart(id, qty) {
-    qty = qty || 1;
-    var c = getCart(), found = false;
-    for (var i = 0; i < c.length; i++) if (c[i].id === id) { c[i].qty += qty; found = true; }
-    if (!found) c.push({ id: id, qty: qty });
-    setCart(c);
-  }
-  function setQty(id, qty) {
-    qty = Math.max(1, Math.min(99, parseInt(qty, 10) || 1));
-    var c = getCart();
-    for (var i = 0; i < c.length; i++) if (c[i].id === id) c[i].qty = qty;
-    setCart(c);
-  }
-  function removeFromCart(id) { setCart(getCart().filter(function (x) { return x.id !== id; })); }
-  function clearCart() { setCart([]); }
-  function cartCount() { return getCart().reduce(function (n, x) { return n + x.qty; }, 0); }
-  function cartLines() {
-    return getCart().map(function (x) {
-      var p = product(x.id);
-      return p ? { product: p, qty: x.qty, line: p.price * x.qty } : null;
-    }).filter(Boolean);
-  }
-  function cartSubtotal() { return cartLines().reduce(function (n, l) { return n + l.line; }, 0); }
-
-  /* ---------- Wishlist ---------- */
-  function getWish() { return read(K.wish, []); }
-  function setWish(w) { write(K.wish, w); document.dispatchEvent(new Event('ladydee:wish')); }
-  function inWish(id) { return getWish().indexOf(id) > -1; }
-  function toggleWish(id) {
-    var w = getWish(), i = w.indexOf(id);
-    if (i > -1) { w.splice(i, 1); setWish(w); return false; }
-    w.push(id); setWish(w); return true;
-  }
-  function wishCount() { return getWish().length; }
-
-  /* ---------- Coupons ---------- */
-  function getCoupons() {
-    var c = read(K.coupons, null);
-    if (!c) { c = SEED_COUPONS.slice(); write(K.coupons, c); }
-    return c;
-  }
-  function setCoupons(c) { write(K.coupons, c); }
-  function findCoupon(code) {
-    code = (code || '').trim().toUpperCase();
-    var list = getCoupons();
-    for (var i = 0; i < list.length; i++) if (list[i].code === code) return list[i];
-    return null;
-  }
-  function applyCoupon(code) {
-    var c = findCoupon(code);
-    if (!c) return { ok: false, reason: 'That code is not recognised.' };
-    if (!c.active) return { ok: false, reason: 'That code is no longer active.' };
-    if (c.used >= c.limit) return { ok: false, reason: 'That code has reached its usage limit.' };
-    return { ok: true, coupon: c };
-  }
-  function redeemCoupon(code) {
-    var list = getCoupons();
-    for (var i = 0; i < list.length; i++) {
-      if (list[i].code === (code || '').toUpperCase()) { list[i].used = (list[i].used || 0) + 1; }
-    }
-    setCoupons(list);
-  }
-
-  /* ---------- Delivery ---------- */
-  function getDeliveryRules() {
-    var r = read(K.delivery, null);
-    if (!r) { r = JSON.parse(JSON.stringify(DEFAULT_DELIVERY_RULES)); write(K.delivery, r); }
-    return r;
-  }
-  function setDeliveryRules(r) { write(K.delivery, r); }
-  function zone(id) {
-    for (var i = 0; i < ZONES.length; i++) if (ZONES[i].id === id) return ZONES[i];
-    return ZONES[1];
-  }
-  function deliveryQuote(zoneId, subtotal, opts) {
-    opts = opts || {};
-    var z = zone(zoneId);
-    var rules = getDeliveryRules();
-    var base = z.fee;
-    var discount = 0;
-    var reasons = [];
-
-    if (base === 0) {
-      return { base: 0, discount: 0, fee: 0, label: 'Free', reasons: ['Pickup — no delivery fee'] };
-    }
-    if (rules.freeOver > 0 && subtotal >= rules.freeOver) {
-      discount = base;
-      reasons.push('Free delivery on orders over ' + money(rules.freeOver));
-    } else if (opts.member && rules.memberFree) {
-      discount = base;
-      reasons.push('Free delivery for signed-in customers');
-    } else if (opts.deliveryCode && rules.codes[opts.deliveryCode]) {
-      var dc = rules.codes[opts.deliveryCode];
-      if (dc.type === 'free') { discount = base; reasons.push(dc.label + ' applied'); }
-      else if (dc.type === 'percent') { discount = base * (dc.value / 100); reasons.push(dc.label + ' applied'); }
-    } else if (rules.percentOff > 0) {
-      discount = base * (rules.percentOff / 100);
-      reasons.push(rules.percentOff + '% off delivery');
-    }
-
-    discount = Math.min(discount, base);
-    var fee = Math.max(0, base - discount);
-    return {
-      base: base, discount: discount, fee: fee,
-      label: fee === 0 ? 'Free' : money(fee),
-      reasons: reasons
-    };
-  }
-
-  /* ---------- Auth ---------- */
-  function getUsers() { return read(K.users, []); }
-  function setUsers(u) { write(K.users, u); }
-  function currentUser() {
-    var s = read(K.session, null);
-    if (!s) return null;
-    var users = getUsers();
-    for (var i = 0; i < users.length; i++) if (users[i].id === s.id) return users[i];
-    return null;
-  }
-  function isLoggedIn() { return !!currentUser(); }
-  function signup(data) {
-    var users = getUsers();
-    var email = (data.email || '').trim().toLowerCase();
-    for (var i = 0; i < users.length; i++) if (users[i].email === email) return { ok: false, reason: 'An account with that email already exists.' };
-    var u = {
-      id: 'u' + Date.now(), name: data.name, email: email, phone: data.phone || '',
-      password: data.password, verified: false, createdAt: new Date().toISOString(),
-      addresses: []
-    };
-    users.push(u); setUsers(users);
-    return { ok: true, user: u };
-  }
-  function verifyUser(email) {
-    var users = getUsers();
-    for (var i = 0; i < users.length; i++) {
-      if (users[i].email === (email || '').toLowerCase()) { users[i].verified = true; setUsers(users); return users[i]; }
-    }
-    return null;
-  }
-  function login(email, password) {
-    var users = getUsers();
-    email = (email || '').trim().toLowerCase();
-    for (var i = 0; i < users.length; i++) {
-      if (users[i].email === email) {
-        if (users[i].password !== password) return { ok: false, reason: 'That password is not correct.' };
-        write(K.session, { id: users[i].id, email: users[i].email, name: users[i].name, at: Date.now() });
-        return { ok: true, user: users[i] };
-      }
-    }
-    return { ok: false, reason: 'No account found with that email.' };
-  }
-  function logout() { localStorage.removeItem(K.session); }
-  function updateUser(patch) {
-    var u = currentUser(); if (!u) return null;
-    var users = getUsers();
-    for (var i = 0; i < users.length; i++) {
-      if (users[i].id === u.id) {
-        for (var k in patch) if (Object.prototype.hasOwnProperty.call(patch, k)) users[i][k] = patch[k];
-        setUsers(users);
-        return users[i];
-      }
-    }
-    return null;
-  }
-  function resetPassword(email, newPassword) {
-    var users = getUsers();
-    for (var i = 0; i < users.length; i++) {
-      if (users[i].email === (email || '').toLowerCase()) { users[i].password = newPassword; setUsers(users); return true; }
-    }
-    return false;
-  }
-
-  /* ---------- Orders ---------- */
-  function getOrders() { return read(K.orders, []); }
-  function setOrders(o) { write(K.orders, o); }
-  function addOrder(o) { var all = getOrders(); all.unshift(o); setOrders(all); return o; }
-  function updateOrder(code, patch) {
-    var all = getOrders();
-    for (var i = 0; i < all.length; i++) {
-      if (all[i].code === code) {
-        for (var k in patch) if (Object.prototype.hasOwnProperty.call(patch, k)) all[i][k] = patch[k];
-        setOrders(all); return all[i];
-      }
-    }
-    return null;
-  }
-  function orderStatuses() {
-    return ['placed', 'confirmed', 'packed', 'out-for-delivery', 'delivered'];
-  }
-  function statusLabel(s) {
-    return ({ placed: 'Placed', confirmed: 'Confirmed', packed: 'Packed',
-      'out-for-delivery': 'Out for delivery', delivered: 'Delivered',
-      rejected: 'Rejected', cancelled: 'Cancelled' })[s] || s;
-  }
-
-  /* ---------- Seed demo data ---------- */
-  function seed() {
-    if (read(K.seeded, false)) return;
-    var users = getUsers();
-    if (!users.length) {
-      users.push({
-        id: 'u-demo', name: 'Alex Morgan', email: 'alex@example.com', phone: '+234 801 234 5678',
-        password: 'demo1234', verified: true, createdAt: new Date().toISOString(),
-        addresses: [
-          { id: 'a1', label: 'Home', name: 'Alex Morgan', phone: '+234 801 234 5678',
-            address: '27 Bourdillon Road, Ikoyi', city: 'Lagos', zone: 'island', isDefault: true },
-          { id: 'a2', label: 'Office', name: 'Alex Morgan', phone: '+234 802 987 6543',
-            address: '14 Adeola Odeku Street, Victoria Island', city: 'Lagos', zone: 'island', isDefault: false }
-        ]
-      });
-      setUsers(users);
-    }
-    if (!getOrders().length) {
-      var mk = function (code, daysAgo, status, items, zoneId, pay) {
-        var sub = items.reduce(function (n, it) { var p = product(it.id); return n + (p ? p.price * it.qty : 0); }, 0);
-        var q = deliveryQuote(zoneId, sub, { member: true });
-        var tax = sub * 0.075;
-        var d = daysFromNow(-daysAgo);
-        return {
-          code: code, date: d.toISOString(), status: status,
-          items: items.map(function (it) {
-            var p = product(it.id);
-            return { id: it.id, name: p.name, size: p.size, image: p.image, price: p.price, qty: it.qty };
-          }),
-          subtotal: sub, discount: 0, deliveryBase: q.base, deliveryDiscount: q.discount,
-          deliveryFee: q.fee, tax: tax, total: sub + q.fee + tax,
-          coupon: null, deliveryCode: null,
-          customer: { name: 'Alex Morgan', email: 'alex@example.com', phone: '+234 801 234 5678',
-            address: '27 Bourdillon Road, Ikoyi', city: 'Lagos', zone: zoneId },
-          payment: pay, eta: zone(zoneId).eta, source: 'sample'
-        };
+    list.querySelectorAll('.reply-form').forEach(f=>{
+      if(f.dataset.bound)return; f.dataset.bound='1';
+      f.onsubmit=async e=>{
+        e.preventDefault(); const fd=new FormData(f),btn=f.querySelector('button'),id=f.dataset.replyForm;
+        const name=String(fd.get('name')||'').trim(),replyText=String(fd.get('reply')||'').trim(); if(!name||!replyText)return;
+        btn.disabled=true;
+        const r=await api('blog_comment_replies',{method:'POST',body:JSON.stringify({comment_id:id,name,reply:replyText,is_admin:false,approved:true})});
+        btn.disabled=false;
+        if(r.ok){f.reset();f.hidden=true;await load();const box=list.querySelector(`[data-replies="${id}"]`);if(box)box.hidden=false;}
       };
-      setOrders([
-        mk('LDM-2026-10482', 2, 'out-for-delivery', [{ id: 'rice-10kg', qty: 1 }, { id: 'oil-5l', qty: 1 }, { id: 'tomato-paste', qty: 4 }], 'island', 'Card'),
-        mk('LDM-2026-10391', 9, 'delivered', [{ id: 'noodles', qty: 1 }, { id: 'milk-powder', qty: 2 }, { id: 'sugar', qty: 1 }], 'mainland', 'Bank transfer'),
-        mk('LDM-2026-10277', 21, 'delivered', [{ id: 'rice-50kg', qty: 1 }, { id: 'beans-10kg', qty: 1 }], 'island', 'Pay on delivery')
-      ]);
-    }
-    write(K.seeded, true);
-  }
-
-  /* ---------- Clean URLs ---------- */
-  var ROUTES = {
-    'index': '/', 'products': '/products', 'product': '/product', 'cart': '/cart',
-    'search': '/search', 'wishlist': '/wishlist', 'account': '/account', 'login': '/login',
-    'signup': '/signup', 'forgot': '/forgot', 'workflows': '/workflows',
-    'adeolaadaccess112': '/adeolaadaccess112'
-  };
-  function fileMode() { return /\.html?$/i.test(location.pathname); }
-  function baseDir() { return location.pathname.replace(/[^/]*$/, ''); }
-  function toHref(clean) {
-    if (!fileMode()) return clean;
-    var base = baseDir();
-    if (clean === '/' || clean === '') return base + 'index.html';
-    var parts = clean.replace(/^\//, '').split('?');
-    return base + parts[0] + '.html' + (parts[1] ? '?' + parts[1] : '');
-  }
-  function normalizeLinks(root) {
-    if (!fileMode()) return;
-    (root || document).querySelectorAll('a[href^="/"]').forEach(function (a) {
-      var h = a.getAttribute('href');
-      if (h.indexOf('//') === 0) return;
-      a.setAttribute('href', toHref(h));
     });
-  }
-  function go(clean) { location.href = toHref(clean); }
-
-  /* ---------- Toast ---------- */
-  function toast(msg, ico) {
-    var host = document.getElementById('toastHost');
-    if (!host) {
-      host = document.createElement('div');
-      host.id = 'toastHost'; host.className = 'toast-host';
-      document.body.appendChild(host);
-    }
-    var el = document.createElement('div');
-    el.className = 'toast';
-    el.innerHTML = '<span class="toast-ico">' + icon(ico || 'checkCircle') + '</span><span>' + esc(msg) + '</span>';
-    host.appendChild(el);
-    requestAnimationFrame(function () { el.classList.add('in'); });
-    setTimeout(function () {
-      el.classList.remove('in');
-      setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, 320);
-    }, 2600);
-  }
-
-  /* ---------- Reveal on scroll (fails open) ---------- */
-  function observeReveals() {
-    var els = document.querySelectorAll('.reveal');
-    if (!('IntersectionObserver' in window)) {
-      els.forEach(function (e) { e.classList.add('in'); });
+  };
+  form.onsubmit=async e=>{
+    e.preventDefault(); const btn=form.querySelector('button'); const status=$('#comment-status'); const fd=new FormData(form);
+    btn.disabled=true; status.textContent='Posting comment…';
+    const r=await api('blog_comments',{method:'POST',body:JSON.stringify({post_slug:slug,name:String(fd.get('name')).trim(),comment:String(fd.get('comment')).trim(),approved:true})});
+    if(r.ok){status.textContent='Comment posted.';form.reset();await load();}else status.textContent='Could not post the comment. Please try again.';
+    btn.disabled=false;
+  };
+  load();
+}
+function appointments(){
+  return `<section class="page-head"><div class="wrap"><span class="eyebrow">Appointment</span><h1>Book an appointment.</h1><p>Your request is saved for the workshop before WhatsApp opens with the same details.</p></div></section><section class="section white"><div class="wrap narrow"><div class="appointment-hours"><span class="eyebrow">Workshop hours</span><div class="appointment-hours-grid">${workingHoursLines()}</div></div><form id="appointment-form" class="form-card"><label>Full Name *<input name="name" required></label><label>Email *<input name="email" type="email" required></label><label>WhatsApp *<input name="phone" required></label><div class="two"><label>Vehicle Model *<input name="model" placeholder="C 300" required></label><label>Year *<input name="year" type="number" required></label></div><label>Location *<input name="location" required></label><label>What is the car doing? *<textarea name="message" rows="7" required></textarea></label><button class="btn red" type="submit">Send Appointment Request</button><p id="appointment-status" class="status"></p></form></div></section>`;
+}
+function bindAppointment(){
+  const f=$('#appointment-form');
+  if(!f||f.dataset.bound)return;
+  f.dataset.bound='1';
+  f.onsubmit=async e=>{
+    e.preventDefault();
+    const fd=new FormData(f),btn=f.querySelector('button[type="submit"]'),status=$('#appointment-status');
+    const p={id:'apt-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8),name:String(fd.get('name')||'').trim(),email:String(fd.get('email')||'').trim(),phone:String(fd.get('phone')||'').trim(),model:String(fd.get('model')||'').trim(),year:Number(fd.get('year')),location:String(fd.get('location')||'').trim(),service:'Appointment Request',registration:null,message:String(fd.get('message')||'').trim(),status:'requested'};
+    btn.disabled=true; status.textContent='Saving request to the workshop…';
+    let saved=false;
+    try{
+      const rpcResult=await rpc('create_appointment',{p_id:p.id,p_name:p.name,p_email:p.email,p_phone:p.phone,p_model:p.model,p_year:p.year,p_service:p.service,p_registration:null,p_location:p.location,p_message:p.message});
+      if(rpcResult.ok)saved=true;
+      else {
+        const direct=await api('appointments',{method:'POST',body:JSON.stringify(p)});
+        saved=direct.ok;
+      }
+    }catch{}
+    if(!saved){
+      status.textContent='We could not save the appointment. Please try again — WhatsApp was not opened.';
+      btn.disabled=false;
       return;
     }
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) {
-        if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
-      });
-    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.05 });
-    els.forEach(function (e) { io.observe(e); });
-    /* Fail open: never leave content permanently hidden. Anything the observer
-       has not revealed shortly after load is shown regardless of position —
-       this page is also embedded in non-scrolling cards, where below-the-fold
-       content would otherwise stay invisible forever. */
-    setTimeout(function () {
-      document.querySelectorAll('.reveal:not(.in)').forEach(function (e) { e.classList.add('in'); });
-    }, 1200);
-  }
-
-  /* ---------- Header / footer ---------- */
-  function headerHTML(active) {
-    var u = currentUser();
-    var store = getStoreInfo();
-    var nav = [
-      { href: '/', label: 'Home', key: 'home' },
-      { href: '/products', label: 'Shop', key: 'products' },
-      { href: '/workflows', label: 'How it works', key: 'workflows' }
-    ];
-    var cats = CATEGORIES.map(function (c) {
-      return '<a class="cat-link" href="' + toHref('/products?cat=' + c.id) + '">' +
-        '<span class="cat-ico">' + icon(c.icon) + '</span><span><b>' + esc(c.name) + '</b><small>' + esc(c.blurb) + '</small></span></a>';
-    }).join('');
-
-    return '' +
-    '<div class="topbar"><div class="wrap">' +
-      '<span class="topbar-msg">' + icon('truck') + ' Free delivery on orders over ' + money(getDeliveryRules().freeOver) + ' across Lagos</span>' +
-      '<span class="topbar-links">' +
-        '<a href="' + toHref('/workflows') + '">Delivery &amp; returns</a>' +
-        '<a href="tel:' + esc(store.phoneHref) + '">' + icon('phone') + ' ' + esc(store.phone) + '</a>' +
-      '</span>' +
-    '</div></div>' +
-    '<header class="header" id="siteHeader"><div class="wrap">' +
-      '<button class="icon-btn menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">' + icon('menu') + '</button>' +
-      '<a class="logo" href="' + toHref('/') + '">' +
-        '<span class="logo-mark">' + icon('basket') + '</span>' +
-        '<span class="logo-text">Ladydee<small>Minimart Store</small></span>' +
-      '</a>' +
-      '<div class="search-wrap" id="searchWrap">' +
-        '<form class="search" id="searchForm" role="search" autocomplete="off">' +
-          '<span class="search-ico">' + icon('search') + '</span>' +
-          '<input type="search" id="searchInput" placeholder="Search rice, oil, noodles\u2026" aria-label="Search products" value="' + esc(param('q') || '') + '">' +
-          '<button class="btn btn-primary btn-sm search-go" type="submit" aria-label="Search">' +
-            '<span class="search-go-ico">' + icon('search') + '</span>' +
-            '<span class="search-go-label">Search</span>' +
-          '</button>' +
-        '</form>' +
-        '<div class="search-drop" id="searchDrop" hidden></div>' +
-      '</div>' +
-      '<nav class="mainnav" aria-label="Main">' +
-        nav.map(function (n) {
-          return '<a href="' + toHref(n.href) + '"' + (active === n.key ? ' class="on"' : '') + '>' + n.label + '</a>';
-        }).join('') +
-      '</nav>' +
-      '<div class="head-actions">' +
-        '<a class="icon-btn" href="' + toHref('/wishlist') + '" aria-label="Wishlist">' + icon('heart') +
-          '<span class="badge" id="wishBadge"' + (wishCount() ? '' : ' hidden') + '>' + wishCount() + '</span></a>' +
-        '<a class="icon-btn" href="' + toHref('/cart') + '" aria-label="Cart">' + icon('cart') +
-          '<span class="badge" id="cartBadge"' + (cartCount() ? '' : ' hidden') + '>' + cartCount() + '</span></a>' +
-        (u
-          ? '<a class="account-chip" href="' + toHref('/account') + '"><span class="ac-av">' + esc((u.name || 'A').charAt(0).toUpperCase()) + '</span><span class="ac-name">' + esc((u.name || '').split(' ')[0]) + '</span></a>'
-          : '<a class="icon-btn" href="' + toHref('/login') + '" aria-label="Sign in">' + icon('user') + '</a>') +
-      '</div>' +
-    '</div>' +
-    '<div class="catbar"><div class="wrap">' + cats + '</div></div>' +
-    '</header>' +
-    '<div class="drawer-scrim" id="drawerScrim" hidden></div>' +
-    '<aside class="drawer" id="drawer" aria-hidden="true">' +
-      '<div class="drawer-head">' +
-        '<a class="logo" href="' + toHref('/') + '"><span class="logo-mark">' + icon('basket') + '</span><span class="logo-text">Ladydee<small>Minimart Store</small></span></a>' +
-        '<button class="icon-btn" id="drawerClose" aria-label="Close menu">' + icon('close') + '</button>' +
-      '</div>' +
-      '<div class="drawer-body">' +
-        '<form class="search drawer-search" id="drawerSearchForm" role="search">' +
-          '<span class="search-ico">' + icon('search') + '</span>' +
-          '<input type="search" id="drawerSearchInput" placeholder="Search products\u2026" aria-label="Search products">' +
-        '</form>' +
-        '<div class="drawer-sec">' +
-          '<span class="drawer-label">Menu</span>' +
-          nav.map(function (n) { return '<a class="drawer-link" href="' + toHref(n.href) + '">' + n.label + '</a>'; }).join('') +
-          '<a class="drawer-link" href="' + toHref('/wishlist') + '">Wishlist</a>' +
-          '<a class="drawer-link" href="' + toHref('/cart') + '">Cart</a>' +
-          (u ? '<a class="drawer-link" href="' + toHref('/account') + '">My account</a>'
-             : '<a class="drawer-link" href="' + toHref('/login') + '">Sign in</a><a class="drawer-link" href="' + toHref('/signup') + '">Create account</a>') +
-        '</div>' +
-        '<div class="drawer-sec">' +
-          '<span class="drawer-label">Shop by category</span>' +
-          '<div class="drawer-cats">' + CATEGORIES.map(function (c) {
-            return '<a class="drawer-cat" href="' + toHref('/products?cat=' + c.id) + '"><span class="cat-ico">' + icon(c.icon) + '</span>' + esc(c.name) + '</a>';
-          }).join('') + '</div>' +
-        '</div>' +
-        '<div class="drawer-sec drawer-help">' +
-          '<span class="drawer-label">Need help?</span>' +
-          '<a class="drawer-link" href="tel:' + esc(store.phoneHref) + '">' + icon('phone') + ' ' + esc(store.phone) + '</a>' +
-          '<a class="drawer-link" href="mailto:' + esc(store.email) + '">' + icon('mail') + ' ' + esc(store.email) + '</a>' +
-        '</div>' +
-      '</div>' +
-    '</aside>';
-  }
-
-  function footerHTML() {
-    var year = new Date().getFullYear();
-    var store = getStoreInfo();
-    return '<footer class="footer"><div class="wrap">' +
-      '<div class="foot-grid">' +
-        '<div class="foot-brand">' +
-          '<a class="logo logo-light" href="' + toHref('/') + '"><span class="logo-mark">' + icon('basket') + '</span><span class="logo-text">Ladydee<small>Minimart Store</small></span></a>' +
-          '<p>Everyday groceries, sealed and delivered across Nigeria. Rice, oil, noodles, household and baby essentials at fair prices.</p>' +
-          '<div class="foot-social">' +
-            '<a href="#" aria-label="Facebook">' + icon('facebook') + '</a>' +
-            '<a href="#" aria-label="Instagram">' + icon('instagram') + '</a>' +
-            '<a href="#" aria-label="X">' + icon('twitter') + '</a>' +
-            '<a href="#" aria-label="WhatsApp">' + icon('whatsapp') + '</a>' +
-          '</div>' +
-        '</div>' +
-        '<div class="foot-col"><h4>Shop</h4>' +
-          CATEGORIES.slice(0, 5).map(function (c) {
-            return '<a href="' + toHref('/products?cat=' + c.id) + '">' + esc(c.name) + '</a>';
-          }).join('') +
-          '<a href="' + toHref('/products') + '">All products</a>' +
-        '</div>' +
-        '<div class="foot-col"><h4>Account</h4>' +
-          '<a href="' + toHref('/account') + '">My account</a>' +
-          '<a href="' + toHref('/login') + '">Sign in</a>' +
-          '<a href="' + toHref('/signup') + '">Create account</a>' +
-          '<a href="' + toHref('/wishlist') + '">Wishlist</a>' +
-          '<a href="' + toHref('/cart') + '">Cart &amp; checkout</a>' +
-        '</div>' +
-        '<div class="foot-col"><h4>Company</h4>' +
-          '<a href="' + toHref('/workflows') + '">How it works</a>' +
-          '<a href="' + toHref('/workflows') + '">Delivery &amp; returns</a>' +
-          '<a href="' + toHref('/workflows') + '">Integrations</a>' +
-        '</div>' +
-        '<div class="foot-col foot-contact"><h4>Contact</h4>' +
-          '<a href="tel:' + esc(store.phoneHref) + '">' + icon('phone') + ' ' + esc(store.phone) + '</a>' +
-          '<a href="mailto:' + esc(store.email) + '">' + icon('mail') + ' ' + esc(store.email) + '</a>' +
-          '<span>' + icon('mapPin') + ' ' + esc(store.address) + '</span>' +
-          '<span>' + icon('clock') + ' ' + esc(store.hours) + '</span>' +
-        '</div>' +
-      '</div>' +
-      '<div class="foot-bottom">' +
-        '<span>&copy; ' + year + ' Ladydee Minimart Store. Demo store — no real payments are processed.</span>' +
-        '<span class="foot-pay">' + ['Card', 'Bank transfer', 'Pay on delivery', 'USSD'].map(function (p) { return '<span class="pay-pill">' + p + '</span>'; }).join('') + '</span>' +
-      '</div>' +
-    '</div></footer>';
-  }
-
-  /* ---------- Live search dropdown ---------- */
-  function initSearch() {
-    var wrap = document.getElementById('searchWrap');
-    var input = document.getElementById('searchInput');
-    var drop = document.getElementById('searchDrop');
-    var form = document.getElementById('searchForm');
-    if (!wrap || !input || !drop) return;
-
-    var POPULAR = ['Rice', 'Vegetable oil', 'Noodles', 'Milk powder', 'Diapers', 'Detergent', 'Tomato paste', 'Sugar'];
-
-    function close() { drop.hidden = true; drop.innerHTML = ''; }
-
-    function render(q) {
-      q = (q || '').trim();
-      if (!q) {
-        drop.innerHTML =
-          '<div class="sd-sec"><span class="sd-label">Popular searches</span><div class="sd-chips">' +
-          POPULAR.map(function (p) { return '<button type="button" class="sd-chip" data-q="' + esc(p) + '">' + esc(p) + '</button>'; }).join('') +
-          '</div></div>' +
-          '<div class="sd-sec"><span class="sd-label">Shop by category</span><div class="sd-cats">' +
-          CATEGORIES.map(function (c) {
-            return '<a class="sd-cat" href="' + toHref('/products?cat=' + c.id) + '"><span class="cat-ico">' + icon(c.icon) + '</span>' + esc(c.name) + '</a>';
-          }).join('') + '</div></div>';
-        drop.hidden = false;
-        return;
-      }
-      var res = searchProducts(q).slice(0, 6);
-      if (!res.length) {
-        drop.innerHTML = '<div class="sd-empty">' + icon('search') + '<b>No matches for “' + esc(q) + '”</b><small>Try “rice”, “oil” or “noodles”.</small></div>';
-        drop.hidden = false;
-        return;
-      }
-      drop.innerHTML =
-        '<div class="sd-sec"><span class="sd-label">' + res.length + ' result' + (res.length === 1 ? '' : 's') + '</span>' +
-        res.map(function (p) {
-          return '<a class="sd-item" href="' + toHref('/product?id=' + p.id) + '">' +
-            '<span class="sd-thumb"><img src="' + p.image + '" alt=""></span>' +
-            '<span class="sd-info"><b>' + esc(p.name) + '</b><small>' + esc(p.size) + ' · ' + esc(catName(p.category)) + '</small></span>' +
-            '<span class="sd-price">' + money(p.price) + '</span></a>';
-        }).join('') +
-        '</div>' +
-        '<a class="sd-all" href="' + toHref('/search?q=' + encodeURIComponent(q)) + '">See all results for “' + esc(q) + '” ' + icon('arrowRight') + '</a>';
-      drop.hidden = false;
+    try{window.MBData?.addAppointment?.(p);}catch{}
+    const n=whatsappNumber();
+    status.textContent=n?'Appointment saved. Opening WhatsApp…':'Appointment saved. We will contact you using the details provided.';
+    btn.disabled=false;
+    if(n){
+      const text=`Hello Moses Benz Auto Care. I would like to book an appointment.\nFull Name: ${p.name}\nEmail: ${p.email}\nWhatsApp: ${p.phone}\nVehicle: ${p.model} (${p.year})\nLocation: ${p.location}\nWhat is the car doing: ${p.message}`;
+      window.setTimeout(()=>{window.location.href='https://wa.me/'+n+'?text='+encodeURIComponent(text);},250);
     }
-
-    input.addEventListener('focus', function () { render(input.value); });
-    input.addEventListener('input', function () { render(input.value); });
-    input.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
-    drop.addEventListener('click', function (e) {
-      var chip = e.target.closest('.sd-chip');
-      if (chip) { input.value = chip.getAttribute('data-q'); render(input.value); input.focus(); }
-    });
-    document.addEventListener('click', function (e) { if (!wrap.contains(e.target)) close(); });
-    if (form) form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var q = input.value.trim();
-      go('/search' + (q ? '?q=' + encodeURIComponent(q) : ''));
-    });
-  }
-
-  /* ---------- Drawer ---------- */
-  function initDrawer() {
-    var btn = document.getElementById('menuBtn');
-    var drawer = document.getElementById('drawer');
-    var scrim = document.getElementById('drawerScrim');
-    var closeBtn = document.getElementById('drawerClose');
-    if (!btn || !drawer) return;
-    function open() {
-      drawer.classList.add('open'); drawer.setAttribute('aria-hidden', 'false');
-      if (scrim) scrim.hidden = false;
-      btn.setAttribute('aria-expanded', 'true');
-      document.body.classList.add('no-scroll');
-    }
-    function shut() {
-      drawer.classList.remove('open'); drawer.setAttribute('aria-hidden', 'true');
-      if (scrim) scrim.hidden = true;
-      btn.setAttribute('aria-expanded', 'false');
-      document.body.classList.remove('no-scroll');
-    }
-    btn.addEventListener('click', open);
-    if (closeBtn) closeBtn.addEventListener('click', shut);
-    if (scrim) scrim.addEventListener('click', shut);
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') shut(); });
-    var df = document.getElementById('drawerSearchForm');
-    if (df) df.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var v = document.getElementById('drawerSearchInput').value.trim();
-      shut(); go('/search' + (v ? '?q=' + encodeURIComponent(v) : ''));
-    });
-  }
-
-  /* ---------- Badges ---------- */
-  function refreshBadges() {
-    var cb = document.getElementById('cartBadge');
-    if (cb) { var n = cartCount(); cb.textContent = n; cb.hidden = !n; }
-    var wb = document.getElementById('wishBadge');
-    if (wb) { var w = wishCount(); wb.textContent = w; wb.hidden = !w; }
-    var bb = document.getElementById('bnCartBadge');
-    if (bb) { var m = cartCount(); bb.textContent = m > 99 ? '99+' : m; bb.hidden = !m; }
-  }
-
-  /* ---------- Sticky mobile bottom nav ---------- */
-  function bottomNavHTML() {
-    var page = (document.body && document.body.getAttribute('data-page')) || '';
-    var u = currentUser();
-    var items = [
-      { href: '/search', label: 'Search', ico: 'search', on: page === 'search' },
-      { href: '/cart', label: 'Cart', ico: 'cart', on: page === 'cart', badge: true },
-      { href: u ? '/account' : '/login', label: u ? 'Account' : 'Sign in', ico: 'user', on: page === 'account' || page === 'login' }
-    ];
-    return '<nav class="bottom-nav" aria-label="Quick navigation"><div class="bn-inner">' +
-      items.map(function (i) {
-        return '<a class="bn-item' + (i.on ? ' on' : '') + '" href="' + toHref(i.href) + '"' + (i.on ? ' aria-current="page"' : '') + '>' +
-          '<span class="bn-ico">' + icon(i.ico) +
-            (i.badge ? '<span class="bn-badge" id="bnCartBadge"' + (cartCount() ? '' : ' hidden') + '>' + cartCount() + '</span>' : '') +
-          '</span><span class="bn-label">' + i.label + '</span></a>';
-      }).join('') +
-    '</div></nav>';
-  }
-
-  /* ---------- Product card ---------- */
-  function productCard(p, opts) {
-    opts = opts || {};
-    var d = discountOf(p);
-    var wished = inWish(p.id);
-    var out = p.stock <= 0;
-    return '<article class="pcard reveal' + (opts.compact ? ' pcard--compact' : '') + '">' +
-      '<div class="pcard-media">' +
-        '<a href="' + toHref('/product?id=' + p.id) + '" aria-label="' + esc(p.name) + '">' +
-          '<img src="' + p.image + '" alt="' + esc(p.name) + ' ' + esc(p.size) + '">' +
-        '</a>' +
-        '<div class="pcard-tags">' +
-          (d ? '<span class="tag tag-sale">−' + d + '%</span>' : '') +
-          (p.badge === 'bestseller' ? '<span class="tag tag-best">Bestseller</span>' : '') +
-          (p.badge === 'new' ? '<span class="tag tag-new">New</span>' : '') +
-          (out ? '<span class="tag tag-out">Out of stock</span>' : '') +
-        '</div>' +
-        '<button class="wish-btn' + (wished ? ' on' : '') + '" data-wish="' + p.id + '" type="button" aria-label="' +
-          (wished ? 'Remove from wishlist' : 'Add to wishlist') + '" aria-pressed="' + wished + '">' + icon('heart') + '</button>' +
-      '</div>' +
-      '<div class="pcard-body">' +
-        '<span class="pcard-cat">' + esc(catName(p.category)) + '</span>' +
-        '<h3 class="pcard-name"><a href="' + toHref('/product?id=' + p.id) + '">' + esc(p.name) + '</a></h3>' +
-        '<span class="pcard-size">' + esc(p.size) + '</span>' +
-        '<div class="pcard-rate">' + stars(p.rating) + '<small>(' + p.reviewCount + ')</small></div>' +
-        '<div class="pcard-foot">' +
-          '<span class="pcard-price"><b>' + money(p.price) + '</b>' +
-            (p.oldPrice ? '<s>' + money(p.oldPrice) + '</s>' : '') + '</span>' +
-          '<button class="btn btn-primary btn-sm add-btn" data-add="' + p.id + '" type="button"' + (out ? ' disabled' : '') + '>' +
-            icon('plus') + '<span>Add</span></button>' +
-        '</div>' +
-      '</div>' +
-    '</article>';
-  }
-
-  /* ---------- Global delegated events ---------- */
-  function initGlobalEvents() {
-    document.addEventListener('click', function (e) {
-      var add = e.target.closest('[data-add]');
-      if (add) {
-        e.preventDefault();
-        var id = add.getAttribute('data-add');
-        addToCart(id, 1);
-        var p = product(id);
-        toast((p ? p.name : 'Item') + ' added to cart', 'cart');
-        refreshBadges();
-        return;
-      }
-      var w = e.target.closest('[data-wish]');
-      if (w) {
-        e.preventDefault();
-        var wid = w.getAttribute('data-wish');
-        var on = toggleWish(wid);
-        w.classList.toggle('on', on);
-        w.setAttribute('aria-pressed', String(on));
-        w.setAttribute('aria-label', on ? 'Remove from wishlist' : 'Add to wishlist');
-        toast(on ? 'Saved to wishlist' : 'Removed from wishlist', 'heart');
-        refreshBadges();
-        return;
-      }
-    });
-    document.addEventListener('ladydee:cart', refreshBadges);
-    document.addEventListener('ladydee:wish', refreshBadges);
-  }
-
-  /* ---------- Boot ---------- */
-  function mount(active) {
-    seed();
-    var h = document.getElementById('site-header');
-    if (h) h.innerHTML = headerHTML(active);
-    var f = document.getElementById('site-footer');
-    if (f) f.innerHTML = footerHTML();
-    /* sticky mobile bottom nav — injected on every page, shown only on mobile */
-    var bn = document.getElementById('bottomNav');
-    if (!bn) {
-      bn = document.createElement('div');
-      bn.id = 'bottomNav';
-      document.body.appendChild(bn);
-    }
-    bn.innerHTML = bottomNavHTML();
-    initSearch();
-    initDrawer();
-    initGlobalEvents();
-    refreshBadges();
-    normalizeLinks();
-    /* keep links injected after mount clean-URL aware when opened as local files */
-    if (fileMode() && 'MutationObserver' in window) {
-      var pending = false;
-      new MutationObserver(function () {
-        if (pending) return;
-        pending = true;
-        setTimeout(function () { pending = false; normalizeLinks(); }, 60);
-      }).observe(document.body, { childList: true, subtree: true });
-    }
-    document.body.classList.add('js-ready');
-    observeReveals();
-    window.addEventListener('scroll', function () {
-      var hd = document.getElementById('siteHeader');
-      if (hd) hd.classList.toggle('is-stuck', window.scrollY > 8);
-    }, { passive: true });
-  }
-
-  /* ---------- Public API ---------- */
-  window.Ladydee = {
-    icon: icon, esc: esc, money: money, param: param, stars: stars, fmtDate: fmtDate, daysFromNow: daysFromNow,
-    CATEGORIES: CATEGORIES, PRODUCTS: PRODUCTS, ZONES: ZONES,
-    product: product, catName: catName, catIcon: catIcon, discountOf: discountOf, searchProducts: searchProducts,
-    getCart: getCart, addToCart: addToCart, setQty: setQty, removeFromCart: removeFromCart,
-    clearCart: clearCart, cartCount: cartCount, cartLines: cartLines, cartSubtotal: cartSubtotal,
-    getWish: getWish, inWish: inWish, toggleWish: toggleWish, wishCount: wishCount,
-    getCoupons: getCoupons, setCoupons: setCoupons, findCoupon: findCoupon, applyCoupon: applyCoupon, redeemCoupon: redeemCoupon,
-    getDeliveryRules: getDeliveryRules, setDeliveryRules: setDeliveryRules, zone: zone, deliveryQuote: deliveryQuote,
-    getStoreInfo: getStoreInfo, setStoreInfo: setStoreInfo, STORE_DEFAULTS: STORE_DEFAULTS,
-    getUsers: getUsers, setUsers: setUsers, currentUser: currentUser, isLoggedIn: isLoggedIn,
-    signup: signup, verifyUser: verifyUser, login: login, logout: logout, updateUser: updateUser, resetPassword: resetPassword,
-    getOrders: getOrders, setOrders: setOrders, addOrder: addOrder, updateOrder: updateOrder,
-    orderStatuses: orderStatuses, statusLabel: statusLabel,
-    toHref: toHref, go: go, normalizeLinks: normalizeLinks, fileMode: fileMode,
-    toast: toast, observeReveals: observeReveals, productCard: productCard, refreshBadges: refreshBadges,
-    mount: mount, read: read, write: write, K: K
   };
-})();
+}
+
+function contact(){return `<section class="page-head"><div class="wrap"><span class="eyebrow">Contact</span><h1>Talk to Moses Benz Auto Care.</h1><p>Call, WhatsApp, email or book an appointment.</p></div></section><section class="section white"><div class="wrap contact-grid"><div class="contact-card"><span>01</span><h2>Call the Workshop</h2><p>Speak directly with the workshop.</p><a data-contact="phone" class="btn red">Call Us</a></div><div class="contact-card"><span>02</span><h2>WhatsApp</h2><p>Send a message and include your vehicle model.</p><a data-contact="whatsapp" class="btn red" target="_blank">WhatsApp Us</a></div><div class="contact-card"><span>03</span><h2>Book a Service</h2><p>Send the vehicle details and the issue directly to the workshop.</p><a class="btn red" href="#appointments">Book a Service</a></div><div class="contact-card"><span>04</span><h2>Email</h2><p>Use email when you prefer a written request.</p><a data-contact="email" class="btn red">Email Us</a></div><div class="contact-card"><span>05</span><h2>Facebook</h2><p>Follow workshop updates.</p><a data-contact="facebook" class="btn red" target="_blank">Facebook</a></div><div class="contact-card"><span>06</span><h2>TikTok</h2><p>See workshop clips and vehicle content.</p><a data-contact="tiktok" class="btn red" target="_blank">TikTok</a></div></div></section>`}
+function careers(){return `<section class="page-head"><div class="wrap"><span class="eyebrow">Careers</span><h1>Work with a Mercedes-Benz specialist.</h1><p>We are interested in skilled, disciplined people who care about proper automotive work.</p></div></section><section class="section white"><div class="wrap narrow prose"><h2>Join Moses Benz Auto Care</h2><p>Tell us about your experience, the kind of work you do best and why you want to work around Mercedes-Benz vehicles.</p><form id="career-form" class="form-card career-form"><div class="two"><label>Full Name *<input name="name" required maxlength="120"></label><label>Phone / WhatsApp *<input name="phone" required maxlength="40"></label></div><label>Email<input name="email" type="email" maxlength="160"></label><label>Role you are applying for *<input name="role" required placeholder="Mercedes-Benz Technician, Auto Electrician, etc."></label><label>Experience *<textarea name="experience" rows="4" required placeholder="Tell us about your experience and skills."></textarea></label><label>Anything else<textarea name="message" rows="4" placeholder="Qualifications, certifications or other information"></textarea></label><button class="btn red" type="submit">Submit Application</button><p id="career-status" class="status"></p></form></div></section>`}
+function bindCareerForm(){
+  const f=$('#career-form'); if(!f||f.dataset.bound)return; f.dataset.bound='1';
+  f.onsubmit=async e=>{
+    e.preventDefault();const fd=new FormData(f),btn=f.querySelector('button'),status=$('#career-status');
+    const p={name:String(fd.get('name')).trim(),phone:String(fd.get('phone')).trim(),email:String(fd.get('email')||'').trim(),role:String(fd.get('role')).trim(),experience:String(fd.get('experience')).trim(),message:String(fd.get('message')||'').trim()};
+    const msg=`Hello Moses Benz Auto Care, I would like to apply for a role.\nName: ${p.name}\nPhone/WhatsApp: ${p.phone}\nEmail: ${p.email||'Not provided'}\nRole: ${p.role}\nExperience: ${p.experience}\n${p.message?'Additional information: '+p.message:''}`;
+    btn.disabled=true;status.textContent='Preparing your application…';
+    let sent=false;
+    const email=String(settings.email||'').trim();
+    if(email){
+      try{
+        const body=new URLSearchParams({...p,_subject:`New job application — ${p.name}`,_replyto:p.email,_captcha:'false',_template:'table'});
+        const r=await fetch('https://formsubmit.co/ajax/'+encodeURIComponent(email),{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body});
+        sent=r.ok;
+      }catch{}
+    }
+    const wa=whatsappNumber();
+    if(wa)window.open('https://wa.me/'+wa+'?text='+encodeURIComponent(msg),'_blank','noopener');
+    status.textContent=sent?'Application sent. WhatsApp has also been opened for direct follow-up.':'WhatsApp has been opened with your application details. Tap Send there to complete it.';
+    f.reset();btn.disabled=false;
+  };
+}
+function guide(){return `<section class="page-head"><div class="wrap"><span class="eyebrow">Mercedes-Benz Guide</span><h1>Mercedes-Benz ownership guidance.</h1></div></section><section class="section white"><div class="wrap prose"><h2>Diagnosis before parts</h2><p>A warning code is a clue, not automatically a command to replace a part. Good diagnosis combines fault codes, live information, physical inspection and the owner's description of the problem.</p><h2>Maintenance in Lagos</h2><p>Heat, traffic, dust and repeated short trips make regular inspection important. Keep records of oil, filters, brakes, tyres, battery and major repairs.</p><h2>Buying a used Mercedes-Benz</h2><p>Check documentation, body condition, service history, mechanical behaviour and diagnostic information before money changes hands.</p></div></section>`}
+let lastRenderedRoute=null;
+function shouldShowSplash(){
+  try{
+    const n=(parseInt(localStorage.getItem('mbac_home_visits')||'0',10)||0)+1;
+    localStorage.setItem('mbac_home_visits',String(n));
+    return (n%5)===1;
+  }catch(e){return false;}
+}
+function splashEngineSound(){
+  try{const Ctx=window.AudioContext||window.webkitAudioContext;if(!Ctx)return;const ctx=new Ctx(),o=ctx.createOscillator(),g=ctx.createGain();o.type='sawtooth';o.frequency.setValueAtTime(70,ctx.currentTime);o.frequency.exponentialRampToValueAtTime(180,ctx.currentTime+.55);o.frequency.exponentialRampToValueAtTime(95,ctx.currentTime+1.15);g.gain.setValueAtTime(.0001,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.07,ctx.currentTime+.08);g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+1.15);o.connect(g);g.connect(ctx.destination);o.start();o.stop(ctx.currentTime+1.2);}catch(e){}
+}
+function showSplash(){
+  if(document.getElementById('splash'))return;
+  const splash=document.createElement('div');splash.id='splash';splash.className='splash';splash.setAttribute('role','dialog');splash.setAttribute('aria-label','Moses Benz Auto Care intro');
+  splash.innerHTML=`<div class="splash-stage" id="splash-stage"><div class="splash-grid"></div><div class="splash-ring"></div><div class="splash-orbit"></div><div class="splash-car-glow"></div><div class="splash-car"><svg viewBox="0 0 760 280" aria-hidden="true"><g transform="translate(18 25)"><path d="M34 188c0-52 43-84 92-88l92-7 54-45c22-18 50-27 79-27h115c48 0 92 18 125 50l53 52h39c28 0 50 22 50 50v38H34z" fill="#151820" stroke="#6e737f" stroke-width="3"/><path d="M230 91l54-44c18-15 41-23 64-23h109c39 0 75 14 103 39l32 28z" fill="#2b303b" stroke="#858a95" stroke-width="2"/><path d="M260 86l48-39c14-11 31-17 49-17h28v56zM397 30h54c30 0 58 10 80 30l28 26H397z" fill="#0d1118"/><path d="M45 160h650" stroke="#c90b2f" stroke-width="5" opacity=".9"/><circle cx="174" cy="194" r="42" fill="#090b0f" stroke="#777d88" stroke-width="7"/><circle cx="174" cy="194" r="14" fill="#c90b2f"/><circle cx="574" cy="194" r="42" fill="#090b0f" stroke="#777d88" stroke-width="7"/><circle cx="574" cy="194" r="14" fill="#c90b2f"/><path d="M700 119l28 17v24h-42" fill="#e8ebef" opacity=".9"/></g></svg></div><div class="splash-brand" id="splash-brand"><img class="splash-logo" src="images/moses-benz-logo.png" alt="Moses Benz Auto Care"><span class="splash-word"><b>Moses Benz</b><small>Auto Care · Idimu, Lagos</small></span></div><div class="splash-meta">Real cars · Real work · Mercedes-Benz specialists</div></div><button type="button" id="splash-skip" class="splash-skip">Skip intro</button>`;
+  document.body.appendChild(splash);
+  const stage=splash.querySelector('#splash-stage'),brand=splash.querySelector('#splash-brand'),skip=splash.querySelector('#splash-skip');let done=false;
+  const tilt=e=>{if(done)return;const r=stage.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;stage.style.transform=`rotateY(${x*7}deg) rotateX(${-y*5}deg) scale(1)`;};
+  const reset=()=>{stage.style.transform='';};
+  splash.addEventListener('pointermove',tilt,{passive:true});splash.addEventListener('pointerleave',reset,{passive:true});
+  function dock(){if(done)return;done=true;splashEngineSound();const target=document.querySelector('.header .brand');if(target&&brand){const t=target.getBoundingClientRect(),b=brand.getBoundingClientRect();brand.style.position='fixed';brand.style.left=b.left+'px';brand.style.top=b.top+'px';brand.style.margin='0';brand.style.transform='none';brand.classList.add('dock');requestAnimationFrame(()=>{const scale=t.height/b.height;brand.style.transform=`translate(${t.left-b.left}px,${t.top-b.top}px) scale(${scale})`;});}splash.classList.add('splash-gone');setTimeout(()=>splash.remove(),950);}
+  skip.addEventListener('click',e=>{e.stopPropagation();dock();});setTimeout(dock,4800);
+}
+async function render(){const hash=location.hash.replace(/^#/,'')||'home',parts=hash.split('/'),route=parts[0],arg=parts.slice(1).join('/');let html=route==='home'?home():route==='inventory'?await inventory():route==='car'?await car(decodeURIComponent(arg)):route==='blog'?await blog(arg?decodeURIComponent(arg):''):route==='appointments'?appointments():route==='contact'?contact():route==='careers'?careers():route==='guide'?guide():home();$('#app').innerHTML=html;$('#route-transition')?.classList.remove('is-active');window.scrollTo({top:0,behavior:'instant'});footer();fab();applyContacts();if(route==='home'){bindCards();homeReviews();bindReviewForm();initGallery();initMobileRails();if(lastRenderedRoute!=='home'&&shouldShowSplash())showSplash();}
+lastRenderedRoute=route;if(route==='inventory'){renderInventory();initMobileRails();}if(route==='car')bindCar(decodeURIComponent(arg));if(route==='appointments')bindAppointment();if(route==='careers')bindCareerForm();if(route==='blog'){bindCards();if(arg){bindBlogArticle(decodeURIComponent(arg));}}}
+async function homeReviews(){
+  const r=await api('reviews?select=*&approved=eq.true&order=created_at.desc&limit=12'),root=$('#reviews');
+  if(root&&r.ok&&Array.isArray(r.data)&&r.data.length){
+    root.innerHTML=r.data.map(x=>`<article class="review"><b>${esc(x.name||'Customer')}</b>${x.model?`<small>${esc(x.model)}</small>`:''}<p>“${esc(x.review||'Great service.')}”</p><span class="stars">${'★'.repeat(Math.max(1,Math.min(5,Number(x.rating)||5)))}</span></article>`).join('');
+  }
+  initReviewsCarousel();
+}
+function bindReviewForm(){
+  const f=$('#review-form'); if(!f||f.dataset.bound)return; f.dataset.bound='1';
+  f.onsubmit=async e=>{
+    e.preventDefault(); const fd=new FormData(f),btn=f.querySelector('button'),status=$('#review-status');
+    btn.disabled=true; status.textContent='Submitting review…';
+    const payload={id:'review-'+Date.now().toString(36),name:String(fd.get('name')).trim(),model:String(fd.get('model')||'').trim(),rating:Number(fd.get('rating')),review:String(fd.get('review')).trim(),approved:true};
+    const r=await api('reviews',{method:'POST',body:JSON.stringify(payload)});
+    if(r.ok){status.textContent='Thank you. Your review has been added.';f.reset();await homeReviews();}
+    else status.textContent='We could not add the review right now. Please try again.';
+    btn.disabled=false;
+  };
+}
+function boot(){
+  const bar=$('#top-progress'); if(bar){bar.style.width='100%';setTimeout(()=>bar.remove(),350)}
+  const menu=document.querySelector('.menu-btn'),drawer=document.querySelector('.mobile-menu');
+  const syncMenu=()=>{const open=drawer?.classList.contains('open');if(menu){menu.textContent=open?'×':'☰';menu.setAttribute('aria-label',open?'Close menu':'Open menu');menu.setAttribute('aria-expanded',open?'true':'false');}};
+  menu?.addEventListener('click',()=>{drawer?.classList.toggle('open');syncMenu();});
+  drawer?.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{drawer.classList.remove('open');syncMenu();}));
+  syncMenu();
+  document.addEventListener('click',e=>{
+    const a=e.target.closest('a[href^="#"]');
+    if(!a)return;
+    const href=a.getAttribute('href');
+    if(!href||href==='#'||a.closest('form')||a.dataset.noDelay==='true')return;
+    e.preventDefault();
+    drawer?.classList.remove('open');
+    goRoute(href);
+  });
+  render();
+  loadSettings().then(()=>{applyContacts();footer();});
+  if(window.MBStore?.hydrate){window.MBStore.hydrate().then(()=>render()).catch(()=>{});}
+  window.addEventListener('hashchange',render);
+}
+boot();
